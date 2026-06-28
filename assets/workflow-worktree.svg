@@ -36,7 +36,7 @@
   <text x="612" y="176" class="sub">태스크마다 커밋  ·  같은 K 분기에 누적</text>
 
   <!-- /wt-auto bracket over steps 3 & 4 -->
-  <text x="644" y="214" class="auto">↻ /wt-auto — ③④ 를 K마다 자율로 (구현 → 검증 → 커밋 → 다음 K)</text>
+  <text x="644" y="214" class="auto">↻ /wt-auto — ③④ K 자율 순회 (구현→검증→커밋→다음 K) · 완료 시 /wt-briefing</text>
   <path d="M644,232 L644,224 L1090,224 L1090,232" fill="none" stroke="#0d9488" stroke-width="1.5"/>
 
   <!-- Pipeline -->

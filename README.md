@@ -10,8 +10,9 @@ git worktree 위에서 한 작업을 **작업 항목(K) 단위로 분기**하고
 ```
 코어 — 호스트 무관 (GitHub·GitLab·이슈 없어도 동작)
   /wt-commit     태스크 단위 커밋 + accumulator-K(…-00N) 분기 누적
-  /wt-auto       plan 의 K 자율 순회 (구현 → 검증 → /wt-commit)
+  /wt-auto       plan 의 K 자율 순회 (구현 → 검증 → /wt-commit → 완료 시 /wt-briefing)
   /wt-progress   K 진행 현황 표 (읽기 전용)
+  /wt-briefing   작업 전체를 설계문서형 브리핑으로 정리 (git·대화 근거, 읽기 전용)
   wt-clean       워크트리·이슈 브랜치 정리 (#마커 보존)
 
 이슈 어댑터 — 옵션 · GitLab (glab 필요)
