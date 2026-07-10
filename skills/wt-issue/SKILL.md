@@ -48,7 +48,7 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 
 8. **브랜치 이름 결정 (두 개)**:
    - **이슈 마커 브랜치**: `<prefix>/<#N>-<slug>` (예: `fix/#42-user-login-token-expiry`) — GitLab 자동 링크 등 이슈-브랜치 연결용
-   - **작업 브랜치**: `<prefix>/<N>-<slug>` (예: `fix/42-user-login-token-expiry`) — `#` 없음. `claude --worktree` 가 `#` 를 거부하기 때문에 워크트리·작업·wt-commit accumulator 는 모두 이 브랜치 사용
+   - **작업 브랜치**: `<prefix>/<N>-<slug>` (예: `fix/42-user-login-token-expiry`) — `#` 없는 슬래시 브랜치. 워크트리 진입·작업·wt-commit accumulator 는 모두 이 브랜치 사용 (wt-plan 이 `git worktree add` 로 이 브랜치를 워크트리에 붙이고 `EnterWorktree` 로 진입)
    - `<prefix>`: 종류 라벨 매핑 — 버그→`fix`, 기능→`feat`, 리팩터링→`refactor`, 문서→`docs`, 테스트→`test`, 기타→`chore`
    - `<N>`: 이슈 번호 (정수)
    - `<slug>`: 제목의 한국어를 의미 기반 영어 kebab-case로 변환 (최대 5단어)
@@ -70,10 +70,11 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
       - <prefix>/<#N>-<slug>  (이슈 마커)
       - <prefix>/<N>-<slug>   (작업·워크트리용, base: origin/<base>)
 
-    다음 단계 — 워크트리 진입:
-      claude --worktree <prefix>/<N>-<slug>
+    다음 단계 — plan 받기:
+      /wt-plan <N>
 
-    워크트리 진입 후 /wt-plan <N> 으로 plan 받기
+    → wt-plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) plan 을 출력한다.
+      (수동 `claude --worktree` 불필요)
     ```
 
 ## 본문 템플릿
