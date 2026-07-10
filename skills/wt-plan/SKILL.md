@@ -1,7 +1,7 @@
 ---
 name: wt-plan
 description: GitLab 어댑터(glab 필요) — 이슈번호로 워크트리 + mirror 분기 셋업, 세션 이동, 코드 분석 기반 작업 단계 plan(K 매핑) 출력. 워크트리 안 재호출 시 이슈번호 자동 추론 + 진행상황·이슈항목 기준 델타 재플랜(스코프 드리프트 처리). 사용자만 호출.
-allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep
+allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree
 disable-model-invocation: true
 ---
 
@@ -11,7 +11,7 @@ disable-model-invocation: true
 
 `/wt-plan [<이슈번호>] [-b <base>] [-p <prefix>] [-r <repo>]`
 
-- `<이슈번호>`: glab으로 본문/라벨 조회. **워크트리 안이면 선택** — 생략 시 accumulator 브랜치 `<prefix>/<N>-<slug>`(또는 워크트리 경로 `<prefix>+<N>-…`)에서 N 자동 추론. **워크트리 밖이면 필수.**
+- `<이슈번호>`: glab으로 본문/라벨 조회. **워크트리 안이면 선택** — 생략 시 accumulator 브랜치 `<prefix>/<N>-<slug>`(또는 워크트리 경로 `<prefix>+<N>-…`)에서 N 자동 추론. **워크트리 밖이면 필수.** 워크트리 안에서 **현재와 다른 이슈번호를 명시**하면, 현재 워크트리는 그대로 두고 그 이슈용 **새 워크트리를 origin/develop 기준으로 판다**(계약 2).
 - `-b <base>`: 분기 베이스 브랜치. 미지정 시 `origin/develop` (없으면 `origin/main`)
 - `-p <prefix>`: 브랜치 prefix. 미지정 시 이슈 라벨에서 추론
   - `종류:버그` → `fix`
@@ -24,19 +24,21 @@ disable-model-invocation: true
 
 1. **이슈 번호 확정 + 메타 로드** — `<이슈번호>` 미지정 + 워크트리 안이면, HEAD 와 ancestry 공유하는 accumulator 브랜치 `<prefix>/<N>-<slug>`(또는 워크트리 경로)에서 정수 N 추론. 미지정 + 워크트리 밖이면 중단·요청. 확정 후 `glab issue view <N> -R <repo>`로 제목·라벨·본문 가져옴. 실패 시 중단·보고
 
-2. **현재 워크트리 감지 + 모드 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재 위치가 main 워킹트리가 아닌 워크트리인지 판정
+2. **현재 워크트리 감지 + 모드 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재 위치가 main 워킹트리가 아닌 워크트리인지 판정. **워크트리 안이면 먼저 현재 워크트리의 이슈번호**(경로 `<prefix>+<N>-…` 또는 브랜치 `<prefix>/<N>-…`)**와 요청 이슈번호를 비교**한다:
    - **워크트리 밖** → 3·4·5 실행(최초 셋업) → 6·7단계
-   - **워크트리 안 + 최초 플랜** (이슈 항목 전부 미완 **AND** mirror 분기·브랜치 고유 커밋 없음) → 3·4·5 skip → 6·7단계 (기존 동작)
-   - **워크트리 안 + 재플랜** (일부 이슈 항목 완료 **OR** mirror 분기(`<accumulator>-00N`)·브랜치 고유 커밋 존재) → 3·4·5 skip → **아래 `## 재플랜 모드`**
+   - **워크트리 안 + 다른 이슈 요청** (요청 `<N>` 이 명시됐고 **현재 워크트리 이슈번호와 불일치**) → **현재 워크트리는 떠나지 않고**, 요청 이슈용 **새 워크트리를 3·4·5 로 셋업**(워크트리 밖과 동일 경로 — `git fetch` 후 origin/develop 기준, wt-issue 가 미리 만든 `<prefix>/<N>-<slug>` 슬래시 브랜치가 있으면 재사용) → `EnterWorktree` 로 그 워크트리 진입 → 6·7단계. ⚠️ 현재 워크트리 브랜치는 체크아웃/이동하지 않는다(격리된 새 워크트리를 추가로 팔 뿐이라 글로벌 "워크트리 이탈 금지" 와 상충하지 않음)
+   - **워크트리 안 + 같은 이슈 + 최초 플랜** (요청 생략 또는 현재 이슈와 일치, 그리고 이슈 항목 전부 미완 **AND** mirror 분기·브랜치 고유 커밋 없음) → 3·4·5 skip → 6·7단계 (기존 동작)
+   - **워크트리 안 + 같은 이슈 + 재플랜** (요청 생략/현재 이슈와 일치, 그리고 일부 이슈 항목 완료 **OR** mirror 분기(`<accumulator>-00N`)·브랜치 고유 커밋 존재) → 3·4·5 skip → **아래 `## 재플랜 모드`**
 
-3. **(워크트리 밖일 때) 이름 안 제시 + 사용자 확인 한 번**:
-   - 워크트리 브랜치: `<prefix>/<N>-<slug>` (`#` 없음 — `claude --worktree` 가 `#` 거부, wt-commit accumulator 도 `#` 없는 쪽). 기존 브랜치가 origin/local 에 있으면 재사용. 없으면 wt-issue 와 동일 컨벤션으로 신규
+3. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 이름 안 제시 + 사용자 확인 한 번**:
+   - 워크트리 브랜치: `<prefix>/<N>-<slug>` (슬래시 브랜치 = wt-commit accumulator). wt-issue 가 미리 만든 이 브랜치가 origin/local 에 있으면 재사용. 없으면 wt-issue 와 동일 컨벤션으로 신규
    - 워크트리 경로: `<repo-root>/.claude/worktrees/<prefix>+<N>-<slug>`
    - slug는 제목의 한국어를 의미 기반 영어 kebab-case로 (최대 5단어)
 
-4. **(워크트리 밖일 때) 워크트리 생성** — `git fetch origin && git worktree add <경로> <브랜치>` (브랜치 기존 사용 시 -b 없음 / 신규 시 `-b <브랜치명> origin/develop`)
+4. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 워크트리 생성** — `git fetch origin && git worktree add <경로> <브랜치>` (브랜치 기존 사용 시 -b 없음 / 신규 시 `-b <브랜치명> origin/develop`). ⚠️ 반드시 **슬래시 브랜치를 명시 지정**해 `git worktree add` 로 붙인다 — 이래야 accumulator·mirror 가 정상 동작
 
-5. **(워크트리 밖일 때) 세션 working directory 이동** — `cd <워크트리경로>` (이 세션에서 이후 명령이 워크트리에서 실행됨)
+5. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 세션을 워크트리로 진입** — `EnterWorktree({ path: <워크트리경로> })` 로 현재 세션을 방금 만든(또는 기존) 워크트리로 **인플레이스 이동**한다. `cd` 와 달리 CWD·시스템프롬프트·메모리·plans 캐시까지 워크트리 기준으로 정리된다.
+   - ⚠️ `claude --worktree` 는 **쓰지 않는다** — 그건 새 세션을 spawn 하고 워크트리 브랜치명을 자기 마음대로 `worktree-…` 로 만들어 미리 만든 slash accumulator 를 못 쓰게 만든다(브랜치 고아화). 진입은 항상 `git worktree add <slash 브랜치>` + `EnterWorktree({ path })` 조합으로
 
 6. **이슈 본문 출력** — 후속 작업의 컨텍스트로 표시. 코드 분석 시작 안내만 하고 수정은 사용자 승인 후
 7. **plan 출력** — 이슈 본문/라벨 + **코드 분석 결과**로 작업 단계 추정 (아래 `## plan 출력 형식` 참고). 자동 실행 안 함, 가이드 용도
@@ -44,11 +46,11 @@ disable-model-invocation: true
 ## 결정·중단 트리거
 
 - 이슈 미존재 / glab 인증 실패 → 보고 후 중단
-- 동일 이름 워크트리/브랜치 이미 존재 → 사용자에게 재사용 vs 신규 선택
+- 동일 이름 워크트리/브랜치 이미 존재 → 사용자에게 재사용 vs 신규 선택 (재사용 시 `EnterWorktree({ path })` 로 기존 워크트리에 세션 진입)
 - base 브랜치 fetch 실패 → 중단·보고
 - prefix 추론 실패 → 사용자에게 묻고 대기
 - 현재 디렉토리가 git 워킹트리 루트가 아님 → 보고 후 중단
-- 워크트리 안인데 현재 브랜치명이 이슈 번호와 불일치 → 사용자에게 경고 + 진행 여부 확인
+- 워크트리 안인데 **이슈번호 미지정**이고 현재 브랜치명에서 N 추론 불가·모호 → 사용자에게 경고 + 진행 여부 확인. (요청 `<N>` 이 **명시**돼 현재 워크트리 이슈와 다를 뿐이면 중단이 아니라 계약 2의 **"다른 이슈 요청"** 모드로 새 워크트리를 판다)
 - 이슈 작업 항목이 조사성이거나, 코드 분석만으로 제거·변경 대상 확정이 안 돼 사용자 판단이 필요 → plan 표 출력 **전에** 먼저 되묻기 (필요시만)
 
 ## 짧은 변형
@@ -145,4 +147,4 @@ disable-model-invocation: true
 
 - 워크트리 브랜치는 origin에 push 안 함 (로컬 전용 작업 공간)
 - mirror 분기 브랜치만 origin에 노출
-- 세션의 표시상 Primary working directory는 시작 시점 값으로 고정. 실제 명령은 cd 이후 워크트리에서 실행됨
+- 세션 진입은 `EnterWorktree` 로 처리(수동 `claude --worktree` 불필요) — 이후 명령·경로·메모리·plans 는 워크트리 기준으로 정리됨
