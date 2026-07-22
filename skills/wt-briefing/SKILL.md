@@ -1,6 +1,6 @@
 ---
 name: wt-briefing
-description: 완료(또는 진행 중)한 작업을 설계문서 느낌의 구조화된 브리핑으로 출력. git 커밋·diff + 대화 맥락에서 사실을 모아 요약/작업항목(K)/영향범위/검증/기술선택 표(선택·이유 + 안 쓴 대안·이유)/결정·오픈이슈로 정리. 근거 없는 항목은 날조 금지. 사용자만 호출.
+description: 완료·진행 작업을 커밋·diff 기반 구조화 브리핑으로 출력(읽기 전용, 날조 금지). 인자 --mr/--detail/--no-fence. "MR용/작업 브리핑" 요청에. 사용자만 호출.
 allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
 disable-model-invocation: true
 ---

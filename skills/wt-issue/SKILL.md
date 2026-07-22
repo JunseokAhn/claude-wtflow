@@ -1,6 +1,6 @@
 ---
 name: wt-issue
-description: GitLab 어댑터(glab 필요) — GitLab 이슈를 자동 생성 + 작업 브랜치 셋업. 사용자가 "이슈 만들어줘", "이슈 등록", "이슈로 올려줘", "GitLab에 등록" 같은 의도를 보이면 호출. 제목 prefix(feat/fix/chore/refactor/docs/test) + 라벨 3종(난이도·우선순위·종류) 자동 적용. 생성 후 브랜치 2개 (이슈 마커 `<prefix>/<#N>-<slug>` + 작업용 `<prefix>/<N>-<slug>`) 분기 + claude --worktree 진입 명령 출력.
+description: GitLab 어댑터(glab 필요) — GitLab 이슈 생성 + 작업 브랜치 셋업. "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 브랜치 2개 분기 + /wt-plan 안내 출력.
 allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 ---
 

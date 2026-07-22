@@ -1,6 +1,6 @@
 ---
 name: wt-plan
-description: GitLab 어댑터(glab 필요) — 이슈번호로 워크트리 + mirror 분기 셋업, 세션 이동, 코드 분석 기반 작업 단계 plan(K 매핑) 출력. 워크트리 안 재호출 시 이슈번호 자동 추론 + 진행상황·이슈항목 기준 델타 재플랜(스코프 드리프트 처리). 사용자만 호출.
+description: GitLab 어댑터(glab 필요) — 이슈번호로 워크트리·분기 셋업 + K 작업계획 출력. 인자 -b/-p/-r. "이슈 N 작업 시작/plan" 요청에. 사용자만 호출.
 allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree
 disable-model-invocation: true
 ---

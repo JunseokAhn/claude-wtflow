@@ -1,6 +1,6 @@
 ---
 name: wt-commit
-description: 워크트리 작업단위를 commit + accumulator-K 분기 생성 (로컬). 구현 완료 시 모델이 자율 호출 가능 — 한 K 의 커밋+미러까지 자동 처리하고 멈춤(다중 K 순회는 /wt-auto 전용, 여기서 흉내 금지). origin push 는 --push 명시 시만.
+description: 워크트리 작업단위 로컬 커밋 + accumulator-K 분기. 인자 -K/--done/--push/--no-test. 한 K 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 K 진행 여부에만; 다중 K 순회는 wt-auto.
 allowed-tools: Bash(git *), Bash(glab *), Bash(./gradlew *), Bash(npm *), Bash(npx *), AskUserQuestion
 disable-model-invocation: false
 ---

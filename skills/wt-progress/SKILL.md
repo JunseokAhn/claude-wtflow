@@ -1,6 +1,6 @@
 ---
 name: wt-progress
-description: 워크트리 이슈 작업의 K(작업 항목) 진행 현황을 표로 출력. 이슈 본문 `작업 항목` 체크리스트(N=K)와 mirror 분기 `<accumulator>-00N`를 읽어 완료/진행중/대기를 한눈에 보여준다. 사용자 호출 + wt-commit/wt-auto 가 매 커밋 후 자율 호출. 읽기 전용 — 커밋·분기·push 일절 안 함.
+description: 워크트리 이슈 작업의 K 진행 현황을 표로 출력(읽기 전용). 사용자 호출 + wt-commit/auto가 매 커밋 후 자율 호출.
 allowed-tools: Bash(git *), Bash(glab *)
 disable-model-invocation: false
 ---

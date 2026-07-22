@@ -1,6 +1,6 @@
 ---
 name: wt-auto
-description: 워크트리에서 이슈 plan 의 작업 항목(K)을 자율로 순회하며 K마다 구현→가벼운 검증→/wt-commit(로컬 누적 커밋)까지 끝까지 돌리는 오케스트레이터. wt-commit 의 자율 카운터파트. "알아서 다 해줘", "작업 항목 끝까지 돌려", "K 돌면서 커밋까지", "이슈 자동으로 처리해" 같이 plan 을 통째로 위임하려는 의도에 사용. 사용자만 명시 호출(자동 발동 안 함). 절대 push 안 함 — 로컬 커밋만, 멈춤 트리거에서 즉시 정지.
+description: plan의 K 항목들을 순회 구현→검증→로컬 커밋. 인자 --from/--only/--push/--dry-run. "알아서 끝까지/작업 항목 다 돌려" 요청에. 사용자 명시 호출만, push 안 함.
 disable-model-invocation: true
 ---
 
