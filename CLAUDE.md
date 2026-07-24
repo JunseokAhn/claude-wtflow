@@ -25,9 +25,13 @@
 **Why:** 자연어 해석 변동성 + 자동 push 회복 어려움 → 스킬 호출이 contract 보장.
 K 모델은 스킬에 있으나 '태스크마다 커밋' 규율이 약해 한 덩어리(batch)로 흐르던 것 보완.
 
-### EnterWorktree 등 다른 도구로 워크트리 만들 때
-- base_ref=develop 명시 (없으면 main fallback)
-- 가능하면 wt-plan 사용 권장
+### 워크트리 진입은 wt-plan 경유
+- 이슈 작업이면 `/wt-plan <N>` — 슬래시 accumulator 브랜치를 붙인 워크트리를 만들고
+  `EnterWorktree` 로 현재 세션을 인플레이스 이동시킨다 (새 세션 spawn 아님)
+- **`claude --worktree` 금지** — 브랜치명을 `worktree-…` 로 새로 만들어 미리 만든
+  슬래시 accumulator 가 고아가 되고 mirror 분기가 붙을 곳을 잃는다
+- 부득이하게 `EnterWorktree` 를 직접 쓸 땐: base_ref=develop 명시(없으면 main fallback)
+  + 슬래시 브랜치를 `git worktree add <브랜치>` 로 먼저 붙인 뒤 그 경로로 진입
 
 ## 커밋 컨벤션
 
