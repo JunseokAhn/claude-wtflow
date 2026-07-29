@@ -1,15 +1,15 @@
 ---
-name: wt-issue
-description: GitLab 어댑터(glab 필요) — GitLab 이슈 생성 + 작업 브랜치 셋업. "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 브랜치 2개 분기 + /wt-plan 안내 출력.
+name: wtflow-issue
+description: GitLab 어댑터(glab 필요) — GitLab 이슈 생성 + 작업 브랜치 셋업. "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 브랜치 2개 분기 + /wtflow-plan 안내 출력.
 allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 ---
 
-# /wt-issue — GitLab 이슈 생성
+# /wtflow-issue — GitLab 이슈 생성
 
 ## 트리거
 
 - 자연어: "이슈 만들어줘: <설명>", "이슈 등록", "GitLab에 올려줘", "이슈로 등록" 등
-- 슬래시: `/wt-issue <설명>`
+- 슬래시: `/wtflow-issue <설명>`
 
 ## 계약
 
@@ -35,7 +35,7 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
    - 예: `fix: 사용자 로그인 시 토큰 만료 에러`
 
 4. **본문 작성** — `.gitlab/issue_templates/` 우선 사용 (아래 `## 본문 템플릿` 참고). 템플릿 없으면 한 줄 요약
-   - **이슈는 "무엇/왜"의 짧은 메모다.** 근본원인 분석·코드경로·클래스명 나열·해결책 설계·세부 작업분해는 이슈에 쓰지 않는다 — 그건 이후 `/wt-plan` plan 단계 몫이다. 지금 이슈에 결론을 박으면 plan 과 중복되거나 어긋난다
+   - **이슈는 "무엇/왜"의 짧은 메모다.** 근본원인 분석·코드경로·클래스명 나열·해결책 설계·세부 작업분해는 이슈에 쓰지 않는다 — 그건 이후 `/wtflow-plan` plan 단계 몫이다. 지금 이슈에 결론을 박으면 plan 과 중복되거나 어긋난다
 
 5. **사용자 확인 한 번 — 산문 말고 `AskUserQuestion`**: 본문 미리보기를 보인 뒤, 조정 가능한 축(prefix/종류·난이도·우선순위·브랜치 생성 여부)을 **`AskUserQuestion` 으로 묻는다**(산문으로 "이대로 생성할까?" 나열 금지 — 이게 가장 흔한 누락). 각 보기 첫째에 추천안을 `(추천)` 으로 표기. 자유 입력 경로는 클라이언트가 자동으로 붙이는 "Other" 로 보장되므로 **"직접 입력" 보기를 따로 넣지 않는다**. 답이 추천과 같으면 그대로, 다르면 반영해 생성
 
@@ -48,7 +48,7 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 
 8. **브랜치 이름 결정 (두 개)**:
    - **이슈 마커 브랜치**: `<prefix>/<#N>-<slug>` (예: `fix/#42-user-login-token-expiry`) — GitLab 자동 링크 등 이슈-브랜치 연결용
-   - **작업 브랜치**: `<prefix>/<N>-<slug>` (예: `fix/42-user-login-token-expiry`) — `#` 없는 슬래시 브랜치. 워크트리 진입·작업·wt-commit accumulator 는 모두 이 브랜치 사용 (wt-plan 이 `git worktree add` 로 이 브랜치를 워크트리에 붙이고 `EnterWorktree` 로 진입)
+   - **작업 브랜치**: `<prefix>/<N>-<slug>` (예: `fix/42-user-login-token-expiry`) — `#` 없는 슬래시 브랜치. 워크트리 진입·작업·wtflow-commit accumulator 는 모두 이 브랜치 사용 (wtflow-plan 이 `git worktree add` 로 이 브랜치를 워크트리에 붙이고 `EnterWorktree` 로 진입)
    - `<prefix>`: 종류 라벨 매핑 — 버그→`fix`, 기능→`feat`, 리팩터링→`refactor`, 문서→`docs`, 테스트→`test`, 기타→`chore`
    - `<N>`: 이슈 번호 (정수)
    - `<slug>`: 제목의 한국어를 의미 기반 영어 kebab-case로 변환 (최대 5단어)
@@ -71,9 +71,9 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
       - <prefix>/<N>-<slug>   (작업·워크트리용, base: origin/<base>)
 
     다음 단계 — plan 받기:
-      /wt-plan <N>
+      /wtflow-plan <N>
 
-    → wt-plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) plan 을 출력한다.
+    → wtflow-plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) plan 을 출력한다.
       (수동 `claude --worktree` 불필요)
     ```
 
@@ -90,7 +90,7 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
    - 템플릿을 Read 해서 섹션 구조 파악
    - **헤더 고정**: 템플릿의 헤더를 그대로 쓴다. 추가·삭제·개명 금지 (`상세 설명`을 `배경`으로 개명하거나 `해결 방향` 같은 새 헤더 추가 금지)
    - **간결성 상한**: 각 섹션 1~2문장. 코드 경로/클래스명 나열, 근본원인 추론, 해결책 설계 금지
-   - **작업 항목/작업 계획**: **큰 틀의 작업 단위**로 작성 (개수 고정 아님 — 작업 성격에 맞게, 보통 2~5개). 세부 단위 분해는 plan 단계 몫. ⚠️ 이 작업 항목이 이후 `/wt-plan` plan·`/wt-commit` 의 **K 넘버링 기준**이 된다 (작업 항목 N = Step N = K N = mirror 분기 `-00N`). 따라서 각 항목은 독립적으로 commit·검증 가능한 단위가 되도록 잡는다(순수 조사·식별·분석처럼 산출물 커밋이 없는 단계는 항목이 아니라 plan 몫 — "제거 대상 식별" 같은 항목 금지). 큰 단위조차 안 잡히면 placeholder 유지
+   - **작업 항목/작업 계획**: **큰 틀의 작업 단위**로 작성 (개수 고정 아님 — 작업 성격에 맞게, 보통 2~5개). 세부 단위 분해는 plan 단계 몫. ⚠️ 이 작업 항목이 이후 `/wtflow-plan` plan·`/wtflow-commit` 의 **K 넘버링 기준**이 된다 (작업 항목 N = Step N = K N = mirror 분기 `-00N`). 따라서 각 항목은 독립적으로 commit·검증 가능한 단위가 되도록 잡는다(순수 조사·식별·분석처럼 산출물 커밋이 없는 단계는 항목이 아니라 plan 몫 — "제거 대상 식별" 같은 항목 금지). 큰 단위조차 안 잡히면 placeholder 유지
      - **마크다운 체크박스 `- [ ]` 로, 위에서부터 K 순서(N=1,2,…)대로 한 줄씩** 작성(다른 체크리스트와 섞지 않기) — K 완료 시 N번째 항목이 자동 체크되기 때문. 템플릿이 평문 나열이면 체크박스로 바꿔 적는다
    - **환경**: 특정 환경에서만 발생하는 등 실제 신호가 있을 때만 채움. 코드 레벨 버그처럼 의미 없으면 placeholder 유지 (`서버/브랜치: <서버> / develop` 같은 무의미한 boilerplate 금지)
    - 그 외 정보 부족한 섹션은 **placeholder 그대로 유지** (사용자가 GitLab UI 에서 보강)

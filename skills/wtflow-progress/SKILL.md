@@ -1,17 +1,17 @@
 ---
-name: wt-progress
-description: 워크트리 이슈 작업의 K 진행 현황을 표로 출력(읽기 전용). 사용자 호출 + wt-commit/auto가 매 커밋 후 자율 호출.
+name: wtflow-progress
+description: 워크트리 이슈 작업의 K 진행 현황을 표로 출력(읽기 전용). 사용자 호출 + wtflow-commit/auto가 매 커밋 후 자율 호출.
 allowed-tools: Bash(git *), Bash(glab *)
 disable-model-invocation: false
 ---
 
-# /wt-progress — 워크트리 K 진행 현황
+# /wtflow-progress — 워크트리 K 진행 현황
 
 이슈 작업 항목(K)별 진행 상태를 표 하나로 보여준다. **읽기 전용** — git/glab 조회만 하고 어떤 변경도 하지 않는다.
 
 ## 호출
 
-`/wt-progress [-N <이슈번호>] [-a <accumulator>] [--quiet]`
+`/wtflow-progress [-N <이슈번호>] [-a <accumulator>] [--quiet]`
 
 - 인자 없음(기본): 현재 워크트리 브랜치에서 이슈 번호·accumulator 자동 추론
 - `-N <이슈번호>`: 이슈 번호 직접 지정(추론 실패 시)
@@ -22,18 +22,18 @@ disable-model-invocation: false
 
 K-모델의 contract 소스 **둘**을 합쳐 상태를 만든다. 추측 금지.
 
-1. **이슈 `작업 항목` 체크리스트** — wt-commit 이 K 완료 시 체크하는 그 리스트. **위에서 N번째 항목 = K N**. `- [x]`=완료 신호.
+1. **이슈 `작업 항목` 체크리스트** — wtflow-commit 이 K 완료 시 체크하는 그 리스트. **위에서 N번째 항목 = K N**. `- [x]`=완료 신호.
 2. **mirror 분기 `<accumulator>-<KKK>`** — K 귀속의 **유일 소스**: 번호(뒤 3자리)=K, tip=그 K 최신 커밋. (커밋 메시지에 `K:` 트레일러 없음.)
 
 > **어떤 mirror tip 의 조상도 아닌 dangling 커밋**은 K 단정 불가 → 표에 넣지 말고 **"미분류 커밋"** 줄로 노출(불변식 지켜지면 안 생김).
 
-**활동 오버레이(K 귀속 소스 아님).** **미귀속 작업**(워킹트리 dirty **또는** 어떤 mirror 도 도달 못 하는 raw 커밋)이 있으면 활동 신호로 보고 **활성 K(절차 9 정의)를 `🟡 진행 중`** 으로 올린다(커밋된 진행 중과 합침, 별도 상태 안 둠). 단정 불가라 활성 K 한 곳에만 적용하고 파일 수·미분류 커밋은 표 아래로 노출(추정 표시). 정확한 귀속은 wt-commit 담당 — "커밋했는데 대기로 보이는" 착시 방지용 best-effort.
+**활동 오버레이(K 귀속 소스 아님).** **미귀속 작업**(워킹트리 dirty **또는** 어떤 mirror 도 도달 못 하는 raw 커밋)이 있으면 활동 신호로 보고 **활성 K(절차 9 정의)를 `🟡 진행 중`** 으로 올린다(커밋된 진행 중과 합침, 별도 상태 안 둠). 단정 불가라 활성 K 한 곳에만 적용하고 파일 수·미분류 커밋은 표 아래로 노출(추정 표시). 정확한 귀속은 wtflow-commit 담당 — "커밋했는데 대기로 보이는" 착시 방지용 best-effort.
 
 ## 절차
 
 1. **워크트리 확인** — `git rev-parse --show-toplevel` + `git worktree list`. main 워킹트리면 경고만 하고 진행(워크트리 전용은 아님, 이슈만 있으면 동작).
 2. **이슈 번호 N 추론** — `-N` 우선. 없으면 현재 브랜치명에서 추출: **(주)** accumulator `<prefix>/<N>-<slug>` 의 `/` 뒤 정수(신 흐름은 워크트리 브랜치 = 이 슬래시 accumulator), **(레거시 폴백)** `worktree-<prefix>+<N>-<slug>` 의 `+` 뒤 정수(구 `claude --worktree` 자동 네이밍). 추출 불가 → 표 없이 한 줄 안내(`-N` 으로 지정 요청) 후 종료.
-3. **accumulator 추론** — `-a` 우선. 없으면 현재 HEAD 와 ancestry 공유하는 `<prefix>/<digits>-<slug>` 로컬 브랜치(wt-commit 컨벤션). 없으면 mirror 분기 조회만 skip(체크리스트만으로 표 구성).
+3. **accumulator 추론** — `-a` 우선. 없으면 현재 HEAD 와 ancestry 공유하는 `<prefix>/<digits>-<slug>` 로컬 브랜치(wtflow-commit 컨벤션). 없으면 mirror 분기 조회만 skip(체크리스트만으로 표 구성).
 4. **이슈 본문 조회** — `glab issue view <N> --output json` 으로 `description` 획득. 실패(인증/미존재) → 경고만 하고 종료.
 5. **작업 항목 파싱** — `작업 항목`(또는 `작업 계획`) 섹션 안의 체크리스트를 **그 섹션 안에서** 순서대로 추출. 각 항목: 순번(=K) · 텍스트 · 체크 여부. 섹션이 없으면(한 줄 요약 이슈) → 표 대상 없음, 한 줄 안내 후 종료.
 6. **mirror 분기 K 귀속** — `git branch --list '<accumulator>-[0-9][0-9][0-9]'` 로 mirror 분기 수집. 각 분기: **번호(뒤 3자리)=K**, **tip=그 K 의 최신 커밋**(`%h %s`). mirror 가 있는 K = 잡힌 K. accumulator 미상(3번 skip)이면 mirror 없이 체크리스트만으로 표 구성.
@@ -57,7 +57,7 @@ K-모델의 contract 소스 **둘**을 합쳐 상태를 만든다. 추측 금지
 - **완료(✅)는 dirty 여도 그대로** — 닫힌 K 에 무관한 변경이 있어도 되돌리지 않는다(활성 K 산정에서 완료 K 는 제외).
 - **현재 K 표시**: 활성 K(절차 9 정의) 행 앞에 `▸`.
 - **계획 외 K**: 체크리스트 항목 수보다 큰 K(mirror 분기)가 있으면 표 아래 `(계획 외 K{n}: <tip>)` 로 따로 한 줄. 추측해서 항목에 끼워 넣지 않는다.
-- **미분류 커밋**(어떤 mirror tip 의 조상도 아닌 dangling 커밋): 어느 K 인지 단정 금지. 표 아래 `미분류 커밋 <n>개: <hash> <subject>…` 한 줄로 **반드시 노출**(`--quiet` 여도 — 귀속 미상임을 드러내려). 정확히 넣으려면 wt-commit 으로 커밋(= 해당 K mirror 를 tip 으로 전진)하라 안내.
+- **미분류 커밋**(어떤 mirror tip 의 조상도 아닌 dangling 커밋): 어느 K 인지 단정 금지. 표 아래 `미분류 커밋 <n>개: <hash> <subject>…` 한 줄로 **반드시 노출**(`--quiet` 여도 — 귀속 미상임을 드러내려). 정확히 넣으려면 wtflow-commit 으로 커밋(= 해당 K mirror 를 tip 으로 전진)하라 안내.
 
 ## 출력 형식
 
@@ -88,10 +88,10 @@ K-모델의 contract 소스 **둘**을 합쳐 상태를 만든다. 추측 금지
 - `작업 항목` 체크리스트 없음 → "체크리스트형 이슈 아님 — 진행 현황 대상 없음"
 - 섹션/항목 순서 모호 → 추측 매핑 금지, 모호하다고만 보고
 
-## wt-commit / wt-auto 연동 (자율 호출)
+## wtflow-commit / wtflow-auto 연동 (자율 호출)
 
-- **wt-commit**: 커밋·체크박스 동기화·요약을 마친 **직후** 이 스킬을 `--quiet` 로 1회 호출해 갱신된 K 표를 덧붙인다(자세히는 wt-commit 계약 8번).
-- **wt-auto**: 커밋을 wt-commit 에 위임하므로 K마다 자동으로 이 표가 따라온다 — 별도 호출 불필요.
+- **wtflow-commit**: 커밋·체크박스 동기화·요약을 마친 **직후** 이 스킬을 `--quiet` 로 1회 호출해 갱신된 K 표를 덧붙인다(자세히는 wtflow-commit 계약 8번).
+- **wtflow-auto**: 커밋을 wtflow-commit 에 위임하므로 K마다 자동으로 이 표가 따라온다 — 별도 호출 불필요.
 - 이 스킬이 종료(이슈 번호 추출 불가 등)해도 커밋 흐름은 막지 않는다 — 진행 가시성용 부가 출력일 뿐.
 
 ## 비고

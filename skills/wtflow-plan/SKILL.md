@@ -1,15 +1,15 @@
 ---
-name: wt-plan
+name: wtflow-plan
 description: GitLab 어댑터(glab 필요) — 이슈번호로 워크트리·분기 셋업 + K 작업계획 출력. 인자 -b/-p/-r. "이슈 N 작업 시작/plan" 요청에. 사용자만 호출.
 allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree
 disable-model-invocation: true
 ---
 
-# /wt-plan — 이슈 기반 워크트리 시작
+# /wtflow-plan — 이슈 기반 워크트리 시작
 
 ## 호출
 
-`/wt-plan [<이슈번호>] [-b <base>] [-p <prefix>] [-r <repo>]`
+`/wtflow-plan [<이슈번호>] [-b <base>] [-p <prefix>] [-r <repo>]`
 
 - `<이슈번호>`: glab으로 본문/라벨 조회. **워크트리 안이면 선택** — 생략 시 accumulator 브랜치 `<prefix>/<N>-<slug>`(또는 워크트리 경로 `<prefix>+<N>-…`)에서 N 자동 추론. **워크트리 밖이면 필수.** 워크트리 안에서 **현재와 다른 이슈번호를 명시**하면, 현재 워크트리는 그대로 두고 그 이슈용 **새 워크트리를 origin/develop 기준으로 판다**(계약 2).
 - `-b <base>`: 분기 베이스 브랜치. 미지정 시 `origin/develop` (없으면 `origin/main`)
@@ -26,12 +26,12 @@ disable-model-invocation: true
 
 2. **현재 워크트리 감지 + 모드 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재 위치가 main 워킹트리가 아닌 워크트리인지 판정. **워크트리 안이면 먼저 현재 워크트리의 이슈번호**(경로 `<prefix>+<N>-…` 또는 브랜치 `<prefix>/<N>-…`)**와 요청 이슈번호를 비교**한다:
    - **워크트리 밖** → 3·4·5 실행(최초 셋업) → 6·7단계
-   - **워크트리 안 + 다른 이슈 요청** (요청 `<N>` 이 명시됐고 **현재 워크트리 이슈번호와 불일치**) → **현재 워크트리는 떠나지 않고**, 요청 이슈용 **새 워크트리를 3·4·5 로 셋업**(워크트리 밖과 동일 경로 — `git fetch` 후 origin/develop 기준, wt-issue 가 미리 만든 `<prefix>/<N>-<slug>` 슬래시 브랜치가 있으면 재사용) → `EnterWorktree` 로 그 워크트리 진입 → 6·7단계. ⚠️ 현재 워크트리 브랜치는 체크아웃/이동하지 않는다(격리된 새 워크트리를 추가로 팔 뿐이라 글로벌 "워크트리 이탈 금지" 와 상충하지 않음)
+   - **워크트리 안 + 다른 이슈 요청** (요청 `<N>` 이 명시됐고 **현재 워크트리 이슈번호와 불일치**) → **현재 워크트리는 떠나지 않고**, 요청 이슈용 **새 워크트리를 3·4·5 로 셋업**(워크트리 밖과 동일 경로 — `git fetch` 후 origin/develop 기준, wtflow-issue 가 미리 만든 `<prefix>/<N>-<slug>` 슬래시 브랜치가 있으면 재사용) → `EnterWorktree` 로 그 워크트리 진입 → 6·7단계. ⚠️ 현재 워크트리 브랜치는 체크아웃/이동하지 않는다(격리된 새 워크트리를 추가로 팔 뿐이라 글로벌 "워크트리 이탈 금지" 와 상충하지 않음)
    - **워크트리 안 + 같은 이슈 + 최초 플랜** (요청 생략 또는 현재 이슈와 일치, 그리고 이슈 항목 전부 미완 **AND** mirror 분기·브랜치 고유 커밋 없음) → 3·4·5 skip → 6·7단계 (기존 동작)
    - **워크트리 안 + 같은 이슈 + 재플랜** (요청 생략/현재 이슈와 일치, 그리고 일부 이슈 항목 완료 **OR** mirror 분기(`<accumulator>-00N`)·브랜치 고유 커밋 존재) → 3·4·5 skip → **아래 `## 재플랜 모드`**
 
 3. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 이름 안 제시 + 사용자 확인 한 번**:
-   - 워크트리 브랜치: `<prefix>/<N>-<slug>` (슬래시 브랜치 = wt-commit accumulator). wt-issue 가 미리 만든 이 브랜치가 origin/local 에 있으면 재사용. 없으면 wt-issue 와 동일 컨벤션으로 신규
+   - 워크트리 브랜치: `<prefix>/<N>-<slug>` (슬래시 브랜치 = wtflow-commit accumulator). wtflow-issue 가 미리 만든 이 브랜치가 origin/local 에 있으면 재사용. 없으면 wtflow-issue 와 동일 컨벤션으로 신규
    - 워크트리 경로: `<repo-root>/.claude/worktrees/<prefix>+<N>-<slug>`
    - slug는 제목의 한국어를 의미 기반 영어 kebab-case로 (최대 5단어)
 
@@ -74,8 +74,8 @@ disable-model-invocation: true
 
 | Step | 설명 | 관련 파일/위치 | 권장 호출 |
 |------|------|----------------|-----------|
-| 1 | <한 줄 요약> | `path/to/file.kt:42`, `path/to/other.kt` | `/wt-commit "<커밋 메시지>" -K 1` |
-| 2 | ... | ... | `/wt-commit "..." -K 2` |
+| 1 | <한 줄 요약> | `path/to/file.kt:42`, `path/to/other.kt` | `/wtflow-commit "<커밋 메시지>" -K 1` |
+| 2 | ... | ... | `/wtflow-commit "..." -K 2` |
 | ... | ... | ... | ... |
 
 ### step 분할 감각 (작업 항목이 비었을 때 폴백)
@@ -93,22 +93,22 @@ disable-model-invocation: true
 한 K 가 명백히 **여러 논리 변경**을 품으면(예: 리팩터 → 기능 추가 → 테스트), 그 K 아래에 2~4개 **commit-sized 하위 태스크**를 `Na`(1a·1b·1c…) 라벨로 쪼개 적는다(권장 — 단일 변경 K 는 제외). 같은 K(`-K N`)에 커밋을 누적하라는 뜻 — 새 K 가 아니다.
 
 ```
-| 2 | 토큰 자동 갱신 도입 | auth/token.ts | /wt-commit "..." -K 2 |
-    └ 2a (리팩터) 만료 체크 분리   → /wt-commit "refactor(auth): ..." -K 2
-    └ 2b (기능) 자동 갱신 로직     → /wt-commit "feat(auth): ..." -K 2
+| 2 | 토큰 자동 갱신 도입 | auth/token.ts | /wtflow-commit "..." -K 2 |
+    └ 2a (리팩터) 만료 체크 분리   → /wtflow-commit "refactor(auth): ..." -K 2
+    └ 2b (기능) 자동 갱신 로직     → /wtflow-commit "feat(auth): ..." -K 2
 ```
 
-- **힌트일 뿐 — 강제 계약 아님.** 커밋 경계는 구현하며 달라진다(plan 은 자주 틀림). 실제 분할은 wt-auto/구현자가 진행 중 판단
+- **힌트일 뿐 — 강제 계약 아님.** 커밋 경계는 구현하며 달라진다(plan 은 자주 틀림). 실제 분할은 wtflow-auto/구현자가 진행 중 판단
 - 하위 태스크가 새 K 처럼 보여도 **K 번호는 작업 항목에 고정**(2a·2b 모두 `-K 2`, mirror `-002`)
 - 작은 K(단일 commit 으로 충분)는 하위 태스크 적지 않는다 — noise
-- **`Na` 는 plan 출력·커밋 메시지 전용** — 이슈 작업 항목엔 K(N)만 쓰고 `Na`(1a·1b…)는 넣지 않는다. 이슈 체크박스는 K 단위(wt-commit `--done` 이 K 단위로 체크)
+- **`Na` 는 plan 출력·커밋 메시지 전용** — 이슈 작업 항목엔 K(N)만 쓰고 `Na`(1a·1b…)는 넣지 않는다. 이슈 체크박스는 K 단위(wtflow-commit `--done` 이 K 단위로 체크)
 
 ### K 매핑 원칙
 
 - **step 번호 = K 번호 = 이슈 작업 항목 번호** (작업 항목 N 완료 시 `-K N`, mirror 분기 `-00N`)
 - 4단계 이상 또는 1주 이상 예상 → 통합 브랜치 + accumulator 패턴 권장
-- 1-2단계 → 굳이 분해 없이 작업 후 `/wt-commit` 1회로 충분
-- 각 step 구현 완료 시 `/wt-commit` 은 **모델이 자율 실행**(커밋+미러까지 자동). 단 커밋 후 멈춘다 — 여러 K 를 이어 순회하려면 사용자가 `/wt-auto` 를 수동 호출(모델 자율 다중-K 순회 금지)
+- 1-2단계 → 굳이 분해 없이 작업 후 `/wtflow-commit` 1회로 충분
+- 각 step 구현 완료 시 `/wtflow-commit` 은 **모델이 자율 실행**(커밋+미러까지 자동). 단 커밋 후 멈춘다 — 여러 K 를 이어 순회하려면 사용자가 `/wtflow-auto` 를 수동 호출(모델 자율 다중-K 순회 금지)
 - plan 자체가 자주 틀림 — 진행 중 자연어로 재조정 가능. 그 시점부터 K 번호만 일관되게 유지하면 됨
 
 복잡한 plan/일반 작업 분해가 필요하면 워크트리 무관한 일반 작업 분해 도구를 별도로 쓴다
@@ -127,7 +127,7 @@ disable-model-invocation: true
 3. **스코프 드리프트 처리** (핵심, plan 표 **전에**) — 실제 작업이 이슈 작업 항목을 벗어났으면(이슈 항목은 다 ✓인데 새 작업이 생김 등) 먼저 되묻는다:
    - (a) 이 브랜치에서 **새 K로 이어붙이기** (이슈 체크박스와 별개로 진행)
    - (b) 이슈 **작업 항목에 추가** (glab 로 체크리스트 확장 후 K 매핑) — 승인 후에만 이슈 수정
-   - (c) **별도 이슈로 분리** (`/wt-issue`)
+   - (c) **별도 이슈로 분리** (`/wtflow-issue`)
    추측 말고 사용자 선택. 선택에 따라 K 번호·체크박스 동기화가 갈린다.
 4. **델타 plan 표** — **잔여 항목 + 신규 스코프만** 새 plan 표(§plan 출력 형식)로. K 번호는 완료 K 고정, 신규는 **`max(mirror 분기 번호)+1`** 부터(mirror 는 이 브랜치에만 있어 타 이슈 K 오염 불가). 재사용·재배치 안 함.
 5. **출력 순서** — ① 완료 현황(✓) → ② (드리프트 시) 처리 선택 → ③ 델타 plan 표.
@@ -136,12 +136,12 @@ disable-model-invocation: true
 
 ## 이후 흐름
 
-- 워크트리 안 커밋은 `/wt-commit <설명> [-K <N>]` — **작업 항목(K)=분기, 그 안 태스크마다 커밋해 누적**. 한 작업 항목의 여러 태스크를 커밋 없이 한 덩어리로 진행 금지(사용자 batch 명시 시 예외)
-- **작업 항목(K) 완료 시 이슈 체크박스 자동 체크** — wt-commit/wt-auto 가 이슈 본문 N번째 작업 항목을 켠다(상세는 wt-commit). plan 의 K 매핑이 곧 체크박스 순서이므로 K 를 작업 항목 번호에 정확히 고정할 것
+- 워크트리 안 커밋은 `/wtflow-commit <설명> [-K <N>]` — **작업 항목(K)=분기, 그 안 태스크마다 커밋해 누적**. 한 작업 항목의 여러 태스크를 커밋 없이 한 덩어리로 진행 금지(사용자 batch 명시 시 예외)
+- **작업 항목(K) 완료 시 이슈 체크박스 자동 체크** — wtflow-commit/wtflow-auto 가 이슈 본문 N번째 작업 항목을 켠다(상세는 wtflow-commit). plan 의 K 매핑이 곧 체크박스 순서이므로 K 를 작업 항목 번호에 정확히 고정할 것
 - step 번호 = K 번호 (plan 출력 표의 매핑 그대로)
 - mirror 브랜치 `<prefix>/<N>-<slug>-NNN`이 K+1씩 증가하며 origin push
 - 커밋+미러는 자동(모델) — **push·MR 생성 시점만 사용자 결정**
-- plan 변경 시 다음 `/wt-commit` 호출에 새 K 번호 직접 지정
+- plan 변경 시 다음 `/wtflow-commit` 호출에 새 K 번호 직접 지정
 
 ## 비고
 
