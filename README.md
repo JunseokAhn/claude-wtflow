@@ -1,4 +1,4 @@
-# claude-worktree-skills
+# claude-wtflow
 
 git worktree 위에서 한 작업을 **작업 항목(K) 단위로 분기**하고 **태스크마다 커밋으로 누적**하는 작업 규율 [Claude Code](https://claude.com/claude-code) 스킬셋.
 코어는 호스트 무관, 이슈 연동은 옵션 어댑터(현재 GitLab).
@@ -25,8 +25,8 @@ git worktree 위에서 한 작업을 **작업 항목(K) 단위로 분기**하고
 ## 설치
 
 ```
-git clone https://github.com/JunseokAhn/claude-worktree-skills.git
-cd claude-worktree-skills
+git clone https://github.com/JunseokAhn/claude-wtflow.git
+cd claude-wtflow
 ./install.sh
 ```
 

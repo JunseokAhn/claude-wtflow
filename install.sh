@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# claude-worktree-skills 설치
+# claude-wtflow 설치
 # 스킬을 ~/.claude/skills/ 에, wtflow-clean 을 ~/.local/bin/ 에 심볼릭 링크한다.
 # 환경변수로 위치 변경 가능: CLAUDE_HOME(기본 ~/.claude), BIN_DIR(기본 ~/.local/bin)
 set -euo pipefail
