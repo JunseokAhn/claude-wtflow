@@ -1,7 +1,7 @@
 ---
 name: wtflow-issue
-description: GitLab 어댑터(glab 필요) — GitLab 이슈 생성 + 작업 브랜치 셋업. "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 브랜치 2개 분기 + /wtflow-plan 안내 출력.
-allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
+description: GitLab 어댑터(glab 필요) — 이슈 생성 + 이슈 note 작성 (브랜치·워크트리는 wtflow-plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 이슈 본문은 자족적으로 유지하고 상세는 note 로 분리.
+allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
 ---
 
 # /wtflow-issue — GitLab 이슈 생성
@@ -9,7 +9,21 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 ## 트리거
 
 - 자연어: "이슈 만들어줘: <설명>", "이슈 등록", "GitLab에 올려줘", "이슈로 등록" 등
-- 슬래시: `/wtflow-issue <설명>`
+- 슬래시: `/wtflow-issue <설명> [-R <group>/<repo>] [--milestone-note <경로> --sections "<절 이름들>"]`
+
+## 마일스톤 판정 — 인자로만 (기억·추측 금지)
+
+**`--milestone-note` 인자가 있으면 마일스톤 이슈, 없으면 단독 이슈다. 그게 전부다.**
+
+- 이 스킬은 마일스톤을 **조회하지 않는다** — `glab` 마일스톤 API 호출, `_milestone/` 디렉토리 탐색 금지
+- 세션에서 `/wtflow-milestone` 을 썼던 기억, 대화에 마일스톤 얘기가 있었다는 정황은 **근거가 아니다.**
+  인자가 안 왔으면 단독 이슈다
+- `--milestone-note` 는 `/wtflow-milestone` 계약 8a 가 넘기는 유일한 경로다. 사용자가 직접
+  칠 일은 거의 없다
+- 인자가 왔는데 그 경로에 파일이 없으면 → 중단하고 보고. 없는 마일스톤을 지어내지 않는다
+
+**Why:** 스킬 호출은 컨텍스트를 공유해서, 산문으로 넘긴 맥락은 단독 이슈에까지 새어든다.
+판정을 "확인 가능한 인자 하나"로 좁혀야 오염이 끊긴다.
 
 ## 계약
 
@@ -36,8 +50,11 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 
 4. **본문 작성** — `.gitlab/issue_templates/` 우선 사용 (아래 `## 본문 템플릿` 참고). 템플릿 없으면 한 줄 요약
    - **이슈는 "무엇/왜"의 짧은 메모다.** 근본원인 분석·코드경로·클래스명 나열·해결책 설계·세부 작업분해는 이슈에 쓰지 않는다 — 그건 이후 `/wtflow-plan` plan 단계 몫이다. 지금 이슈에 결론을 박으면 plan 과 중복되거나 어긋난다
+   - **이미 상세히 계획해둔 게 있으면 이슈에 밀어넣지 말고 note 로 흘려보낸다** (계약 12). 페이로드 계약·타입·에러코드·호출 순서 같은 것이 여기 해당한다. 이슈가 비대해지는 건 규칙이 약해서가 아니라 적을 곳이 없어서였다 — 이제 목적지가 있다
+   - ⚠️ **이슈는 자족적이어야 한다 — wtflow 를 전혀 모르는 글로 쓴다.** 팀원에겐 `~/.claude/notes/` 가 없다. **어느 섹션에도**(`참고 자료` 포함 — 여기가 제일 잘 샌다) 쓰지 않는다: note 의 **절 이름 참조**(~~"계약 상세는 마일스톤 문서 … 절 참조"~~), **로컬 경로·파일명**(`.claude/…`, "마일스톤 문서"), **내부 용어**(K 번호·mirror 분기·accumulator·워크트리).
+     맥락이 더 필요하면 가리키지 말고 **그 내용을 직접 풀어 쓴다.** `참고 자료` 에는 팀원이 실제로 열 수 있는 것만(GitLab 링크·외부 URL·Notion)
 
-5. **사용자 확인 한 번 — 산문 말고 `AskUserQuestion`**: 본문 미리보기를 보인 뒤, 조정 가능한 축(prefix/종류·난이도·우선순위·브랜치 생성 여부)을 **`AskUserQuestion` 으로 묻는다**(산문으로 "이대로 생성할까?" 나열 금지 — 이게 가장 흔한 누락). 각 보기 첫째에 추천안을 `(추천)` 으로 표기. 자유 입력 경로는 클라이언트가 자동으로 붙이는 "Other" 로 보장되므로 **"직접 입력" 보기를 따로 넣지 않는다**. 답이 추천과 같으면 그대로, 다르면 반영해 생성
+5. **사용자 확인 한 번 — 산문 말고 `AskUserQuestion`**: 본문 미리보기를 보인 뒤, 조정 가능한 축(prefix/종류·난이도·우선순위)을 **`AskUserQuestion` 으로 묻는다**(산문으로 "이대로 생성할까?" 나열 금지 — 이게 가장 흔한 누락). 각 보기 첫째에 추천안을 `(추천)` 으로 표기. 자유 입력 경로는 클라이언트가 자동으로 붙이는 "Other" 로 보장되므로 **"직접 입력" 보기를 따로 넣지 않는다**(여기 질문은 prefix·라벨처럼 보기가 유한해서 Other 한 줄이면 충분하다. 반대로 사용자가 **값을 지어내야 하는** 질문 — 페이로드 필드·에러코드 같은 것 — 에는 `직접 입력` 보기를 넣는다). 답이 추천과 같으면 그대로, 다르면 반영해 생성
 
 6. **glab으로 생성** — `-R` 미지정 시 **현재 디렉토리 git remote 의 레포 기준**으로 생성한다 (자동, 묻지 않음. glab 기본 동작과 동일). 사용자가 `-R`/"repo는 X" 로 명시했을 때만 다른 레포 사용:
    ```
@@ -46,36 +63,78 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 
 7. **이슈 생성 결과 수집**: 이슈 번호 + URL
 
-8. **브랜치 이름 결정 (두 개)**:
-   - **이슈 마커 브랜치**: `<prefix>/<#N>-<slug>` (예: `fix/#42-user-login-token-expiry`) — GitLab 자동 링크 등 이슈-브랜치 연결용
-   - **작업 브랜치**: `<prefix>/<N>-<slug>` (예: `fix/42-user-login-token-expiry`) — `#` 없는 슬래시 브랜치. 워크트리 진입·작업·wtflow-commit accumulator 는 모두 이 브랜치 사용 (wtflow-plan 이 `git worktree add` 로 이 브랜치를 워크트리에 붙이고 `EnterWorktree` 로 진입)
-   - `<prefix>`: 종류 라벨 매핑 — 버그→`fix`, 기능→`feat`, 리팩터링→`refactor`, 문서→`docs`, 테스트→`test`, 기타→`chore`
-   - `<N>`: 이슈 번호 (정수)
-   - `<slug>`: 제목의 한국어를 의미 기반 영어 kebab-case로 변환 (최대 5단어)
+8. **브랜치 이름만 정한다 — 만들지는 않는다**:
+   - **워크트리 브랜치** (= accumulator = 이슈 마커): `<prefix>/#<N>-<slug>`. 실제 생성은
+     `/wtflow-plan` 이 워크트리를 팔 때 한다 — 브랜치를 쓸 시점에 만드는 게 맞고, 크로스 레포에서
+     엉뚱한 레포에 브랜치가 쌓이는 사고도 원천 차단된다
+   - 정한 이름은 **note frontmatter `branch:` 에 기록**한다. plan 이 그걸 읽어 그대로 쓰므로
+     slug 가 양쪽에서 따로 유도돼 어긋날 일이 없다
+   - `<N>`: 이슈 번호 / `<slug>`: 제목을 의미 기반 영어 kebab-case (최대 5단어)
+   - `<prefix>`: 계약 1 에서 정한 prefix 그대로 (종류 라벨과 같은 매핑 — 버그→`fix`, 기능→`feat`,
+     리팩터링→`refactor`, 문서→`docs`, 테스트→`test`, 기타→`chore`). ⚠️ **`worktree/` 를 쓰지 않는다**
+   - mirror 분기는 이 이름 뒤에 `-<KKK>` 만 붙인다(`<prefix>/#<N>-<slug>-001`) — base 를 따로
+     적어둘 필요가 없다
 
-9. **base 브랜치 결정 + fetch**: `origin/develop` (없으면 `origin/main`)
-   - `git fetch origin <base>` 먼저 실행
+9. **이슈 note 작성 — 적을 게 있을 때만** (형식은 아래 `## 이슈 note 형식`)
 
-10. **두 브랜치 모두 분기 생성** — 같은 base 에서 두 개 모두 만듦. 체크아웃 안 함:
-    - `git branch <prefix>/<#N>-<slug> origin/<base>`
-    - `git branch <prefix>/<N>-<slug> origin/<base>`
-    - 둘 중 하나라도 동일 이름 브랜치 이미 존재 → 사용자에게 재사용 vs 다른 이름 물음
+    `~/.claude/notes/<group>/<repo>/issue-<N>.md` 에 그냥 쓴다 — git 과 무관하다(커밋·MR diff 없음).
+    워크트리에서는 훅이 걸어준 `.claude/notes/<repo>/issue-<N>.md` 가 같은 파일이다.
 
-11. **최종 출력**:
+    마일스톤 여부는 `--milestone-note` 인자로만 판정한다 (`## 마일스톤 판정`).
+    없으면 `milestone*` frontmatter 줄을 생략하고 계약을 note 에 직접 적으면 끝이다.
+
+    - 페이로드·타입·에러코드처럼 **이미 정해둔 상세가 있을 때만.** 없으면 이슈만 남긴다
+    - `<group>`/`<repo>` 는 `-R <group>/<repo>` 인자에서, 없으면 현재 `remote get-url origin` 에서.
+      **로컬 체크아웃이 없어도 된다** — 브랜치를 안 만드니 경로를 찾을 이유가 없다
+    - 쓰기 전에 `mkdir -p ~/.claude/notes/<group>/<repo>` — 그룹 디렉토리가 있어야 훅이 워크트리에
+      `.claude/notes` 를 걸 수 있다. 그룹의 첫 이슈면 아직 없다
+    - **계약 4에서 뺀 상세가 여기 들어간다.** 여기서는 마일스톤 note 의 절을 마음껏 참조해도 된다
+
+10. **최종 출력**:
     ```
     ✓ 이슈 생성: #<N> <제목>
       <이슈 URL>
 
-    ✓ 브랜치 생성:
-      - <prefix>/<#N>-<slug>  (이슈 마커)
-      - <prefix>/<N>-<slug>   (작업·워크트리용, base: origin/<base>)
+    ✓ 이슈 note: ~/.claude/notes/<group>/<repo>/issue-<N>.md
 
-    다음 단계 — plan 받기:
+    다음 단계 — 워크트리·브랜치 만들고 plan 받기:
       /wtflow-plan <N>
 
-    → wtflow-plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) plan 을 출력한다.
-      (수동 `claude --worktree` 불필요)
+    → wtflow-plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) 계획서를 읽고
+      plan 을 출력한다. (수동 `claude --worktree` 불필요)
     ```
+
+## 이슈 note 형식
+
+`~/.claude/notes/<group>/<repo>/issue-<N>.md`. 계약 12 가 만든다.
+**작업하며 고쳐 쓰는 계약 저장소**이지 발행 문서가 아니다 — 분량 제한 없이 규격을 못박는 게 목적:
+
+```markdown
+---
+issue: <N>
+repo: <group>/<repo>
+branch: <prefix>/#<N>-<slug>     # = 워크트리 브랜치 = accumulator = 이슈 마커
+                                 # mirror 분기는 여기에 -<KKK> 만 붙인다
+milestone_note: ../_milestone/<iid>-<slug>.md   # 마일스톤 없으면 이 줄 생략
+---
+
+## 배경          무슨 문제를 왜 푸는가 + 범위·전제 (2-4문장)
+
+## 계약 요약      다른 사람·다른 레포가 맞춰 구현해야 하는 규격. 산문 말고 표로:
+                엔드포인트 | 페이로드(필드·타입·필수·기본) | 에러코드 | 호환성·배포 순서
+                확정 안 된 필드는 행을 지어내지 말고 `(미정)`
+
+## 열린 질문      아직 안 정한 것 + 재검토 트리거 (있을 때만)
+
+## K별 계약·위치  작업 인덱스 — plan 이 갱신한다
+| K | 구현하는 계약 | 관련 파일/위치 |     (※ K 제목·완료 여부 없음)
+```
+
+- **마일스톤 있음** → 계약을 복사하지 말고 `milestone_note` + 절 이름으로 가리킨다
+  (예: "마일스톤 note 의 `이벤트 페이로드` 절"). 복사하면 원본이 바뀔 때 사본이 조용히 낡는다
+- **마일스톤 없음** → 여기 계약 요약이 곧 원본이다. 직접 적는다
+- 표에 담기는 건 **규격**이지 구현이 아니다 — 함수 본문·쿼리를 옮겨오지 않는다
+- ⚠️ **K 제목·완료 여부·체크박스 금지.** 진행 상태의 진실원은 이슈 체크박스와 mirror 분기다
 
 ## 본문 템플릿
 
@@ -105,9 +164,7 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 - 현재 디렉토리가 git 워킹트리 아님 + `-R` 미지정 → repo 명시 요청
 - prefix 추정 불가 + 사용자 미응답 → 묻기
 - 사용자가 확인 단계에서 거부 → 중단
-- `origin/develop` / `origin/main` 둘 다 fetch 실패 → 보고 후 중단
-- 동일 브랜치 이름 이미 존재 → 사용자에게 재사용 vs 다른 이름 물음
-- 동일 워크트리 경로 이미 존재 → 사용자에게 재사용 vs 다른 이름 물음
+- 그룹을 못 구함(로컬 remote 등) → note 만 건너뛰고 이슈는 유지, 명시 보고
 
 ## 짧은 변형
 
@@ -115,9 +172,8 @@ allowed-tools: Bash(glab *), Bash(git *), Read, Glob, AskUserQuestion
 - "긴급" / "우선순위 높음" → 우선순위 조정
 - "쉬움"/"낮음" → `난이도:낮음`, "어려움"/"높음" → `난이도:높음`
 - "repo는 X" → `-R X`
-- "본문 자세히" → 본문에 맥락 추가
-- "--no-branch" / "이슈만" → 계약 8~11 단계 생략 (이슈 생성만)
-- "base는 main 으로" → base 강제 `origin/main`
+- "본문 자세히" → 본문에 맥락 추가 (단, 계약 4 상한은 유지 — 상세는 계획서로)
+- "--no-plan" / "note 빼고" → 계약 9 생략
 
 ## 비고
 
