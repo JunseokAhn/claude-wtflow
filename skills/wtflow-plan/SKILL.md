@@ -1,7 +1,7 @@
 ---
 name: wtflow-plan
-description: GitLab 어댑터(glab 필요) — 이슈번호로 워크트리·분기 셋업 + K 작업계획 출력. 인자 -b/-p/-r. "이슈 N 작업 시작/plan" 요청에. 사용자만 호출.
-allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree
+description: GitLab 어댑터(glab 필요) — 이슈번호로 워크트리·분기 셋업 + note(이슈·마일스톤) 로드 + K 작업계획 출력·저장. 인자 -b/-p/-r. "이슈 N 작업 시작/plan" 요청에. 사용자만 호출.
+allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Write, Edit, Glob, Grep, EnterWorktree
 disable-model-invocation: true
 ---
 
@@ -11,9 +11,9 @@ disable-model-invocation: true
 
 `/wtflow-plan [<이슈번호>] [-b <base>] [-p <prefix>] [-r <repo>]`
 
-- `<이슈번호>`: glab으로 본문/라벨 조회. **워크트리 안이면 선택** — 생략 시 accumulator 브랜치 `<prefix>/<N>-<slug>`(또는 워크트리 경로 `<prefix>+<N>-…`)에서 N 자동 추론. **워크트리 밖이면 필수.** 워크트리 안에서 **현재와 다른 이슈번호를 명시**하면, 현재 워크트리는 그대로 두고 그 이슈용 **새 워크트리를 origin/develop 기준으로 판다**(계약 2).
+- `<이슈번호>`: glab으로 본문/라벨 조회. **워크트리 안이면 선택** — 생략 시 accumulator 브랜치 `<prefix>/#<N>-<slug>`(또는 워크트리 경로 `<N>-<slug>`)에서 N 자동 추론. **워크트리 밖이면 필수.** 워크트리 안에서 **현재와 다른 이슈번호를 명시**하면, 현재 워크트리는 그대로 두고 그 이슈용 **새 워크트리를 origin/develop 기준으로 판다**(계약 2).
 - `-b <base>`: 분기 베이스 브랜치. 미지정 시 `origin/develop` (없으면 `origin/main`)
-- `-p <prefix>`: 브랜치 prefix. 미지정 시 이슈 라벨에서 추론
+- `-p <prefix>`: 브랜치 prefix (워크트리 브랜치·mirror 공통). 미지정 시 **이슈 note frontmatter `branch:`** 에서, 그것도 없으면 이슈 라벨에서 추론
   - `종류:버그` → `fix`
   - `종류:기능` → `feat`
   - `종류:리팩터링` → `refactor`
@@ -22,31 +22,73 @@ disable-model-invocation: true
 
 ## 계약 (보장되어야 하는 것)
 
-1. **이슈 번호 확정 + 메타 로드** — `<이슈번호>` 미지정 + 워크트리 안이면, HEAD 와 ancestry 공유하는 accumulator 브랜치 `<prefix>/<N>-<slug>`(또는 워크트리 경로)에서 정수 N 추론. 미지정 + 워크트리 밖이면 중단·요청. 확정 후 `glab issue view <N> -R <repo>`로 제목·라벨·본문 가져옴. 실패 시 중단·보고
+1. **이슈 번호 확정 + 메타 로드** — `<이슈번호>` 미지정 + 워크트리 안이면, HEAD 와 ancestry 공유하는 accumulator `<prefix>/#<N>-<slug>`(mirror `-<KKK>` 제외 — 아래 `## accumulator 탐지`)나 워크트리 경로에서 정수 N 추론. 미지정 + 워크트리 밖이면 중단·요청. 확정 후 `glab issue view <N> -R <repo>`로 제목·라벨·본문 가져옴. 실패 시 중단·보고
 
-2. **현재 워크트리 감지 + 모드 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재 위치가 main 워킹트리가 아닌 워크트리인지 판정. **워크트리 안이면 먼저 현재 워크트리의 이슈번호**(경로 `<prefix>+<N>-…` 또는 브랜치 `<prefix>/<N>-…`)**와 요청 이슈번호를 비교**한다:
-   - **워크트리 밖** → 3·4·5 실행(최초 셋업) → 6·7단계
-   - **워크트리 안 + 다른 이슈 요청** (요청 `<N>` 이 명시됐고 **현재 워크트리 이슈번호와 불일치**) → **현재 워크트리는 떠나지 않고**, 요청 이슈용 **새 워크트리를 3·4·5 로 셋업**(워크트리 밖과 동일 경로 — `git fetch` 후 origin/develop 기준, wtflow-issue 가 미리 만든 `<prefix>/<N>-<slug>` 슬래시 브랜치가 있으면 재사용) → `EnterWorktree` 로 그 워크트리 진입 → 6·7단계. ⚠️ 현재 워크트리 브랜치는 체크아웃/이동하지 않는다(격리된 새 워크트리를 추가로 팔 뿐이라 글로벌 "워크트리 이탈 금지" 와 상충하지 않음)
-   - **워크트리 안 + 같은 이슈 + 최초 플랜** (요청 생략 또는 현재 이슈와 일치, 그리고 이슈 항목 전부 미완 **AND** mirror 분기·브랜치 고유 커밋 없음) → 3·4·5 skip → 6·7단계 (기존 동작)
-   - **워크트리 안 + 같은 이슈 + 재플랜** (요청 생략/현재 이슈와 일치, 그리고 일부 이슈 항목 완료 **OR** mirror 분기(`<accumulator>-00N`)·브랜치 고유 커밋 존재) → 3·4·5 skip → **아래 `## 재플랜 모드`**
+2. **현재 워크트리 감지 + 모드 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재 위치가 main 워킹트리가 아닌 워크트리인지 판정. **워크트리 안이면 먼저 현재 워크트리의 이슈번호**(경로 `<N>-…` 또는 브랜치 `<prefix>/#<N>-…`)**와 요청 이슈번호를 비교**한다:
+   - **워크트리 밖** → 3·4·5 실행(최초 셋업) → 6~9단계
+   - **워크트리 안 + 다른 이슈 요청** (요청 `<N>` 이 명시됐고 **현재 워크트리 이슈번호와 불일치**) → **현재 워크트리는 떠나지 않고**, 요청 이슈용 **새 워크트리를 3·4·5 로 셋업**(워크트리 밖과 동일 경로 — `git fetch` 후 origin/develop 기준, 기존 `<prefix>/#<N>-<slug>` 가 있으면 재사용) → `EnterWorktree` 로 그 워크트리 진입 → 6~9단계. ⚠️ 현재 워크트리 브랜치는 체크아웃/이동하지 않는다(격리된 새 워크트리를 추가로 팔 뿐이라 글로벌 "워크트리 이탈 금지" 와 상충하지 않음)
+   - **워크트리 안 + 같은 이슈 + 최초 플랜** (요청 생략 또는 현재 이슈와 일치, 그리고 이슈 항목 전부 미완 **AND** mirror 분기·브랜치 고유 커밋 없음) → 3·4·5 skip → 6~9단계 (기존 동작)
+   - **워크트리 안 + 같은 이슈 + 재플랜** (요청 생략/현재 이슈와 일치, 그리고 일부 이슈 항목 완료 **OR** mirror 분기(`<prefix>/#<N>-<slug>-<KKK>`)·브랜치 고유 커밋 존재) → 3·4·5 skip → **아래 `## 재플랜 모드`**
 
 3. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 이름 안 제시 + 사용자 확인 한 번**:
-   - 워크트리 브랜치: `<prefix>/<N>-<slug>` (슬래시 브랜치 = wtflow-commit accumulator). wtflow-issue 가 미리 만든 이 브랜치가 origin/local 에 있으면 재사용. 없으면 wtflow-issue 와 동일 컨벤션으로 신규
-   - 워크트리 경로: `<repo-root>/.claude/worktrees/<prefix>+<N>-<slug>`
+   - 워크트리 브랜치: `<prefix>/#<N>-<slug>` (= wtflow-commit accumulator = 이슈 마커).
+     **여기가 이 브랜치의 생성 지점이다** — wtflow-issue 는 이름만 정하고 만들지 않는다.
+     이름은 **이슈 note frontmatter `branch:` 를 그대로 쓴다**(있으면). note 가 없을 때만 컨벤션대로 새로 유도 — slug 를 양쪽에서 따로 만들면 어긋난다. `#` 때문에 **항상 따옴표로 감싼다**
+   - `<prefix>`: `-p` > note `branch:` > 이슈 종류 라벨 순. ⚠️ **`worktree/` 를 쓰지 않는다** —
+     이 이름이 그대로 mirror base 이고 머지 커밋 메시지에 남는다
+   - 워크트리 경로: `<repo-root>/.claude/worktrees/<N>-<slug>` — 경로엔 `#` 를 넣지 않는다(셸 주석 문자)
    - slug는 제목의 한국어를 의미 기반 영어 kebab-case로 (최대 5단어)
 
-4. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 워크트리 생성** — `git fetch origin && git worktree add <경로> <브랜치>` (브랜치 기존 사용 시 -b 없음 / 신규 시 `-b <브랜치명> origin/develop`). ⚠️ 반드시 **슬래시 브랜치를 명시 지정**해 `git worktree add` 로 붙인다 — 이래야 accumulator·mirror 가 정상 동작
+4. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 브랜치 + 워크트리 생성**:
+   - base 결정 후 fetch: `git fetch origin <base>` (`origin/develop`, 없으면 `origin/main`)
+   - `git worktree add <경로> -b "<prefix>/#<N>-<slug>" origin/<base>`
+     — 브랜치 생성과 워크트리 부착을 한 번에
+   - **같은 이름 브랜치가 이미 있으면 기본은 재사용이다** — 사용자가 미리 만들어 둔 마커일 가능성이
+     높다. `-b` 없이 `git worktree add <경로> "<prefix>/#<N>-<slug>"` 로 붙이고, tip 커밋과
+     base 대비 ahead/behind 를 보고한다. **되묻는 건 그 브랜치가 이미 다른 워크트리에 물려 있을
+     때뿐**(그때만 재사용 불가 → 다른 이름 or 그 워크트리로 진입)
+   - ⚠️ 반드시 **`<prefix>/#<N>-<slug>` 를 명시 지정**한다 — 이래야 accumulator·mirror 가 정상 동작
 
 5. **(신규 워크트리 셋업 시 — 워크트리 밖, 또는 워크트리 안 다른 이슈 요청) 세션을 워크트리로 진입** — `EnterWorktree({ path: <워크트리경로> })` 로 현재 세션을 방금 만든(또는 기존) 워크트리로 **인플레이스 이동**한다. `cd` 와 달리 CWD·시스템프롬프트·메모리·plans 캐시까지 워크트리 기준으로 정리된다.
-   - ⚠️ `claude --worktree` 는 **쓰지 않는다** — 그건 새 세션을 spawn 하고 워크트리 브랜치명을 자기 마음대로 `worktree-…` 로 만들어 미리 만든 slash accumulator 를 못 쓰게 만든다(브랜치 고아화). 진입은 항상 `git worktree add <slash 브랜치>` + `EnterWorktree({ path })` 조합으로
+   - ⚠️ `claude --worktree` 는 **쓰지 않는다** — 그건 새 세션을 spawn 하고 브랜치명을 자기 마음대로 `worktree-…` 로 지어서 컨벤션(`<prefix>/#<N>-<slug>`)을 깨고 mirror 가 붙을 곳을 잃게 만든다. 진입은 항상 `git worktree add -b "<prefix>/#<N>-<slug>"` + `EnterWorktree({ path })` 조합으로
 
-6. **이슈 본문 출력** — 후속 작업의 컨텍스트로 표시. 코드 분석 시작 안내만 하고 수정은 사용자 승인 후
-7. **plan 출력** — 이슈 본문/라벨 + **코드 분석 결과**로 작업 단계 추정 (아래 `## plan 출력 형식` 참고). 자동 실행 안 함, 가이드 용도
+6. **계획 문서 로드 (plan 출력 전 필수)** — 이슈 본문만으로 plan 을 짜기 전에, 이미 정해진 계약이
+   있는지 먼저 확인한다. 순서대로:
+   - a. `.claude/notes/<repo>/issue-<N>.md` 가 있으면 Read — plan 표의 근거가 된다
+   - b. frontmatter 에 `milestone_note` 가 있으면 그것도 Read. **이걸 안 읽고 짠 plan 은 다른
+        이슈와 계약이 어긋난다.** 심링크라 다른 세션이 고친 것도 항상 현행으로 보인다
+   - c. 둘 다 없으면 건너뛴다 — **마일스톤을 찾아 나서지 않는다.** 단독 이슈가 기본이고,
+        `milestone_note` 가 없으면 마일스톤은 없는 것이다 (`glab` 마일스톤 조회 금지)
+   - 로드한 계약은 plan 표의 "관련 파일/위치" 와 각 K 설명에 반영하고, 계약과 충돌하는 분해를 내지 않는다
+
+7. **이슈 본문 출력** — 후속 작업의 컨텍스트로 표시. 코드 분석 시작 안내만 하고 수정은 사용자 승인 후
+8. **plan 출력** — 이슈 본문/라벨 + 계약 6 의 계획 문서 + **코드 분석 결과**로 작업 단계 추정
+   (아래 `## plan 출력 형식` 참고). 자동 실행 안 함, 가이드 용도
+9. **note 반영 (저장)** — plan 표를 낸 뒤 `.claude/notes/<repo>/issue-<N>.md` 를 갱신한다.
+   세션이 끊기거나 컨텍스트가 압축돼도 K별 계약·파일 위치가 남아 재플랜의 근거가 된다.
+   - 파일이 없으면, **plan 에 남길 계약이 실제로 있을 때만** 신규 작성
+     (형식은 `/wtflow-issue` 의 `## 이슈 note 형식`). 없으면 안 만든다 — 빈 뼈대는 노이즈
+   - 있으면 `K별 계약·위치` 표만 갱신 — `이 이슈 고유 결정`·`열린 질문` 절은 보존
+   - ⚠️ **K 제목·완료 여부·체크박스를 넣지 않는다.** 상태의 진실원은 이슈 체크박스와 mirror 분기다
+     (근거는 wtflow-milestone `## 이원화 금지`). note 는 계약 저장소일 뿐이다
+   - note 와 이슈 작업 항목이 어긋나면 **항상 이슈가 이긴다.** note 를 이슈에 맞춰 고친다
+
+## accumulator 탐지 (계약 1·2 공통)
+
+accumulator 와 mirror 가 같은 prefix 를 쓰므로 **`-<KKK>` 유무로 가른다.**
+
+```
+git branch --list '*/#*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
+```
+
+그중 HEAD 와 ancestry 를 공유하는 것이 accumulator. 레거시 워크트리는 `worktree/#<N>-<slug>` 로
+잡히는데 **폴백으로 인정만 하고 새로 만들지 않는다**(새 브랜치는 항상 `<prefix>/`).
 
 ## 결정·중단 트리거
 
 - 이슈 미존재 / glab 인증 실패 → 보고 후 중단
-- 동일 이름 워크트리/브랜치 이미 존재 → 사용자에게 재사용 vs 신규 선택 (재사용 시 `EnterWorktree({ path })` 로 기존 워크트리에 세션 진입)
+- 동일 이름 **브랜치** 이미 존재 → 중단 아님. 계약 4 대로 **재사용이 기본**(tip·ahead/behind 보고). 그 브랜치가 이미 다른 워크트리에 물려 있을 때만 되묻는다
+- 동일 이름 **워크트리** 이미 존재 → `EnterWorktree({ path })` 로 기존 워크트리에 세션 진입
 - base 브랜치 fetch 실패 → 중단·보고
 - prefix 추론 실패 → 사용자에게 묻고 대기
 - 현재 디렉토리가 git 워킹트리 루트가 아님 → 보고 후 중단
@@ -57,8 +99,10 @@ disable-model-invocation: true
 
 - "베이스는 main 으로" → `-b origin/main`
 - "feat 로" → `-p feat`
-- "plan 빼고" → 계약 6번 생략 (이슈 본문만 출력)
-- "plan만 간단히" → 코드 분석 없이 이슈 본문만으로 plan
+- "plan 빼고" → 계약 8·9 생략 (이슈 본문만 출력)
+- "plan만 간단히" → 코드 분석 없이 이슈 본문 + 계획 문서로만 plan
+- "note 저장 안 함" → 계약 9 생략 (출력만)
+- "계약 확인" / "마일스톤 계약 보여줘" → 계약 6만 실행하고 로드한 계약을 그대로 출력
 
 ## plan 출력 형식
 
@@ -119,9 +163,13 @@ disable-model-invocation: true
 
 ### 절차
 
+0. **note 로드** — 계약 6 과 동일하게 이슈 note(+ 연결된 마일스톤 note)를 먼저 Read.
+   재플랜에서 특히 중요하다 — 세션이 길어져 컨텍스트가 압축됐어도 여기 K별 계약이 남아 있다.
+   단, **진행 상태는 note 에서 읽지 않는다.** 상태는 아래 1번(이슈 체크박스 + mirror 분기)에서만 온다.
+
 1. **진행 상태 수집**:
    - 이슈 체크박스 — `glab issue view <N> --output json` 의 description 에서 `작업 항목`/`작업 계획` 체크리스트의 완료(`- [x]`)/대기(`- [ ]`) 파악.
-   - K 진행 — **mirror 분기로 집계**: `git branch --list '<accumulator>-[0-9][0-9][0-9]'` 번호=진행 K, tip=최신 커밋. (커밋 메시지에 `K:` 트레일러 없음.)
+   - K 진행 — **mirror 분기로 집계**: `git branch --list '*/#<N>-<slug>-[0-9][0-9][0-9]'` 번호=진행 K, tip=최신 커밋. (커밋 메시지에 `K:` 트레일러 없음.)
    - 세션 진행 — 대화 맥락상 완료된 작업 / 새로 생긴 방향 요약.
 2. **완료 접기** — 완료된 이슈 항목·K 는 `✓` 한 줄 요약만(재출력 최소화).
 3. **스코프 드리프트 처리** (핵심, plan 표 **전에**) — 실제 작업이 이슈 작업 항목을 벗어났으면(이슈 항목은 다 ✓인데 새 작업이 생김 등) 먼저 되묻는다:
@@ -129,22 +177,26 @@ disable-model-invocation: true
    - (b) 이슈 **작업 항목에 추가** (glab 로 체크리스트 확장 후 K 매핑) — 승인 후에만 이슈 수정
    - (c) **별도 이슈로 분리** (`/wtflow-issue`)
    추측 말고 사용자 선택. 선택에 따라 K 번호·체크박스 동기화가 갈린다.
-4. **델타 plan 표** — **잔여 항목 + 신규 스코프만** 새 plan 표(§plan 출력 형식)로. K 번호는 완료 K 고정, 신규는 **`max(mirror 분기 번호)+1`** 부터(mirror 는 이 브랜치에만 있어 타 이슈 K 오염 불가). 재사용·재배치 안 함.
+4. **델타 plan 표** — **잔여 항목 + 신규 스코프만** 새 plan 표(§plan 출력 형식)로. K 번호는 완료 K 고정, 신규는 **`max(mirror 분기 KKK)+1`** 부터(mirror 는 이 브랜치에만 있어 타 이슈 K 오염 불가). 재사용·재배치 안 함.
 5. **출력 순서** — ① 완료 현황(✓) → ② (드리프트 시) 처리 선택 → ③ 델타 plan 표.
+6. **note 반영** — 계약 9 와 동일. 신규 K 의 계약·위치만 덧붙인다(완료분은 손대지 않음).
 
-재플랜은 **읽기 전용 + plan 출력**만 (커밋·분기 안 함. 이슈 항목 추가는 3-(b) 승인 시에만).
+재플랜은 **커밋·분기 안 함** (이슈 항목 추가는 3-(b) 승인 시에만). note 는 git 밖이라 이력 영향 없다.
 
 ## 이후 흐름
 
 - 워크트리 안 커밋은 `/wtflow-commit <설명> [-K <N>]` — **작업 항목(K)=분기, 그 안 태스크마다 커밋해 누적**. 한 작업 항목의 여러 태스크를 커밋 없이 한 덩어리로 진행 금지(사용자 batch 명시 시 예외)
 - **작업 항목(K) 완료 시 이슈 체크박스 자동 체크** — wtflow-commit/wtflow-auto 가 이슈 본문 N번째 작업 항목을 켠다(상세는 wtflow-commit). plan 의 K 매핑이 곧 체크박스 순서이므로 K 를 작업 항목 번호에 정확히 고정할 것
 - step 번호 = K 번호 (plan 출력 표의 매핑 그대로)
-- mirror 브랜치 `<prefix>/<N>-<slug>-NNN`이 K+1씩 증가하며 origin push
+- mirror 분기 `<prefix>/#<N>-<slug>-<KKK>` 가 K마다 증가하며 origin push
 - 커밋+미러는 자동(모델) — **push·MR 생성 시점만 사용자 결정**
 - plan 변경 시 다음 `/wtflow-commit` 호출에 새 K 번호 직접 지정
 
 ## 비고
 
+- 참고하는 note 둘 — `.claude/notes/<repo>/issue-<N>.md` 와 `milestone_note` 가 가리키는
+  `.claude/notes/_milestone/…`. 훅이 심링크로 꽂아두므로 그냥 읽으면 된다. **이 스킬은 읽기만
+  한다** — 형식과 생성은 `/wtflow-issue` 계약 12 · `/wtflow-milestone` 몫이다
 - 워크트리 브랜치는 origin에 push 안 함 (로컬 전용 작업 공간)
 - mirror 분기 브랜치만 origin에 노출
 - 세션 진입은 `EnterWorktree` 로 처리(수동 `claude --worktree` 불필요) — 이후 명령·경로·메모리·plans 는 워크트리 기준으로 정리됨
