@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# wt-clean — Claude 워크트리 + 이슈 브랜치 정리 (글로벌, 레포 비결합)
+# wtflow-clean — Claude 워크트리 + 이슈 브랜치 정리 (글로벌, 레포 비결합)
 #
-# 사용법: wt-clean [옵션] [이슈번호|작업브랜치]
+# 사용법: wtflow-clean [옵션] [이슈번호|작업브랜치]
 #
 # 기본 동작: 이슈 N 의 '#' 없는 브랜치를 모두 삭제하고 워크트리를 제거. '#' 마커만 남긴다.
-#   삭제 대상  = 작업 브랜치 <prefix>/<N>-…, 워크트리 브랜치 worktree-<prefix>+<N>-…,
+#   삭제 대상  = 워크트리 브랜치 worktree/#<N>-… (레거시 worktree-<prefix>+<N>-…),
 #                그리고 그들의 미러 -NNN  (예: fix/42-foo-001 … 3자리)
 #   워크트리   = .../.claude/worktrees/ 아래의 해당 워크트리
 #   마커 보존  = 삭제 전, '#' 마커 분기를 작업 최신 커밋(tip)으로 올려(ff) 최종 작업물 보존.
@@ -15,6 +15,11 @@
 #     [m] untracked 를 메인 워킹트리(develop)로 이관 후 제거 / [f] 강제 제거(버림) / [s] 건너뜀
 #
 # 옵션:
+#   -a, --all             '#' 마커/원본 브랜치까지 삭제 (기본은 마커 보존).
+#                         마커 정렬(ff)은 건너뛰고, 마커도 develop/main 병합분만 삭제
+#                         (미보존이면 -f/-M 필요). 워크트리(-w)·미러(-m) 전용 모드엔 영향 없음.
+#                         워크트리가 '#' 마커 브랜치를 그대로 물고 있어도 대상이 되며,
+#                         삭제 직전 그 워크트리를 develop(없으면 main)으로 옮겨 체크아웃을 푼다.
 #   -m, --mirror-only     미러 분기(-NNN)만 삭제 (작업/워크트리 브랜치·워크트리 보존)
 #   -w, --worktree-only   워크트리만 삭제 (브랜치 보존)
 #   -M, --merge           삭제 전에 작업 tip 을 develop(없으면 main)에 머지.
@@ -26,16 +31,18 @@
 #   -h, --help            이 도움말
 #
 # 위치 인자:
-#   숫자(이슈번호 N) → 브랜치/위치와 무관하게 이슈 N 의 브랜치들을 역추적 (예: wt-clean 42)
+#   숫자(이슈번호 N) → 브랜치/위치와 무관하게 이슈 N 의 브랜치들을 역추적 (예: wtflow-clean 42)
 #   그 외(작업브랜치) → 그 브랜치(및 같은 이슈번호 브랜치)를 대상으로
 #   생략             → 현재 체크아웃된 브랜치를 대상으로
 #
-# '#' 포함 브랜치(이슈 마커/원본 <prefix>/<#N>-…)와 현재 체크아웃 브랜치는 절대 삭제하지 않는다.
-# origin 은 건드리지 않는다 (로컬 분기/워크트리만).
+# 이슈 마커 <prefix>/#<N>-<slug> 는 사용자 수동 관리 영역이라 삭제하지 않는다(-a 로 포함 가능).
+# 판별: worktree/ 로 시작 | -NNN 으로 끝남 | '#' 없음(레거시 구 컨벤션) → 삭제 가능.
+#       그 외, 즉 '#' 를 가진 <prefix>/#<N>-<slug> 만 마커로 보고 보호한다.
+# 현재 체크아웃 브랜치는 -a 여도 절대 삭제하지 않는다. origin 은 건드리지 않는다 (로컬 분기/워크트리만).
 
 set -uo pipefail
 
-die() { printf 'wt-clean: %s\n' "$*" >&2; exit 1; }
+die() { printf 'wtflow-clean: %s\n' "$*" >&2; exit 1; }
 note() { printf '%s\n' "$*" >&2; }
 
 # 브랜치가 어딘가에 보존돼 있는지: 마커(정렬 후) / develop / main 에 포함되면 안전.
@@ -45,6 +52,8 @@ is_preserved() {
   c=$(git -C "$main_top" rev-parse --verify -q "refs/heads/$b") || return 0   # 없으면 보존 취급
   for base in "$marker_branch" develop main origin/develop origin/main; do
     [ -n "$base" ] || continue
+    # -a: 마커도 삭제하므로 마커를 '보존 근거'로 세지 않는다 (develop/main 병합분만 안전 취급)
+    { [ "$del_marker" = 1 ] && [ "$base" = "$marker_branch" ]; } && continue
     bref=$(git -C "$main_top" rev-parse --verify -q "refs/heads/$base" 2>/dev/null \
         || git -C "$main_top" rev-parse --verify -q "$base" 2>/dev/null) || continue
     if git -C "$main_top" merge-base --is-ancestor "$c" "$bref" 2>/dev/null; then
@@ -91,10 +100,12 @@ force=0
 merge=0
 assume_yes=0
 dry=0
+del_marker=0     # -a: '#' 마커/원본 브랜치까지 삭제 대상에 포함
 target_arg=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
+    -a|--all)           del_marker=1 ;;
     -m|--mirror-only)   mode=mirror ;;
     -w|--worktree-only) mode=worktree ;;
     -M|--merge)         merge=1 ;;
@@ -103,7 +114,7 @@ while [ $# -gt 0 ]; do
     -n|--dry-run)       dry=1 ;;
     -h|--help)          show_help; exit 0 ;;
     --)                 shift; break ;;
-    -*)                 die "알 수 없는 옵션: $1 (도움말: wt-clean -h)" ;;
+    -*)                 die "알 수 없는 옵션: $1 (도움말: wtflow-clean -h)" ;;
     *)                  [ -z "$target_arg" ] || die "인자가 너무 많습니다: $1"; target_arg="$1" ;;
   esac
   shift
@@ -178,11 +189,11 @@ merge_marker_only() {
 # 이슈 번호 N → 작업 브랜치 역추적 (브랜치/위치 무관)
 resolve_by_number() {
   local num="$1" cands wt_br
-  # 후보: <prefix>/<N>-… 또는 worktree-<prefix>+<N>-… (워크트리 없는 고아 브랜치 포함)
-  #        ('#' 제외, 미러 -NNN 제외)
+  # 후보: 워크트리 브랜치 worktree/#<N>-… (레거시 worktree-<prefix>+<N>-… 포함).
+  #        이슈 마커 <prefix>/#<N>-<slug> 와 미러 -NNN 은 제외.
   cands=$(git for-each-ref --format='%(refname:short)' refs/heads \
-    | grep -E "[/+]${num}-" \
-    | grep -v '#' \
+    | grep -E "[/+]#?${num}-" \
+    | awk '/^worktree[\/-]/ || !/#/' \
     | grep -vE -- '-[0-9][0-9][0-9]$' || true)
   local n; n=$(printf '%s\n' "$cands" | grep -c . || true)
   if [ "$n" -eq 1 ]; then
@@ -206,7 +217,7 @@ resolve_by_number() {
   fi
   # 브랜치로 못 찾으면 워크트리 경로(.claude/worktrees/<prefix>+<N>-…)로 시도
   wt_br=$(wt_lines | awk -F'\t' -v n="$num" \
-    'index($1,"/.claude/worktrees/")>0 && $1 ~ ("[+]" n "-") {print $2; exit}')
+    'index($1,"/.claude/worktrees/")>0 && ($1 ~ ("[+]" n "-") || $1 ~ ("/" n "-")) {print $2; exit}')
   if [ -z "$wt_br" ]; then
     # 작업 브랜치·워크트리가 없음. '#' 마커만 남았으면 '이미 정리됨'(return 2), 아예 없으면 에러(die).
     if git for-each-ref --format='%(refname:short)' refs/heads | grep -qE "#${num}-"; then
@@ -218,6 +229,7 @@ resolve_by_number() {
 }
 
 # 대상 작업 브랜치 결정
+marker_only=0    # 작업 브랜치/워크트리 없이 '#' 마커만 남은 상태 (-a 로 그 마커를 삭제)
 if [ -n "$target_arg" ]; then
   case "$target_arg" in
     *[!0-9]*) target_branch="$target_arg" ;;        # 숫자 아님 → 브랜치명
@@ -225,39 +237,58 @@ if [ -n "$target_arg" ]; then
               target_branch=$(resolve_by_number "$target_arg"); rb=$?
               case "$rb" in
                 0) ;;
-                2) if [ "$merge" = 1 ] && merge_marker_only "$target_arg"; then exit 0; fi
-                   note "이슈 #${target_arg}: 작업 브랜치/워크트리 없음 — 이미 정리됨 (마커만 남음)."; exit 0 ;;
+                2) # 마커만 남음: -a 면 그 마커까지 삭제하러 진행, 아니면 기존 동작(정리됨/머지)
+                   if [ "$del_marker" = 1 ]; then
+                     marker_only=1; target_branch=""
+                   elif [ "$merge" = 1 ] && merge_marker_only "$target_arg"; then exit 0
+                   else
+                     note "이슈 #${target_arg}: 작업 브랜치/워크트리 없음 — 이미 정리됨 (마커만 남음)."; exit 0
+                   fi ;;
                 *) exit 1 ;;
               esac ;;
   esac
 else
   target_branch="$current_branch"
 fi
-[ -n "$target_branch" ] && [ "$target_branch" != "HEAD" ] \
-  || die "대상 브랜치를 알 수 없습니다 (detached HEAD?). 이슈번호나 작업브랜치명을 인자로 주세요."
-
-case "$target_branch" in
-  *'#'*) die "대상이 '#' 포함 브랜치($target_branch)입니다 — 마커/원본 브랜치는 보호 대상입니다." ;;
-esac
+if [ "$marker_only" != 1 ]; then
+  [ -n "$target_branch" ] && [ "$target_branch" != "HEAD" ] \
+    || die "대상 브랜치를 알 수 없습니다 (detached HEAD?). 이슈번호나 작업브랜치명을 인자로 주세요."
+  case "$target_branch" in
+    # 워크트리가 '#' 마커 브랜치를 그대로 물고 있는 경우 여기로 온다.
+    # 기본은 보호(die), -a 면 삭제 의사가 명시된 것이므로 진행한다.
+    *) case "$target_branch" in
+         worktree/*|worktree-*|*-[0-9][0-9][0-9]) ;;      # 워크트리 브랜치·미러는 삭제 가능
+         *'#'*) [ "$del_marker" = 1 ] \
+                  || die "대상이 이슈 마커 브랜치($target_branch)입니다 — 사용자 수동 관리 영역이라 보호합니다 (-a 로 삭제 가능)."
+                note "이슈 마커 브랜치입니다 — -a 이므로 삭제 대상에 포함: $target_branch" ;;
+       esac ;;
+  esac
+fi
 
 # 이슈번호: 숫자 인자 우선, 없으면 target_branch 에서 추출
 issue_num=""
 case "$target_arg" in ''|*[!0-9]*) ;; *) issue_num="$target_arg" ;; esac
-[ -n "$issue_num" ] || issue_num=$(printf '%s\n' "$target_branch" | sed -nE 's@^.*[/+]([0-9]+)-.*@\1@p')
+[ -n "$issue_num" ] || issue_num=$(printf '%s\n' "$target_branch" | sed -nE 's@^.*[/+]#?([0-9]+)-.*@\1@p')
 
-# 이슈 N 에 속한 삭제 대상 브랜치 = '#' 없는 모든 관련 브랜치
-#   작업 브랜치 <prefix>/<N>-…, 워크트리 브랜치 worktree-<prefix>+<N>-…, 그리고 그들의 미러 -NNN.
-#   '#' 마커/원본 브랜치는 제외(보호). 번호를 못 구하면 target_branch + 그 -NNN 미러로 한정.
+# 이슈 N 에 속한 삭제 대상 = 워크트리 브랜치(worktree/#N-…) + 미러(-NNN).
+#   새 컨벤션에선 모든 브랜치에 '#' 가 붙으므로 '#' 유무로는 못 가른다.
+#   이슈 마커 <prefix>/#<N>-<slug>(worktree/ 아니고 -NNN 도 아닌 것)는 사용자 수동 영역이라 보호.
 if [ -n "$issue_num" ]; then
   issue_branches=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
-    | grep -E "[/+]${issue_num}-" | grep -v '#' || true)
+    | grep -E "[/+]#?${issue_num}-" \
+    | awk '/^worktree[\/-]/ || /-[0-9][0-9][0-9]$/ || !/#/' || true)
 else
   issue_branches=$( { printf '%s\n' "$target_branch"; \
     git -C "$main_top" for-each-ref --format='%(refname:short)' "refs/heads/${target_branch}-*" 2>/dev/null \
-      | grep -E -- '-[0-9][0-9][0-9]$'; } | grep -v '#' || true)
+      | grep -E -- '-[0-9][0-9][0-9]$'; } \
+    | awk '/^worktree[\/-]/ || /-[0-9][0-9][0-9]$/ || !/#/' || true)
 fi
-# 현재 체크아웃된 브랜치는 삭제 불가 → 제외
-if [ -n "$current_branch" ] && [ "$current_branch" != HEAD ]; then
+# -a + both: 체크아웃돼 있어도 삭제 직전 develop 으로 옮겨 풀어주므로 제외하지 않는다.
+release_checkouts=0
+{ [ "$del_marker" = 1 ] && [ "$mode" = both ]; } && release_checkouts=1
+
+# 현재 체크아웃된 브랜치는 삭제 불가 → 제외 (release_checkouts 면 풀어주므로 유지)
+if [ "$release_checkouts" != 1 ] && [ -n "$current_branch" ] && [ "$current_branch" != HEAD ]; then
   issue_branches=$(printf '%s\n' "$issue_branches" | grep -vxF "$current_branch" || true)
 fi
 # 표시/분류용: 작업 브랜치(미러 아님) vs 미러 분기(-NNN)
@@ -266,7 +297,7 @@ mirror_branches=$(printf '%s\n' "$issue_branches" | grep -E -- '-[0-9][0-9][0-9]
 # 대상 워크트리: .claude/worktrees/ 아래, 경로에 +<N>- 가 있거나 target_branch 가 체크아웃된 것
 target_wt=$(wt_lines | awk -F'\t' -v n="$issue_num" -v tb="$target_branch" '
   index($1,"/.claude/worktrees/")==0 { next }
-  (n!="" && $1 ~ ("[+]" n "-")) || $2==tb { print $1; exit }')
+  (n!="" && ($1 ~ ("[+]" n "-") || $1 ~ ("/" n "-"))) || $2==tb { print $1; exit }')
 
 # ── 마커('#') 분기 최상단 정렬 준비 ──────────────────────────
 # 삭제로 사라질 작업의 최신 커밋(tip)을 구해, '#' 마커 분기가 그보다 뒤처져 있으면
@@ -285,9 +316,16 @@ while IFS= read -r b; do
   fi
 done <<< "$issue_branches"
 
+marker_branches=""
 if [ -n "$issue_num" ]; then
   marker_branch=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
     | grep -E "#${issue_num}-" | head -n1 || true)
+  # -a: 이슈 N 의 '#' 마커/원본 브랜치 전체 (현재 체크아웃 브랜치는 삭제 불가 → 제외)
+  marker_branches=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
+    | grep -E "#${issue_num}-" || true)
+  if [ "$release_checkouts" != 1 ] && [ -n "$current_branch" ] && [ "$current_branch" != HEAD ]; then
+    marker_branches=$(printf '%s\n' "$marker_branches" | grep -vxF "$current_branch" || true)
+  fi
 fi
 if [ -n "$marker_branch" ]; then
   marker_commit=$(git -C "$main_top" rev-parse --verify -q "refs/heads/$marker_branch" || true)
@@ -314,7 +352,11 @@ fi
 # 삭제 브랜치 집합: 모드별
 #   both     → 이슈 브랜치 전부(작업+워크트리+미러)   mirror → 미러 -NNN 만   worktree → 없음
 case "$mode" in
-  both)     del_set="$issue_branches" ;;
+  both)     del_set="$issue_branches"
+            # -a: '#' 마커/원본 브랜치도 삭제 대상에 추가 (issue_branches 는 '#' 제외라 중복 없음)
+            if [ "$del_marker" = 1 ] && [ -n "$marker_branches" ]; then
+              del_set=$(printf '%s\n%s\n' "$del_set" "$marker_branches" | grep -v '^$' || true)
+            fi ;;
   mirror)   del_set="$mirror_branches" ;;
   worktree) del_set="" ;;
 esac
@@ -322,7 +364,7 @@ del_wt=0; del_branch=0
 [ "$mode" != mirror ] && [ -n "$target_wt" ] && del_wt=1
 [ -n "$del_set" ] && del_branch=1
 
-note "대상 이슈: #${issue_num:-?}  (작업 브랜치: $target_branch)"
+note "대상 이슈: #${issue_num:-?}  (작업 브랜치: ${target_branch:-없음 · 마커만})"
 if [ "$mode" != mirror ]; then
   if [ -n "$target_wt" ]; then note "  워크트리   : $target_wt"; else note "  워크트리   : (없음)"; fi
 fi
@@ -332,21 +374,27 @@ if [ -n "$del_set" ]; then
 else
   note "  삭제 브랜치: (없음)"
 fi
-if [ -n "$marker_branch" ]; then
-  note "  (보호) 마커 분기 $marker_branch — 삭제 안 함"
-fi
-note "  (보호) '#' 포함 마커/원본 브랜치, 현재 체크아웃 브랜치, origin 은 건드리지 않음"
-if [ "$marker_action" = ff ]; then
-  note "  마커 정렬  : $marker_branch → 최상단($tip_ref) 으로 올림 (삭제 전 작업물 보존)"
-elif [ "$marker_action" = skip ]; then
-  note "  마커 정렬  : $marker_branch (작업 tip 과 갈라져 있어 건드리지 않음)"
+if [ "$del_marker" = 1 ]; then
+  note "  (-a) '#' 마커/원본 브랜치도 삭제 — 마커 정렬(ff) 건너뜀"
+  note "  (보호) 현재 체크아웃 브랜치, origin 은 건드리지 않음"
+else
+  if [ -n "$marker_branch" ]; then
+    note "  (보호) 마커 분기 $marker_branch — 삭제 안 함"
+  fi
+  note "  (보호) '#' 포함 마커/원본 브랜치, 현재 체크아웃 브랜치, origin 은 건드리지 않음"
+  if [ "$marker_action" = ff ]; then
+    note "  마커 정렬  : $marker_branch → 최상단($tip_ref) 으로 올림 (삭제 전 작업물 보존)"
+  elif [ "$marker_action" = skip ]; then
+    note "  마커 정렬  : $marker_branch (작업 tip 과 갈라져 있어 건드리지 않음)"
+  fi
 fi
 if [ "$merge" = 1 ]; then
   if [ -n "$merge_block" ]; then
     note "  머지       : ✗ 불가 — $merge_block (머지·삭제 모두 건너뜀)"
   else
     plan_src="$tip_ref"
-    if [ -n "$marker_branch" ] && { [ "$marker_action" = ff ] || [ "$marker_action" = already ]; }; then
+    if [ -n "$marker_branch" ] && [ "$del_marker" != 1 ] \
+       && { [ "$marker_action" = ff ] || [ "$marker_action" = already ]; }; then
       plan_src="$marker_branch"
     fi
     note "  머지       : $merge_ref ← $plan_src (no-ff, $(printf '%.9s' "$tip_commit")) — 성공 시 모든 이슈 브랜치 삭제"
@@ -383,7 +431,7 @@ branch_force=$force   # 머지 성공 시 1 로 올려, 머지된 이슈 브랜�
 # ── 마커('#') 분기 최상단 정렬 (삭제 전에 작업물 보존) ──
 # 마커가 어딘가에 체크아웃돼 있으면 `git branch -f` 가 거부된다(흔함: 사용자가 마커 위에 서 있음).
 # 그 경우 해당 워크트리가 깨끗하면 `merge --ff-only` 로 안전하게 올리고, 더러우면 보류한다.
-if [ "$marker_action" = ff ]; then
+if [ "$marker_action" = ff ] && [ "$del_marker" != 1 ]; then
   marker_wt=$(wt_lines | awk -F'\t' -v b="$marker_branch" '$2==b {print $1; exit}')
   short_tip=$(printf '%.9s' "$tip_commit")
   if [ -z "$marker_wt" ]; then
@@ -414,7 +462,7 @@ fi
 # `Merge branch '<prefix>/#N-…' into develop` + 커밋 shortlog 로 남긴다. 아니면 tip 작업 브랜치.
 if [ "$merge" = 1 ]; then
   merge_src="$tip_ref"
-  if [ -n "$marker_branch" ] \
+  if [ -n "$marker_branch" ] && [ "$del_marker" != 1 ] \
      && [ "$(git -C "$main_top" rev-parse --verify -q "refs/heads/$marker_branch")" = "$tip_commit" ]; then
     merge_src="$marker_branch"
   fi
@@ -480,11 +528,39 @@ if [ "$del_wt" = 1 ]; then
   git -C "$main_top" worktree prune >/dev/null 2>&1 || true
 fi
 
+# ── (-a) 삭제할 브랜치를 물고 있는 워크트리를 base 로 옮겨 체크아웃을 푼다 ──
+# 워크트리가 '#' 마커 브랜치를 그대로 물고 있으면 그 상태로는 branch -D 가 거부된다.
+# base(develop, 없으면 main)로 옮기되, 이미 다른 워크트리가 base 를 물고 있으면 detach 로 붙인다.
+release_checkout() {
+  local b="$1" wt base d co=""
+  wt=$(wt_lines | awk -F'\t' -v b="$b" '$2==b {print $1; exit}')
+  [ -n "$wt" ] || return 0            # 체크아웃돼 있지 않음 → 할 일 없음
+  base=""
+  for d in develop main; do
+    git -C "$main_top" rev-parse --verify -q "refs/heads/$d" >/dev/null 2>&1 && { base="$d"; break; }
+  done
+  [ -n "$base" ] || { note "⚠ 체크아웃 해제 불가: develop/main 을 찾지 못했습니다 ($b)"; return 1; }
+  if [ -n "$(git -C "$wt" status --porcelain 2>/dev/null)" ]; then
+    [ "$force" = 1 ] || { note "⚠ 체크아웃 해제 보류: $wt 에 변경사항이 있습니다 (-f 로 강제)"; return 1; }
+    co="-f"
+  fi
+  # $co 는 빈 문자열이거나 "-f" — 의도적으로 따옴표 없이 전개 (bash 3.2 빈 배열 회피)
+  # shellcheck disable=SC2086
+  if git -C "$wt" checkout $co "$base" >/dev/null 2>&1 \
+     || git -C "$wt" checkout $co --detach "$base" >/dev/null 2>&1; then
+    note "  · 체크아웃 해제: $wt → $base ($b 삭제 가능)"
+    return 0
+  fi
+  note "⚠ 체크아웃 해제 실패: $wt ($b)"
+  return 1
+}
+
 # ── 이슈 브랜치 삭제 (작업+워크트리+미러, 마커 제외) ──────────
 # 마커/develop/main 에 병합·포함된 브랜치만 삭제. 보존 안 된 건 -f 없이는 건너뜀(작업물 보호).
 if [ "$del_branch" = 1 ]; then
   while IFS= read -r b; do
     [ -n "$b" ] || continue
+    [ "$release_checkouts" = 1 ] && { release_checkout "$b" || rc=1; }
     if [ "$branch_force" != 1 ] && ! is_preserved "$b"; then
       rc=1
       note "⚠ 건너뜀(미보존): $b — 마커/develop/main 에 없음. 지우려면 -f(--force) 또는 -M(--merge)"
