@@ -3,8 +3,8 @@ name: wtflow-merge
 description: >-
   아직 develop 에 안 들어간 작업 브랜치들을 develop 으로 머지하고 충돌을 해소한다.
   "디벨롭에 머지해줘", "안 머지된 거 머지해줘", "충돌 풀어서 develop 에 올려줘" 같은
-  요청에 사용한다. 머지 대상·메시지는 mirror 가 아니라 **워크트리 브랜치(= 이슈 마커
-  `<prefix>/#N-slug`)** 이름으로 적고, 레포마다 develop 을 어디서 꺼낼지 판단해 사용자 체크아웃을
+  요청에 사용한다. 머지 대상·메시지는 mirror 가 아니라 **워크트리 브랜치
+  `<prefix>/#N-slug`** 이름 그대로 적고, 레포마다 develop 을 어디서 꺼낼지 판단해 사용자 체크아웃을
   망가뜨리지 않는다. 사용자만 호출.
 disable-model-invocation: true
 ---
@@ -21,21 +21,23 @@ disable-model-invocation: true
 
 1. **대상은 `git branch --no-merged develop` 로 확정한다.** 이슈 체크박스·브랜치 이름으로 추정하지 않는다.
    `main`·`local/*`·무관한 옛 브랜치는 **제외**하고, 무엇을 왜 뺐는지 보고한다.
-2. **머지 대상·메시지는 워크트리 브랜치(= accumulator = 이슈 마커) 이름으로 적는다** —
-   mirror(`<prefix>/#N-slug-00K`)나 임시 통합 브랜치 이름을 쓰지 않는다.
-   accumulator 는 커밋마다 전진하므로 그 이슈의 모든 K 를 이미 담고 있다:
+2. **머지 대상은 워크트리 브랜치(= accumulator) 그 자체다** — mirror(`<prefix>/#N-slug-00K`)나
+   임시 통합 브랜치를 머지하지 않는다. accumulator 는 커밋마다 전진하므로 그 이슈의 모든 K 를
+   이미 담고 있다:
    ```
    git merge --no-ff '<prefix>/#<N>-<slug>'
    ```
-   기본 메시지가 곧 `Merge branch '<prefix>/#<N>-<slug>' into develop` 이라 `-m` 이 필요 없다.
-   - accumulator 가 없을 때만(워크트리를 이미 지웠거나 레거시 `worktree/#N-slug`) **최종 K 의
-     mirror tip 을 머지하고 메시지만 마커 이름으로** 적는다:
+   **메시지를 손대지 않는다.** 브랜치 prefix 가 커밋 컨벤션과 같은 값(`fix`/`feat`/`refactor`…)이라
+   기본 메시지 `Merge branch '<prefix>/#<N>-<slug>' into develop` 이 그대로 읽히는 이력이 된다.
+   `-m` 을 붙일 이유가 없다.
+   - accumulator 가 없을 때만(워크트리를 이미 지웠거나 레거시 브랜치) **최종 K 의 mirror tip 을
+     머지하고 메시지만 accumulator 이름으로** 적는다 — mirror 이름에서 `-<KKK>` 를 떼면 그 이름이다:
      ```
      git merge --no-ff '<prefix>/#<N>-<slug>-<최종 K>' \
        -m "Merge branch '<prefix>/#<N>-<slug>' into develop"
      ```
-   - ⚠️ **레거시 `worktree/#N-slug` 는 이름 그대로 머지 메시지에 쓰지 않는다** — `<prefix>/` 이름으로
-     바꿔 적는다
+   - ⚠️ 레거시 `worktree/#N-slug` 만 예외로 **이름을 바꿔 적는다** — `<prefix>/` 로 시작하는
+     정상 이름으로. 그 prefix 는 mirror 에서, mirror 도 없으면 이슈 종류 라벨에서 유도한다
 3. **`--no-ff` 고정.** 머지 커밋이 남아야 어느 이슈가 언제 들어갔는지 이력에 보인다.
 4. **여러 이슈는 번호 오름차순**으로 하나씩. 한 번에 octopus 머지하지 않는다 — 충돌이 뭉쳐 못 푼다.
 5. **충돌 해소 후 빌드로 검증한다.** 해소가 끝이 아니다:
