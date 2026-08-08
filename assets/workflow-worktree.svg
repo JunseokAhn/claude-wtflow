@@ -36,7 +36,7 @@
   <text x="612" y="176" class="sub">태스크마다 커밋  ·  같은 K 분기에 누적</text>
 
   <!-- /wtflow-auto bracket over steps 3 & 4 -->
-  <text x="644" y="214" class="auto">↻ /wtflow-auto — ③④ K 자율 순회 (구현→검증→커밋→다음 K) · 완료 시 /wtflow-briefing</text>
+  <text x="644" y="214" class="auto" font-size="13">↻ /wtflow-auto — ③④ 자율 순회 (구현→검증→커밋) · 완료 시 /wtflow-briefing</text>
   <path d="M644,232 L644,224 L1090,224 L1090,232" fill="none" stroke="#0d9488" stroke-width="1.5"/>
 
   <!-- Pipeline -->
@@ -96,10 +96,11 @@
   <text x="537" y="597" class="tag" fill="#0f766e">b</text>
   <circle cx="655" cy="592" r="12" fill="#fff" stroke="#0d9488" stroke-width="3"/>
   <text x="647" y="597" class="tag" fill="#0f766e">c</text>
-  <text x="366" y="572" class="lab" fill="#4338ca">작업 항목 1  →  feat/#42-…  (= K1)</text>
+  <text x="120" y="597" class="sub" fill="#4338ca">feat/#42-slug (워크트리 브랜치)</text>
+  <text x="366" y="572" class="lab" fill="#4338ca">작업 항목 1  (= K1)</text>
   <line x1="667" y1="592" x2="715" y2="592" stroke="#6366f1" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
-  <rect x="718" y="576" width="168" height="32" rx="8" fill="#eef2ff" stroke="#6366f1"/>
-  <text x="732" y="597" class="sub" fill="#4338ca">mirror feat/#42-…-001</text>
+  <rect x="718" y="576" width="200" height="32" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="732" y="597" class="sub" fill="#4338ca">mirror feat/#42-slug-001</text>
 
   <!-- branch K2 -->
   <path d="M655,592 C710,677 730,677 752,677 L900,677" fill="none" stroke="#8b5cf6" stroke-width="3"/>
@@ -109,9 +110,9 @@
   <text x="887" y="682" class="tag" fill="#0f766e">e</text>
   <text x="752" y="657" class="lab" fill="#6d28d9">작업 항목 2  (= K2)</text>
   <line x1="907" y1="677" x2="918" y2="677" stroke="#8b5cf6" stroke-width="2.5"/>
-  <rect x="905" y="702" width="168" height="32" rx="8" fill="#f5f3ff" stroke="#8b5cf6"/>
+  <rect x="905" y="702" width="200" height="32" rx="8" fill="#f5f3ff" stroke="#8b5cf6"/>
   <line x1="905" y1="685" x2="960" y2="702" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
-  <text x="919" y="723" class="sub" fill="#6d28d9">mirror feat/#42-…-002</text>
+  <text x="919" y="723" class="sub" fill="#6d28d9">mirror feat/#42-slug-002</text>
 
   <!-- callouts -->
   <line x1="545" y1="606" x2="500" y2="807" stroke="#0d9488" stroke-width="1.3" stroke-dasharray="3 3"/>
