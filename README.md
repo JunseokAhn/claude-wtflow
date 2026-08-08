@@ -14,7 +14,7 @@ git worktree 위에서 한 작업을 **작업 항목(K) 단위로 분기**하고
   /wtflow-progress   K 진행 현황 표 + 이슈↔note drift 보고 (읽기 전용)
   /wtflow-briefing   작업 전체를 설계문서형 브리핑으로 정리 (git·대화 근거, 읽기 전용)
   /wtflow-merge      안 머지된 작업 브랜치를 develop 으로 (충돌 해소 + 빌드 검증)
-  wtflow-clean       워크트리·이슈 브랜치 정리 (마커 보존, -a 로 마커까지)
+  wtflow-clean       워크트리·브랜치 정리 (develop/main 병합분만, 미병합은 -f/-M)
 
 이슈 어댑터 — 옵션 · GitLab (glab 필요)
   /wtflow-issue      이슈 생성 + 이슈 note 작성
