@@ -32,8 +32,8 @@ K-모델의 contract 소스 **둘**을 합쳐 상태를 만든다. 추측 금지
 ## 절차
 
 1. **워크트리 확인** — `git rev-parse --show-toplevel` + `git worktree list`. main 워킹트리면 경고만 하고 진행(워크트리 전용은 아님, 이슈만 있으면 동작).
-2. **이슈 번호 N 추론** — `-N` 우선. 없으면 현재 브랜치명에서 추출: **(주)** accumulator `<prefix>/#<N>-<slug>` 의 `#` 뒤 정수(워크트리 브랜치 = accumulator = 이슈 마커), **(레거시 폴백)** 옛 `worktree/#<N>-<slug>` 의 `#` 뒤, 또는 `worktree-<prefix>+<N>-<slug>` 의 `+` 뒤 정수(구 `claude --worktree` 자동 네이밍). 추출 불가 → 표 없이 한 줄 안내(`-N` 으로 지정 요청) 후 종료.
-3. **accumulator 추론** — `-a` 우선. 없으면 `git branch --list '*/#*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'` 중 현재 HEAD 와 ancestry 를 공유하는 것(wtflow-commit 컨벤션 — `-<KKK>` 로 끝나는 건 mirror 라 제외). 레거시 `worktree/#<digits>-<slug>` 도 폴백으로 인정. 없으면 mirror 분기 조회만 skip(체크리스트만으로 표 구성).
+2. **이슈 번호 N 추론** — `-N` 우선. 없으면 현재 브랜치명에서 추출: accumulator `<prefix>/#<N>-<slug>` 의 `#` 뒤 정수(워크트리 브랜치 = accumulator = 이슈 마커). 추출 불가 → 표 없이 한 줄 안내(`-N` 으로 지정 요청) 후 종료.
+3. **accumulator 추론** — `-a` 우선. 없으면 `git branch --list '*/#*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'` 중 현재 HEAD 와 ancestry 를 공유하는 것(wtflow-commit 컨벤션 — `-<KKK>` 로 끝나는 건 mirror 라 제외). 없으면 mirror 분기 조회만 skip(체크리스트만으로 표 구성).
 4. **이슈 본문 조회** — `glab issue view <N> --output json` 으로 `description` 획득. 실패(인증/미존재) → 경고만 하고 종료.
 5. **작업 항목 파싱** — `작업 항목`(또는 `작업 계획`) 섹션 안의 체크리스트를 **그 섹션 안에서** 순서대로 추출. 각 항목: 순번(=K) · 텍스트 · 체크 여부. 섹션이 없으면(한 줄 요약 이슈) → 표 대상 없음, 한 줄 안내 후 종료.
 6. **mirror 분기 K 귀속** — `git branch --list '*/#<N>-<slug>-[0-9][0-9][0-9]'` 로 mirror 분기 수집. 각 분기: **번호(뒤 3자리)=K**, **tip=그 K 의 최신 커밋**(`%h %s`). mirror 가 있는 K = 잡힌 K. accumulator 미상(3번 skip)이면 mirror 없이 체크리스트만으로 표 구성.

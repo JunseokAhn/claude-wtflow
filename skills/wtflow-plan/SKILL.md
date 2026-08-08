@@ -81,8 +81,7 @@ accumulator 와 mirror 가 같은 prefix 를 쓰므로 **`-<KKK>` 유무로 가�
 git branch --list '*/#*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
 ```
 
-그중 HEAD 와 ancestry 를 공유하는 것이 accumulator. 레거시 워크트리는 `worktree/#<N>-<slug>` 로
-잡히는데 **폴백으로 인정만 하고 새로 만들지 않는다**(새 브랜치는 항상 `<prefix>/`).
+그중 HEAD 와 ancestry 를 공유하는 것이 accumulator.
 
 ## 결정·중단 트리거
 

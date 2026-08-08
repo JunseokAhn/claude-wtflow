@@ -15,7 +15,7 @@ disable-model-invocation: false
 - `-K <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **이슈 작업 항목 번호와 일치**(wtflow-plan plan 의 Step N = 이슈 작업 항목 N = K N). 명시 시 그 K 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
 - `-n` / `--new-topic`: 이번 커밋부터 새 주제 — 새 분기(`기존 최고 K + 1`) 강제
 - `-s` / `--same-topic`: 현재(최고 K) 분기에 누적 강제
-- `-a <accumulator>`: 워크트리 브랜치. 예 `refactor/#30-metric-history-pg-migration`. 미지정 시 자동 탐지 — `git branch --list '*/#*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'` 중 현재 HEAD 와 ancestry 를 공유하는 것(`-<KKK>` 로 끝나는 건 mirror 라 제외). 레거시 `worktree/#<digits>-<slug>` 도 폴백으로 인정
+- `-a <accumulator>`: 워크트리 브랜치. 예 `refactor/#30-metric-history-pg-migration`. 미지정 시 자동 탐지 — `git branch --list '*/#*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'` 중 현재 HEAD 와 ancestry 를 공유하는 것(`-<KKK>` 로 끝나는 건 mirror 라 제외).
 - `--done`: 이번 커밋으로 **현재 K(작업 항목)가 완료**됨을 명시 → 이슈의 해당 작업 항목 체크박스 체크(아래 "이슈 작업 항목 체크박스 동기화"). 주제 전환 없이 끝나는 마지막 K, 또는 단일 커밋으로 끝나는 K 에 사용
 - `--no-test`: 테스트 단계 생략
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
@@ -46,9 +46,6 @@ disable-model-invocation: false
 > mirror 는 뒤에 `-<KKK>` 만 붙인 `<prefix>/#<N>-<slug>-<KKK>` 다 — prefix 를 따로 유도하지 않는다.
 > base 자체(= accumulator = 이슈 마커)는 워크트리에 체크아웃돼 있어 커밋마다 자동 전진하므로
 > 별도로 `git branch -f` 할 일이 없다.
-> ⚠️ **레거시 폴백** — accumulator 가 옛 `worktree/#<N>-<slug>` 로 잡히면 그 이름을 base 로 쓰지 말고,
-> 기존 mirror(`git branch --list '*/#<N>-<slug>-[0-9][0-9][0-9]'`)의 prefix 를, 없으면 이슈 라벨에서
-> 유도해 `<prefix>/#<N>-<slug>` 를 base 로 삼는다(그 base 브랜치 자체는 만들지 않는다).
 
 4. **분기 브랜치 = 작업단위(K=주제) 1개, 커밋은 누적** — `<mirror base>-<KKK>` (3자리 zero-padding). 체크아웃 없음. **로컬만**. 커밋마다 새 분기 만들지 않는다:
    - **주제 판단(기본, `-K`/`-n`/`-s` 없을 때)**: `<작업 설명>` 이 직전 커밋과 같은 주제(같은 기능/수정 흐름)면 **현재 분기 전진**, 다른 주제면 **새 분기**

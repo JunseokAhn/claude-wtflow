@@ -30,14 +30,12 @@ disable-model-invocation: true
    **메시지를 손대지 않는다.** 브랜치 prefix 가 커밋 컨벤션과 같은 값(`fix`/`feat`/`refactor`…)이라
    기본 메시지 `Merge branch '<prefix>/#<N>-<slug>' into develop` 이 그대로 읽히는 이력이 된다.
    `-m` 을 붙일 이유가 없다.
-   - accumulator 가 없을 때만(워크트리를 이미 지웠거나 레거시 브랜치) **최종 K 의 mirror tip 을
-     머지하고 메시지만 accumulator 이름으로** 적는다 — mirror 이름에서 `-<KKK>` 를 떼면 그 이름이다:
+   - accumulator 가 이미 지워졌을 때만 **최종 K 의 mirror tip 을 머지하고 메시지만 accumulator
+     이름으로** 적는다 — mirror 이름에서 `-<KKK>` 를 떼면 그 이름이다:
      ```
      git merge --no-ff '<prefix>/#<N>-<slug>-<최종 K>' \
        -m "Merge branch '<prefix>/#<N>-<slug>' into develop"
      ```
-   - ⚠️ 레거시 `worktree/#N-slug` 만 예외로 **이름을 바꿔 적는다** — `<prefix>/` 로 시작하는
-     정상 이름으로. 그 prefix 는 mirror 에서, mirror 도 없으면 이슈 종류 라벨에서 유도한다
 3. **`--no-ff` 고정.** 머지 커밋이 남아야 어느 이슈가 언제 들어갔는지 이력에 보인다.
 4. **여러 이슈는 번호 오름차순**으로 하나씩. 한 번에 octopus 머지하지 않는다 — 충돌이 뭉쳐 못 푼다.
 5. **충돌 해소 후 빌드로 검증한다.** 해소가 끝이 아니다:
