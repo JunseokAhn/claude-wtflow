@@ -22,8 +22,9 @@ disable-model-invocation: true
 1. **대상은 `git branch --no-merged develop` 로 확정한다.** 이슈 체크박스·브랜치 이름으로 추정하지 않는다.
    `main`·`local/*`·무관한 옛 브랜치는 **제외**하고, 무엇을 왜 뺐는지 보고한다.
 2. **머지 대상은 워크트리 브랜치(= accumulator) 그 자체다** — mirror(`<prefix>/#N-slug-00K`)나
-   임시 통합 브랜치를 머지하지 않는다. accumulator 는 커밋마다 전진하므로 그 이슈의 모든 K 를
-   이미 담고 있다:
+   임시 통합 브랜치를 머지하지 않는다. accumulator 는 커밋마다 전진하므로 그 작업의 모든 K 를
+   이미 담고 있다. 이슈 없는 작업의 accumulator(`<prefix>/+<slug>` — `#<N>` 자리가 `+`)도
+   아래 명령·메시지 규칙이 똑같이 적용된다:
    ```
    git merge --no-ff '<prefix>/#<N>-<slug>'
    ```

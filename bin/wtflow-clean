@@ -332,7 +332,12 @@ del_wt=0; del_branch=0
 [ "$mode" != mirror ] && [ -n "$target_wt" ] && del_wt=1
 [ -n "$del_set" ] && del_branch=1
 
-note "대상 이슈: #${issue_num:-?}  (작업 브랜치: ${target_branch:-없음 · 마커만})"
+if [ -n "$issue_num" ]; then
+  note "대상 이슈: #${issue_num}  (작업 브랜치: ${target_branch:-없음 · 마커만})"
+else
+  # 이슈 없는 adhoc 작업(<prefix>/+<slug>) 등 번호가 없는 브랜치 — 그 브랜치와 미러만 대상이다
+  note "대상 작업: ${target_branch:-?}  (이슈 번호 없음 · 이 브랜치와 미러만)"
+fi
 if [ "$mode" != mirror ]; then
   if [ -n "$target_wt" ]; then note "  워크트리   : $target_wt"; else note "  워크트리   : (없음)"; fi
 fi
