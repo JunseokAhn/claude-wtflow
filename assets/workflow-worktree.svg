@@ -45,7 +45,7 @@
     <text x="64" y="268" class="box">① /wtflow-issue</text>
     <text x="288" y="259" text-anchor="end" class="gl">GitLab</text>
     <text x="64" y="292" class="sub">이슈 생성 + 라벨 3종</text>
-    <text x="64" y="311" class="sub">작업 항목 = K 기준으로 사이징</text>
+    <text x="64" y="311" class="sub">K 사이징 · 상세 계약은 note 로</text>
 
     <line x1="298" y1="280" x2="338" y2="280" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
 
@@ -53,7 +53,7 @@
     <text x="354" y="268" class="box">② /wtflow-plan</text>
     <text x="592" y="259" text-anchor="end" class="gl">GitLab</text>
     <text x="354" y="292" class="sub">plan: 작업항목 N = Step N = K N</text>
-    <text x="354" y="311" class="sub">워크트리 진입</text>
+    <text x="354" y="311" class="sub">워크트리·브랜치 생성 + 진입</text>
 
     <line x1="602" y1="280" x2="642" y2="280" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
 
@@ -75,10 +75,10 @@
   <text x="66" y="373" class="note"><tspan font-weight="700" fill="#334155">/wtflow-progress</tspan>  —  커밋마다 진행 현황 표 (읽기 전용 · 커밋/푸시 안 함)</text>
 
   <rect x="678" y="346" width="412" height="44" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
-  <text x="694" y="373" class="note"><tspan font-weight="700" fill="#334155">wtflow-clean</tspan>  —  작업 끝 → 워크트리·브랜치 정리 (#마커 보존)</text>
+  <text x="694" y="373" class="note"><tspan font-weight="700" fill="#334155">/wtflow-merge · wtflow-clean</tspan>  —  develop 머지 → 워크트리·브랜치 정리</text>
 
   <!-- legend: core vs adapter -->
-  <text x="50" y="416" class="note"><tspan class="gl">◆ GitLab</tspan> = 이슈 어댑터 (glab 필요)  ·  <tspan fill="#0f766e" font-weight="700">③④ · /wtflow-progress · wtflow-clean = 호스트 무관 코어 (GitHub 등 그대로 동작)</tspan></text>
+  <text x="50" y="416" class="note"><tspan class="gl">◆ GitLab</tspan> = 이슈 어댑터 (①② · /wtflow-milestone — glab 필요)  ·  <tspan fill="#0f766e" font-weight="700">③④ · progress · merge · clean = 호스트 무관 코어 (GitHub 등 그대로 동작)</tspan></text>
 
   <!-- Git graph -->
   <text x="50" y="458" class="lab">git 그래프 — 한 이슈, 작업 항목 2개</text>
@@ -96,10 +96,10 @@
   <text x="537" y="597" class="tag" fill="#0f766e">b</text>
   <circle cx="655" cy="592" r="12" fill="#fff" stroke="#0d9488" stroke-width="3"/>
   <text x="647" y="597" class="tag" fill="#0f766e">c</text>
-  <text x="366" y="572" class="lab" fill="#4338ca">작업 항목 1  →  feat/42  (= K1)</text>
+  <text x="366" y="572" class="lab" fill="#4338ca">작업 항목 1  →  feat/#42-…  (= K1)</text>
   <line x1="667" y1="592" x2="715" y2="592" stroke="#6366f1" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
   <rect x="718" y="576" width="168" height="32" rx="8" fill="#eef2ff" stroke="#6366f1"/>
-  <text x="732" y="597" class="sub" fill="#4338ca">mirror feat/42-001</text>
+  <text x="732" y="597" class="sub" fill="#4338ca">mirror feat/#42-…-001</text>
 
   <!-- branch K2 -->
   <path d="M655,592 C710,677 730,677 752,677 L900,677" fill="none" stroke="#8b5cf6" stroke-width="3"/>
@@ -111,7 +111,7 @@
   <line x1="907" y1="677" x2="918" y2="677" stroke="#8b5cf6" stroke-width="2.5"/>
   <rect x="905" y="702" width="168" height="32" rx="8" fill="#f5f3ff" stroke="#8b5cf6"/>
   <line x1="905" y1="685" x2="960" y2="702" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
-  <text x="919" y="723" class="sub" fill="#6d28d9">mirror feat/42-002</text>
+  <text x="919" y="723" class="sub" fill="#6d28d9">mirror feat/#42-…-002</text>
 
   <!-- callouts -->
   <line x1="545" y1="606" x2="500" y2="807" stroke="#0d9488" stroke-width="1.3" stroke-dasharray="3 3"/>
