@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/link-worktree-local.sh",
+            "statusMessage": "워크트리 로컬 파일 연결 확인 중"
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/link-worktree-local.sh",
+            "statusMessage": "워크트리 로컬 파일 연결 확인 중"
+          }
+        ]
+      }
+    ]
+  }
+}
