@@ -1,18 +1,20 @@
 ---
-name: wtflow-milestone
+name: milestone
 description: 여러 이슈에 걸친 마일스톤 note 작성·갱신 + 이슈 분할 생성. 페이로드·타입·에러코드를 ~/.claude/notes 에 한 벌로 두고 각 이슈 note 가 참조. "마일스톤 계획/여러 이슈로 쪼개줘" 요청에.
 allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *), Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill
 ---
 
-# /wtflow-milestone — 마일스톤 계약 문서
+# /wtflow:milestone — 마일스톤 계약 문서
 
-이슈는 "무엇/왜"의 짧은 메모여야 하는데(wtflow-issue 계약 4), 여러 이슈가 엮인 작업은 착수 전에
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+
+이슈는 "무엇/왜"의 짧은 메모여야 하는데(wtflow:issue 계약 4), 여러 이슈가 엮인 작업은 착수 전에
 페이로드·타입·에러코드·호출 순서까지 정해두게 된다. **그걸 적을 곳이 없어서 이슈가 비대해진다.**
 이 스킬이 그 목적지다.
 
 ## 호출
 
-`/wtflow-milestone [<제목 또는 iid>] [-g <group>] [--new] [--no-issue]`
+`/wtflow:milestone [<제목 또는 iid>] [-g <group>] [--new] [--no-issue]`
 
 - `<제목 또는 iid>`: 대상 마일스톤. 미지정 시 활성 목록에서 `AskUserQuestion` 으로 선택
 - `-g <group>`: GitLab 그룹. 미지정 시 remote 에서 추론 (`<org>/<repo>` → `<org>`)
@@ -26,7 +28,7 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 ```
 ~/.claude/notes/<group>/          ← 훅이 이걸 통째로 워크트리의 .claude/notes 로 심링크
   _milestone/<iid>-<slug>.md      ← 이 스킬이 만든다. 여러 이슈·레포가 공유
-  <repo>/issue-<N>.md             ← wtflow-issue 계약 12 가 만든다
+  <repo>/issue-<N>.md             ← wtflow:issue 계약 12 가 만든다
 ```
 
 - **심링크가 핵심이다.** 마일스톤 note 는 진행 중 고쳐지고 그 수정이 **다른 브랜치·다른 세션에서
@@ -68,27 +70,27 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
    기존 이슈는 빼고 **신규분만**. 보기에 `직접 입력`(분할을 직접 적겠다) 포함
 
 8. **이슈 생성 + 마일스톤 배정** — 승인된 각 이슈마다:
-   - a. `Skill(wtflow-issue)` 호출 — **마일스톤 맥락은 인자로만 넘긴다** (산문으로 설명하면
+   - a. `Skill(wtflow:issue)` 호출 — **마일스톤 맥락은 인자로만 넘긴다** (산문으로 설명하면
         그 스킬이 단독 이슈와 구분하지 못한다):
         ```
-        /wtflow-issue <설명> -R <group>/<repo> \
+        /wtflow:issue <설명> -R <group>/<repo> \
           --milestone-note ~/.claude/notes/<group>/_milestone/<iid>-<slug>.md \
           --sections "역할 경계, BE 엣지 계약"
         ```
         **이슈 본문은 짧게.** 넘긴 절 이름은 **이슈 note 에만** 들어간다.
         ⚠️ **GitLab 이슈에는 절 이름·문서 경로를 넣지 않는다 — `참고 자료` 섹션에도.** 깨진 포인터다
-        (wtflow-issue 계약 4). 계약 전문도 넘기지 않는다 — note 는 가리키기만 해야 한다
+        (wtflow:issue 계약 4). 계약 전문도 넘기지 않는다 — note 는 가리키기만 해야 한다
    - b. 배정 — `-m` 의 제목 해석이 그룹 마일스톤에서 불확실하므로 **글로벌 ID 로 명시**:
         ```
         glab api --method PUT "projects/<group>%2F<repo>/issues/<N>" -f milestone_id=<글로벌 id>
         ```
    - c. 이슈 note 는 a 가 이미 만들었다. **다시 쓰지 않는다**(덮어쓰면 앞의 것이 사라진다)
    - d. `이슈 분할` 표에 의존 관계 행 추가
-   - ⚠️ **브랜치는 여기서 만들지 않는다** — wtflow-issue 가 note frontmatter `branch:` 에
-     이름(`<prefix>/#<N>-<slug>`)만 적어두고, 실제 생성은 `/wtflow-plan` 몫이다.
+   - ⚠️ **브랜치는 여기서 만들지 않는다** — wtflow:issue 가 note frontmatter `branch:` 에
+     이름(`<prefix>/#<N>-<slug>`)만 적어두고, 실제 생성은 `/wtflow:plan` 몫이다.
      `worktree/` prefix 는 쓰지 않는다 (CLAUDE.md `브랜치 이름 규칙`)
 
-9. **최종 출력** — 결과 표 ③ + 문서 경로 + 다음 단계(`/wtflow-plan <N>`)
+9. **최종 출력** — 결과 표 ③ + 문서 경로 + 다음 단계(`/wtflow:plan <N>`)
 
 ## 중간 표 출력
 
@@ -125,12 +127,12 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 | 페이로드·타입·에러코드 | **이 문서** | ✅ 본체 |
 | 이슈 간 의존 순서 | **이 문서** | ✅ GitLab 에 없는 정보 |
 
-체크박스·완료 칼럼·진행률을 넣는 순간 `wtflow-commit --done` 이 참조하는 이슈 체크박스와
+체크박스·완료 칼럼·진행률을 넣는 순간 `wtflow:commit --done` 이 참조하는 이슈 체크박스와
 어긋나 엉뚱한 항목이 체크된다.
 
 ## 마일스톤 note 형식
 
-이슈 note(`/wtflow-issue` 의 `## 이슈 note 형식`)와 같은 뼈대에 범위만 넓다.
+이슈 note(`/wtflow:issue` 의 `## 이슈 note 형식`)와 같은 뼈대에 범위만 넓다.
 **발행 문서가 아니라 마일스톤 내내 고쳐 쓰는 현행 계약**이라 분량 제한이 없다:
 
 ```markdown
@@ -165,7 +167,7 @@ web_url: <마일스톤 URL>
 - 계약 핵심(페이로드·에러코드)이 대화에 근거 없음 → `(미정)` 후 1회 되묻기. 지어내지 말 것
 - 마일스톤 생성·이슈 생성·배정은 외부 반영 → 각각 승인 후에만
 - 기존 문서 병합이 모호 → 덮어쓰지 말고 확인
-- 이슈 분할이 2개 이하 → 마일스톤 문서가 과함. `/wtflow-issue` 단독을 권하고 진행 여부 확인
+- 이슈 분할이 2개 이하 → 마일스톤 문서가 과함. `/wtflow:issue` 단독을 권하고 진행 여부 확인
 
 ## 짧은 변형
 
@@ -180,6 +182,6 @@ web_url: <마일스톤 URL>
 - **팀 합의용 방향 문서(RFC·제안서)와 혼동하지 않는다** — 그쪽은 "구체 세부는 방향 수준으로
   미룬다"가 원칙인데 이 문서는 반대로 계약을 확정해서 박는 게 목적이다. 방향 합의가 필요하면 별도로
 - 마일스톤 note 는 로컬 전용이라 팀과 공유되지 않는다. 공유가 필요하면 마일스톤 description 으로
-- 이슈 착수는 `/wtflow-plan <N>`, 마일스톤 종료 회고는 `/wtflow-briefing`
-- 크로스 레포 이슈도 브랜치는 여기서 만들지 않는다 — 해당 레포에서 `/wtflow-plan <N>` 을 부르면
+- 이슈 착수는 `/wtflow:plan <N>`, 마일스톤 종료 회고는 `/wtflow:briefing`
+- 크로스 레포 이슈도 브랜치는 여기서 만들지 않는다 — 해당 레포에서 `/wtflow:plan <N>` 을 부르면
   그 레포에 생긴다

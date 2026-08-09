@@ -1,24 +1,26 @@
 ---
-name: wtflow-issue
-description: GitLab 어댑터(glab 필요) — 이슈 생성 + 이슈 note 작성 (브랜치·워크트리는 wtflow-plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 이슈 본문은 자족적으로 유지하고 상세는 note 로 분리.
+name: issue
+description: GitLab 어댑터(glab 필요) — 이슈 생성 + 이슈 note 작성 (브랜치·워크트리는 wtflow:plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 의도에 자율 호출. prefix·라벨3종 자동, 이슈 본문은 자족적으로 유지하고 상세는 note 로 분리.
 allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
 ---
 
-# /wtflow-issue — GitLab 이슈 생성
+# /wtflow:issue — GitLab 이슈 생성
+
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
 
 ## 트리거
 
 - 자연어: "이슈 만들어줘: <설명>", "이슈 등록", "GitLab에 올려줘", "이슈로 등록" 등
-- 슬래시: `/wtflow-issue <설명> [-R <group>/<repo>] [--milestone-note <경로> --sections "<절 이름들>"]`
+- 슬래시: `/wtflow:issue <설명> [-R <group>/<repo>] [--milestone-note <경로> --sections "<절 이름들>"]`
 
 ## 마일스톤 판정 — 인자로만 (기억·추측 금지)
 
 **`--milestone-note` 인자가 있으면 마일스톤 이슈, 없으면 단독 이슈다. 그게 전부다.**
 
 - 이 스킬은 마일스톤을 **조회하지 않는다** — `glab` 마일스톤 API 호출, `_milestone/` 디렉토리 탐색 금지
-- 세션에서 `/wtflow-milestone` 을 썼던 기억, 대화에 마일스톤 얘기가 있었다는 정황은 **근거가 아니다.**
+- 세션에서 `/wtflow:milestone` 을 썼던 기억, 대화에 마일스톤 얘기가 있었다는 정황은 **근거가 아니다.**
   인자가 안 왔으면 단독 이슈다
-- `--milestone-note` 는 `/wtflow-milestone` 계약 8a 가 넘기는 유일한 경로다. 사용자가 직접
+- `--milestone-note` 는 `/wtflow:milestone` 계약 8a 가 넘기는 유일한 경로다. 사용자가 직접
   칠 일은 거의 없다
 - 인자가 왔는데 그 경로에 파일이 없으면 → 중단하고 보고. 없는 마일스톤을 지어내지 않는다
 
@@ -49,7 +51,7 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write
    - 예: `fix: 사용자 로그인 시 토큰 만료 에러`
 
 4. **본문 작성** — `.gitlab/issue_templates/` 우선 사용 (아래 `## 본문 템플릿` 참고). 템플릿 없으면 한 줄 요약
-   - **이슈는 "무엇/왜"의 짧은 메모다.** 근본원인 분석·코드경로·클래스명 나열·해결책 설계·세부 작업분해는 이슈에 쓰지 않는다 — 그건 이후 `/wtflow-plan` plan 단계 몫이다. 지금 이슈에 결론을 박으면 plan 과 중복되거나 어긋난다
+   - **이슈는 "무엇/왜"의 짧은 메모다.** 근본원인 분석·코드경로·클래스명 나열·해결책 설계·세부 작업분해는 이슈에 쓰지 않는다 — 그건 이후 `/wtflow:plan` plan 단계 몫이다. 지금 이슈에 결론을 박으면 plan 과 중복되거나 어긋난다
    - **이미 상세히 계획해둔 게 있으면 이슈에 밀어넣지 말고 note 로 흘려보낸다** (계약 12). 페이로드 계약·타입·에러코드·호출 순서 같은 것이 여기 해당한다. 이슈가 비대해지는 건 규칙이 약해서가 아니라 적을 곳이 없어서였다 — 이제 목적지가 있다
    - ⚠️ **이슈는 자족적이어야 한다 — wtflow 를 전혀 모르는 글로 쓴다.** 팀원에겐 `~/.claude/notes/` 가 없다. **어느 섹션에도**(`참고 자료` 포함 — 여기가 제일 잘 샌다) 쓰지 않는다: note 의 **절 이름 참조**(~~"계약 상세는 마일스톤 문서 … 절 참조"~~), **로컬 경로·파일명**(`.claude/…`, "마일스톤 문서"), **내부 용어**(K 번호·mirror 분기·accumulator·워크트리).
      맥락이 더 필요하면 가리키지 말고 **그 내용을 직접 풀어 쓴다.** `참고 자료` 에는 팀원이 실제로 열 수 있는 것만(GitLab 링크·외부 URL·Notion)
@@ -65,7 +67,7 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write
 
 8. **브랜치 이름만 정한다 — 만들지는 않는다**:
    - **워크트리 브랜치** (= accumulator = 이슈 마커): `<prefix>/#<N>-<slug>`. 실제 생성은
-     `/wtflow-plan` 이 워크트리를 팔 때 한다 — 브랜치를 쓸 시점에 만드는 게 맞고, 크로스 레포에서
+     `/wtflow:plan` 이 워크트리를 팔 때 한다 — 브랜치를 쓸 시점에 만드는 게 맞고, 크로스 레포에서
      엉뚱한 레포에 브랜치가 쌓이는 사고도 원천 차단된다
    - 정한 이름은 **note frontmatter `branch:` 에 기록**한다. plan 이 그걸 읽어 그대로 쓰므로
      slug 가 양쪽에서 따로 유도돼 어긋날 일이 없다
@@ -98,9 +100,9 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write
     ✓ 이슈 note: ~/.claude/notes/<group>/<repo>/issue-<N>.md
 
     다음 단계 — 워크트리·브랜치 만들고 plan 받기:
-      /wtflow-plan <N>
+      /wtflow:plan <N>
 
-    → wtflow-plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) 계획서를 읽고
+    → wtflow:plan 이 이 세션을 워크트리로 자동 진입시킨 뒤(EnterWorktree) 계획서를 읽고
       plan 을 출력한다. (수동 `claude --worktree` 불필요)
     ```
 
@@ -149,7 +151,7 @@ milestone_note: ../_milestone/<iid>-<slug>.md   # 마일스톤 없으면 이 줄
    - 템플릿을 Read 해서 섹션 구조 파악
    - **헤더 고정**: 템플릿의 헤더를 그대로 쓴다. 추가·삭제·개명 금지 (`상세 설명`을 `배경`으로 개명하거나 `해결 방향` 같은 새 헤더 추가 금지)
    - **간결성 상한**: 각 섹션 1~2문장. 코드 경로/클래스명 나열, 근본원인 추론, 해결책 설계 금지
-   - **작업 항목/작업 계획**: **큰 틀의 작업 단위**로 작성 (개수 고정 아님 — 작업 성격에 맞게, 보통 2~5개). 세부 단위 분해는 plan 단계 몫. ⚠️ 이 작업 항목이 이후 `/wtflow-plan` plan·`/wtflow-commit` 의 **K 넘버링 기준**이 된다 (작업 항목 N = Step N = K N = mirror 분기 `-00N`). 따라서 각 항목은 독립적으로 commit·검증 가능한 단위가 되도록 잡는다(순수 조사·식별·분석처럼 산출물 커밋이 없는 단계는 항목이 아니라 plan 몫 — "제거 대상 식별" 같은 항목 금지). 큰 단위조차 안 잡히면 placeholder 유지
+   - **작업 항목/작업 계획**: **큰 틀의 작업 단위**로 작성 (개수 고정 아님 — 작업 성격에 맞게, 보통 2~5개). 세부 단위 분해는 plan 단계 몫. ⚠️ 이 작업 항목이 이후 `/wtflow:plan` plan·`/wtflow:commit` 의 **K 넘버링 기준**이 된다 (작업 항목 N = Step N = K N = mirror 분기 `-00N`). 따라서 각 항목은 독립적으로 commit·검증 가능한 단위가 되도록 잡는다(순수 조사·식별·분석처럼 산출물 커밋이 없는 단계는 항목이 아니라 plan 몫 — "제거 대상 식별" 같은 항목 금지). 큰 단위조차 안 잡히면 placeholder 유지
      - **마크다운 체크박스 `- [ ]` 로, 위에서부터 K 순서(N=1,2,…)대로 한 줄씩** 작성(다른 체크리스트와 섞지 않기) — K 완료 시 N번째 항목이 자동 체크되기 때문. 템플릿이 평문 나열이면 체크박스로 바꿔 적는다
    - **환경**: 특정 환경에서만 발생하는 등 실제 신호가 있을 때만 채움. 코드 레벨 버그처럼 의미 없으면 placeholder 유지 (`서버/브랜치: <서버> / develop` 같은 무의미한 boilerplate 금지)
    - 그 외 정보 부족한 섹션은 **placeholder 그대로 유지** (사용자가 GitLab UI 에서 보강)
