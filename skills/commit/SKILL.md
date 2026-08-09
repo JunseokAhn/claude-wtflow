@@ -1,18 +1,20 @@
 ---
-name: wtflow-commit
-description: 워크트리 작업단위 로컬 커밋 + accumulator-K 분기. 인자 -K/--done/--push/--no-test. 한 K 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 K 진행 여부에만; 다중 K 순회는 wtflow-auto.
+name: commit
+description: 워크트리 작업단위 로컬 커밋 + accumulator-K 분기. 인자 -K/--done/--push/--no-test. 한 K 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 K 진행 여부에만; 다중 K 순회는 wtflow:auto.
 allowed-tools: Bash(git *), Bash(glab *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
 
-# /wtflow-commit — 워크트리 작업단위 처리
+# /wtflow:commit — 워크트리 작업단위 처리
+
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/commit-convention.md`(메시지 형식)를 읽는다.**
 
 ## 호출
 
-`/wtflow-commit <작업 설명> [-K <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
+`/wtflow:commit <작업 설명> [-K <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
 
 - `<작업 설명>` (필수): 한국어 한 줄. commit subject + 본문에 사용
-- `-K <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **작업 항목 번호와 일치**(wtflow-plan plan 의 Step N = 작업 항목 N = K N). 명시 시 그 K 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
+- `-K <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N = K N). 명시 시 그 K 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
 - `-n` / `--new-topic`: 이번 커밋부터 새 주제 — 새 분기(`기존 최고 K + 1`) 강제
 - `-s` / `--same-topic`: 현재(최고 K) 분기에 누적 강제
 - `-a <accumulator>`: 워크트리 브랜치 (예 `refactor/#30-metric-history-pg-migration`, 이슈 없는 작업이면 `refactor/+metric-history-pg-migration`). 미지정 시 자동 탐지:
@@ -32,8 +34,8 @@ disable-model-invocation: false
 이 스킬은 **한 작업 항목(K)의 커밋 하나**를 처리하고 **멈춘다**. 커밋·요약·진행표(계약 8) 출력 후 **다음 K 를 자율로 이어서 구현·커밋하지 않는다** — 다음 K 진행은 사용자의 다음 신호를 기다린다.
 
 - **커밋 자체는 묻지 않는다(기본).** 현재 K 의 구현 + 검증이 끝나면 "커밋할까요?" 승인을 구하지 말고 **곧장 이 스킬을 자율 호출해 커밋**한다. 메시지는 커밋 컨벤션대로 모델이 짓고 결과만 보고. 사용자 신호를 기다리는 유일한 지점은 **다음 K 로 넘어갈지**다(커밋 전 승인 ✗ / 다음 K 진행 승인 ○).
-- 자연어 "k3부터 진행", "쭉 가", "남은 거 다 해줘" 가 **여러 K 를 연속 처리하라는 뜻처럼 읽혀도**, 명시적 `/wtflow-auto` 호출이 없으면 **지명된(없으면 현재) 한 K 만** 처리하고 멈춰 다음 진행 여부를 묻는다. 예: "k3부터 진행" → **K3 하나만**(K4 이후 자동 진행 ✗).
-- 여러 K 를 사람 개입 없이 순회하는 건 **오직 사용자가 `/wtflow-auto` 를 직접 호출**했을 때만. wtflow-commit 을 K 마다 반복 호출하며 **손으로 wtflow-auto 를 흉내내지 말 것**(가장 흔한 오작동 — 이 가드가 그걸 막는다).
+- 자연어 "k3부터 진행", "쭉 가", "남은 거 다 해줘" 가 **여러 K 를 연속 처리하라는 뜻처럼 읽혀도**, 명시적 `/wtflow:auto` 호출이 없으면 **지명된(없으면 현재) 한 K 만** 처리하고 멈춰 다음 진행 여부를 묻는다. 예: "k3부터 진행" → **K3 하나만**(K4 이후 자동 진행 ✗).
+- 여러 K 를 사람 개입 없이 순회하는 건 **오직 사용자가 `/wtflow:auto` 를 직접 호출**했을 때만. wtflow:commit 을 K 마다 반복 호출하며 **손으로 wtflow:auto 를 흉내내지 말 것**(가장 흔한 오작동 — 이 가드가 그걸 막는다).
 - 한 K 안의 여러 태스크는 **같은 K 에 커밋 누적** OK. **다른 작업 항목(새 K)로 넘어가는 순간** 멈추고 묻는다.
 - 멈춰 묻거나 방식을 고르게 할 땐 산문 나열 말고 **`AskUserQuestion`**(보기 첫째에 추천안 `(추천)`). 자유 입력은 자동 "Other" 로 보장되니 "직접 입력" 보기는 넣지 않는다.
 
@@ -78,7 +80,7 @@ disable-model-invocation: false
 
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 K` 또는 `adhoc-<slug> 항목 K`)
 
-8. **진행 현황 자동 출력** — 요약 직후 `/wtflow-progress --quiet` 1회 호출해 갱신된 K 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
+8. **진행 현황 자동 출력** — 요약 직후 `/wtflow:progress --quiet` 1회 호출해 갱신된 K 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
 
 ## 결정·중단 트리거
 
@@ -102,7 +104,7 @@ disable-model-invocation: false
 
 mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 워크트리 브랜치 통째로 PR 1개라 분기 격리·충돌이 없고, 모든 커밋이 한 줄로 선형 누적되므로 전진은 늘 fast-forward(계약 4) — 새 커밋 생성·history 재작성·충돌이 구조적으로 없다(rebase/amend 의 안전한 대체).
 
-**불변식 — 최상단 mirror = worktree tip.** 커밋이 쌓이면(K 커밋이든 **후속 정정·비-K chore 든**) 반드시 어떤 mirror 가 tip 을 가리켜야 한다. 새 K면 새 mirror, 아니면 **최상단 mirror 를 HEAD 로 FF**. **wtflow-commit 을 안 거친 수동 `git commit` 이라도 직접 FF**한다("비-K 라서 생략" 없음 — 가장 흔한 누락).
+**불변식 — 최상단 mirror = worktree tip.** 커밋이 쌓이면(K 커밋이든 **후속 정정·비-K chore 든**) 반드시 어떤 mirror 가 tip 을 가리켜야 한다. 새 K면 새 mirror, 아니면 **최상단 mirror 를 HEAD 로 FF**. **wtflow:commit 을 안 거친 수동 `git commit` 이라도 직접 FF**한다("비-K 라서 생략" 없음 — 가장 흔한 누락).
 
 **"최상단" 은 번호가 아니라 최근성(ancestry)으로.** K 는 작업 항목 번호라 커밋 순서와 다를 수 있다(K6 을 K4 보다 먼저 커밋 → `-006` 이 `-004` 보다 옛 커밋). 최상단 = **HEAD 의 직계 조상 중 가장 최근 tip 을 가진 mirror**. `git for-each-ref`·`merge-base --is-ancestor` 로 판정 — ⚠️ `git branch --list` 의 `+`(다른 워크트리 체크아웃) 마커가 섞여 이름 `sort|tail` 은 틀린다. **손 sort 말고 ancestry 로.**
 

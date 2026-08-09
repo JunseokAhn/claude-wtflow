@@ -1,18 +1,20 @@
 ---
-name: wtflow-briefing
+name: briefing
 description: 완료·진행 작업을 커밋·diff 기반 구조화 브리핑으로 출력(읽기 전용, 날조 금지). 인자 --mr/--detail/--no-fence. "MR용/작업 브리핑" 요청에. 사용자만 호출.
 allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
 disable-model-invocation: true
 ---
 
-# /wtflow-briefing — 작업 브리핑 생성
+# /wtflow:briefing — 작업 브리핑 생성
+
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
 
 ## 호출
 
-`/wtflow-briefing [<범위>] [-t <제목>] [--mr] [--no-table] [--detail] [--no-fence]`
+`/wtflow:briefing [<범위>] [-t <제목>] [--mr] [--no-table] [--detail] [--no-fence]`
 
 - `<범위>` (선택): git revision 범위. 미지정 시 자동 추정
-  - 워크트리면 `<accumulator base>..HEAD` (wtflow-commit accumulator 또는 `origin/develop`/`origin/main` merge-base)
+  - 워크트리면 `<accumulator base>..HEAD` (wtflow:commit accumulator 또는 `origin/develop`/`origin/main` merge-base)
   - 그 외 현재 브랜치의 `develop`/`main` 대비 범위
 - `-t <제목>`: 문서 제목. 미지정 시 브랜치명/이슈에서 추론
 - `--mr`: 전체 통합본 대신 **MR description 압축본**(변경 요약 + 검증 + 전제만, 근거·대안 표 생략)

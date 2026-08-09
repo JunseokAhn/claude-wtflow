@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "claude-kit",
+  "description": "junseok 의 Claude Code 플러그인 모음",
+  "owner": {
+    "name": "junseok",
+    "github": "JunseokAhn"
+  },
+  "plugins": [
+    {
+      "name": "wtflow",
+      "source": "./",
+      "description": "워크트리에서 작업 항목마다 분기를 두고 태스크마다 커밋을 쌓게 하는 작업 규율. GitLab 이슈 연동은 옵션."
+    }
+  ]
+}

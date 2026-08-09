@@ -1,17 +1,19 @@
 ---
-name: wtflow-progress
-description: 워크트리 작업(이슈/adhoc)의 K 진행 현황을 표로 출력(읽기 전용) + 이슈↔note K 표 drift 보고. 사용자 호출 + wtflow-commit/auto가 매 커밋 후 자율 호출.
+name: progress
+description: 워크트리 작업(이슈/adhoc)의 K 진행 현황을 표로 출력(읽기 전용) + 이슈↔note K 표 drift 보고. 사용자 호출 + wtflow:commit/auto가 매 커밋 후 자율 호출.
 allowed-tools: Bash(git *), Bash(glab *), Read
 disable-model-invocation: false
 ---
 
-# /wtflow-progress — 워크트리 K 진행 현황
+# /wtflow:progress — 워크트리 K 진행 현황
+
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
 
 작업 항목(K)별 진행 상태를 표 하나로 보여준다. **읽기 전용** — 조회만 하고 어떤 변경도 하지 않는다.
 
 ## 호출
 
-`/wtflow-progress [-N <이슈번호>] [-a <accumulator>] [--quiet]`
+`/wtflow:progress [-N <이슈번호>] [-a <accumulator>] [--quiet]`
 
 - 인자 없음(기본): 현재 워크트리 브랜치에서 자동 추론
 - `-N <이슈번호>`: 이슈 번호 직접 지정(추론 실패 시). 이슈 없는 작업엔 해당 없음 — 그땐 `-a`
@@ -22,13 +24,13 @@ disable-model-invocation: false
 
 추측 금지. 상태는 이 소스에서만 파생한다.
 
-1. **`작업 항목` 체크리스트** — wtflow-commit 이 K 완료 시 체크하는 그 리스트. **위에서 N번째 = K N**, `- [x]`=완료. 위치는 **작업 문서** — accumulator 가 `/#<N>` 이면 이슈 본문, `/+<slug>` 면 `.claude/notes/<repo>/adhoc-<slug>.md`
+1. **`작업 항목` 체크리스트** — wtflow:commit 이 K 완료 시 체크하는 그 리스트. **위에서 N번째 = K N**, `- [x]`=완료. 위치는 **작업 문서** — accumulator 가 `/#<N>` 이면 이슈 본문, `/+<slug>` 면 `.claude/notes/<repo>/adhoc-<slug>.md`
 2. **mirror 분기 `<accumulator>-<KKK>`** — K 귀속의 **유일 소스**: 번호(뒤 3자리)=K, tip=그 K 최신 커밋. (커밋 메시지에 `K:` 트레일러 없음)
 3. **워킹트리 상태** — dirty 여부·파일 수 (아래 활동 오버레이)
 
 > **어떤 mirror tip 의 조상도 아닌 dangling 커밋**은 K 단정 불가 → 표에 넣지 말고 **"미분류 커밋"** 줄로 노출(불변식이 지켜지면 안 생긴다).
 
-**활동 오버레이(K 귀속 소스 아님).** **미귀속 작업**(dirty **또는** 어떤 mirror 도 도달 못 하는 raw 커밋)이 있으면 활동 신호로 보고 **활성 K(절차 7)를 🟡 진행 중** 으로 올린다. 단정 불가라 활성 K 한 곳에만 적용하고 파일 수·미분류 커밋은 표 아래로 노출. "커밋했는데 대기로 보이는" 착시를 막는 best-effort 이고, 정확한 귀속은 wtflow-commit 담당.
+**활동 오버레이(K 귀속 소스 아님).** **미귀속 작업**(dirty **또는** 어떤 mirror 도 도달 못 하는 raw 커밋)이 있으면 활동 신호로 보고 **활성 K(절차 7)를 🟡 진행 중** 으로 올린다. 단정 불가라 활성 K 한 곳에만 적용하고 파일 수·미분류 커밋은 표 아래로 노출. "커밋했는데 대기로 보이는" 착시를 막는 best-effort 이고, 정확한 귀속은 wtflow:commit 담당.
 
 ## 절차
 
@@ -68,7 +70,7 @@ disable-model-invocation: false
 - **완료(✅)는 dirty 여도 그대로** — 닫힌 K 는 활성 K 산정에서 제외
 - **현재 K 표시**: 활성 K 행 앞에 `▸`
 - **계획 외 K**: 항목 수보다 큰 K(mirror)가 있으면 표 아래 `(계획 외 K{n}: <tip>)` 한 줄. 추측해서 항목에 끼워 넣지 않는다
-- **미분류 커밋**: 어느 K 인지 단정 금지. 표 아래 `미분류 커밋 <n>개: <hash> <subject>…` 로 **반드시 노출**(`--quiet` 여도 — 귀속 미상임을 드러내려). 정확히 넣으려면 wtflow-commit 으로 커밋하라 안내
+- **미분류 커밋**: 어느 K 인지 단정 금지. 표 아래 `미분류 커밋 <n>개: <hash> <subject>…` 로 **반드시 노출**(`--quiet` 여도 — 귀속 미상임을 드러내려). 정확히 넣으려면 wtflow:commit 으로 커밋하라 안내
 
 ## 출력 형식
 
@@ -97,12 +99,12 @@ note drift: K<n> <이슈 항목> ↔ note <note 쪽 내용>   ← 어긋날 때�
 
 - 이슈 번호·accumulator 추출 불가 → `-N` 또는 `-a` 로 지정 요청
 - glab 인증/조회 실패 → 실패 사유 한 줄
-- adhoc note 없음 → "`/wtflow-plan` 으로 작업 항목을 세우면 표가 나온다"
+- adhoc note 없음 → "`/wtflow:plan` 으로 작업 항목을 세우면 표가 나온다"
 - `작업 항목` 체크리스트 없음 → "체크리스트형 아님 — 진행 현황 대상 없음"
 - 섹션/항목 순서 모호 → 추측 매핑 금지, 모호하다고만 보고
 
 ## 비고
 
-- **wtflow-commit** 이 커밋·체크박스 동기화·요약 직후 `--quiet` 로 1회 호출한다(commit 계약 8). **wtflow-auto** 는 커밋을 commit 에 위임하므로 K마다 자동으로 이 표가 따라온다. 이 스킬이 종료돼도 커밋 흐름은 막지 않는다 — 진행 가시성용 부가 출력일 뿐
+- **wtflow:commit** 이 커밋·체크박스 동기화·요약 직후 `--quiet` 로 1회 호출한다(commit 계약 8). **wtflow:auto** 는 커밋을 commit 에 위임하므로 K마다 자동으로 이 표가 따라온다. 이 스킬이 종료돼도 커밋 흐름은 막지 않는다 — 진행 가시성용 부가 출력일 뿐
 - 읽기 전용·멱등·무부작용 — 아무 때나 여러 번 호출해도 안전
-- **이슈 작업에서 note 는 상태 소스가 아니다.** drift 점검은 계약 표가 이슈 항목과 같은 것을 가리키는지 볼 뿐이고, 완료/진행 판정은 체크리스트·mirror·워킹트리에서만 나온다. **이슈가 없으면 그 note 가 곧 소스 1이다** — 그래도 읽기만 한다(체크는 wtflow-commit `--done` 만)
+- **이슈 작업에서 note 는 상태 소스가 아니다.** drift 점검은 계약 표가 이슈 항목과 같은 것을 가리키는지 볼 뿐이고, 완료/진행 판정은 체크리스트·mirror·워킹트리에서만 나온다. **이슈가 없으면 그 note 가 곧 소스 1이다** — 그래도 읽기만 한다(체크는 wtflow:commit `--done` 만)
