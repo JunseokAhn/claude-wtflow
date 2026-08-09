@@ -9,7 +9,7 @@ git worktree 위에서 한 작업을 **작업 항목(K) 단위로 분기**하고
 
 ```
 /plugin marketplace add JunseokAhn/claude-wtflow
-/plugin install wtflow@wtflow
+/plugin install wtflow@claude-kit
 ```
 
 이게 전부다. 스킬·훅·정리 스크립트가 한 번에 붙는다 — 심링크도, `settings.json` 편집도 없다.

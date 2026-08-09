@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "wtflow",
-  "description": "워크트리 기반 작업 규율 스킬셋",
+  "name": "claude-kit",
+  "description": "junseok 의 Claude Code 플러그인 모음",
   "owner": {
     "name": "junseok",
     "github": "JunseokAhn"
