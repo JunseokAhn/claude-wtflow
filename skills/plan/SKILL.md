@@ -1,11 +1,13 @@
 ---
-name: wtflow-plan
+name: plan
 description: 워크트리·분기 셋업 + note 로드 + K 작업계획 출력·저장. 이슈번호로도, 이슈 없이 작업 설명만으로도(adhoc) 시작 가능 — 이슈 모드만 glab 필요. 인자 -b/-p/-r. "이슈 N 작업 시작/plan", "이슈 없이 이거 작업 시작" 요청에. 사용자만 호출.
 allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Write, Edit, Glob, Grep, EnterWorktree, AskUserQuestion
 disable-model-invocation: true
 ---
 
-# /wtflow-plan — 워크트리 작업 시작
+# /wtflow:plan — 워크트리 작업 시작
+
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
 
 ## 작업 문서
 
@@ -14,7 +16,7 @@ disable-model-invocation: true
 
 | | 이슈 작업 | 이슈 없는 작업 (adhoc) |
 |---|---|---|
-| 트리거 | 인자가 정수 — `/wtflow-plan 42` | 인자가 문장 — `/wtflow-plan "다크모드 토글"` |
+| 트리거 | 인자가 정수 — `/wtflow:plan 42` | 인자가 문장 — `/wtflow:plan "다크모드 토글"` |
 | 식별자 | 이슈번호 `N` | `slug` |
 | accumulator (=워크트리 브랜치) | `<prefix>/#<N>-<slug>` | `<prefix>/+<slug>` |
 | 워크트리 경로 | `.claude/worktrees/<N>-<slug>` | `.claude/worktrees/<slug>` |
@@ -22,13 +24,13 @@ disable-model-invocation: true
 | 계약 note | `.claude/notes/<repo>/issue-<N>.md` | (작업 문서와 같은 파일) |
 
 - **accumulator 이름이 유일한 입력이다.** `/#` 뒤 정수면 이슈 작업, `/+` 뒤 문자열이면 adhoc.
-  이 해석은 wtflow-commit·progress·auto 도 똑같이 쓴다
+  이 해석은 wtflow:commit·progress·auto 도 똑같이 쓴다
 - **갈리는 건 "작업 문서가 어디 있나" 뿐**이다. K 분해·mirror·커밋·auto 순회는 두 경우가 완전히 같다
 - `+` 는 "이슈 없음" 마커이자 accumulator 자동탐지의 걸쇠다. `~`·`^` 는 git refname 금지문자라 못 쓴다
 
 ## 호출
 
-`/wtflow-plan [<이슈번호> | "<작업 설명>"] [-b <base>] [-p <prefix>] [-r <repo>]`
+`/wtflow:plan [<이슈번호> | "<작업 설명>"] [-b <base>] [-p <prefix>] [-r <repo>]`
 
 | 인자 | 뜻 |
 |---|---|
@@ -69,7 +71,7 @@ disable-model-invocation: true
 ### 3~5. 신규 워크트리 셋업 (워크트리 밖, 또는 다른 작업 요청일 때만)
 
 3. **이름 안 제시 + 사용자 확인 한 번** — accumulator 이름은 위 `## 작업 문서` 표 그대로.
-   - **여기가 이 브랜치의 생성 지점이다** — wtflow-issue 는 이름만 정하고 만들지 않는다
+   - **여기가 이 브랜치의 생성 지점이다** — wtflow:issue 는 이름만 정하고 만들지 않는다
    - note frontmatter `branch:` 가 있으면 **그대로 쓴다**. 없을 때만 새로 유도 — slug 를 양쪽에서
      따로 만들면 어긋난다. `#` 때문에 브랜치명은 **항상 따옴표로 감싼다**(adhoc 도 형태를 맞춘다)
    - ⚠️ prefix 에 **`worktree/` 를 쓰지 않는다** — 이 이름이 그대로 mirror base 이고 머지 커밋
@@ -110,9 +112,9 @@ disable-model-invocation: true
    | | `issue-<N>.md` | `adhoc-<slug>.md` |
    |---|---|---|
    | 언제 만드나 | **남길 계약이 실제로 있을 때만**(빈 뼈대는 노이즈) | **항상**(작업 항목의 유일한 기록이라) |
-   | 형식 | `/wtflow-issue` `## 이슈 note 형식` | 아래 `### adhoc note 형식` |
+   | 형식 | `/wtflow:issue` `## 이슈 note 형식` | 아래 `### adhoc note 형식` |
    | 갱신 범위 | `K별 계약·위치` 표만 — `이 이슈 고유 결정`·`열린 질문` 절은 보존 | 같음 + `작업 항목` 추가·수정 |
-   | 체크박스 | ⚠️ **넣지 않는다** — 진실원은 이슈 체크박스 + mirror (근거: wtflow-milestone `## 이원화 금지`) | **넣는다** — 이슈가 없어 이원화될 상대가 없다 |
+   | 체크박스 | ⚠️ **넣지 않는다** — 진실원은 이슈 체크박스 + mirror (근거: wtflow:milestone `## 이원화 금지`) | **넣는다** — 이슈가 없어 이원화될 상대가 없다 |
 
    - 이슈 작업에서 note 와 이슈 작업 항목이 어긋나면 **항상 이슈가 이긴다.** note 를 이슈에 맞춰 고친다
 
@@ -170,14 +172,14 @@ started: 2026-08-08             # 상대날짜 금지
 - …
 ```
 
-- **`작업 항목` 섹션명과 `- [ ] <번호>. ` 형태를 지킨다** — wtflow-commit `--done` 과
-  wtflow-progress 가 이슈 본문과 **같은 규칙**(섹션 안 위에서 K번째 체크박스)으로 읽는다
-- 체크박스는 **wtflow-commit 이 켠다.** plan 은 항목을 만들거나 고칠 뿐 상태를 손대지 않는다
+- **`작업 항목` 섹션명과 `- [ ] <번호>. ` 형태를 지킨다** — wtflow:commit `--done` 과
+  wtflow:progress 가 이슈 본문과 **같은 규칙**(섹션 안 위에서 K번째 체크박스)으로 읽는다
+- 체크박스는 **wtflow:commit 이 켠다.** plan 은 항목을 만들거나 고칠 뿐 상태를 손대지 않는다
 - `milestone_note` frontmatter 를 달면 마일스톤 note 도 같이 로드된다(계약 6-b)
 
 ### 이슈로 승격
 
-작업 도중 이슈로 올려야겠다 싶으면 `/wtflow-issue` 로 이슈를 만든 뒤 **이름만 갈아끼운다**
+작업 도중 이슈로 올려야겠다 싶으면 `/wtflow:issue` 로 이슈를 만든 뒤 **이름만 갈아끼운다**
 (작업물·커밋은 그대로). **사용자 요청 시에만.**
 
 ```
@@ -230,8 +232,8 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 
 | Step | 설명 | 관련 파일/위치 | 권장 호출 |
 |------|------|----------------|-----------|
-| 1 | <한 줄 요약> | `path/to/file.kt:42`, `path/to/other.kt` | `/wtflow-commit "<커밋 메시지>" -K 1` |
-| 2 | ... | ... | `/wtflow-commit "..." -K 2` |
+| 1 | <한 줄 요약> | `path/to/file.kt:42`, `path/to/other.kt` | `/wtflow:commit "<커밋 메시지>" -K 1` |
+| 2 | ... | ... | `/wtflow:commit "..." -K 2` |
 
 ### step 분할 감각 (작업 항목을 새로 만들 때)
 
@@ -247,12 +249,12 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 `Na`(1a·1b…)로 쪼개 적는다. 같은 K 에 커밋을 누적하라는 뜻 — 새 K 가 아니다.
 
 ```
-| 2 | 토큰 자동 갱신 도입 | auth/token.ts | /wtflow-commit "..." -K 2 |
-    └ 2a (리팩터) 만료 체크 분리   → /wtflow-commit "refactor(auth): ..." -K 2
-    └ 2b (기능) 자동 갱신 로직     → /wtflow-commit "feat(auth): ..." -K 2
+| 2 | 토큰 자동 갱신 도입 | auth/token.ts | /wtflow:commit "..." -K 2 |
+    └ 2a (리팩터) 만료 체크 분리   → /wtflow:commit "refactor(auth): ..." -K 2
+    └ 2b (기능) 자동 갱신 로직     → /wtflow:commit "feat(auth): ..." -K 2
 ```
 
-- **힌트일 뿐 — 강제 계약 아님.** 커밋 경계는 구현하며 달라진다. 실제 분할은 wtflow-auto/구현자 판단
+- **힌트일 뿐 — 강제 계약 아님.** 커밋 경계는 구현하며 달라진다. 실제 분할은 wtflow:auto/구현자 판단
 - 하위 태스크가 새 K 처럼 보여도 **K 번호는 작업 항목에 고정**(2a·2b 모두 `-K 2`, mirror `-002`)
 - 작은 K 는 하위 태스크를 적지 않는다 — noise
 - **`Na` 는 plan 출력·커밋 메시지 전용** — 작업 문서의 `작업 항목` 엔 K(N)만 (체크는 `--done` 이 K 단위로)
@@ -273,7 +275,7 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 2. **완료 접기** — 완료된 항목·K 는 `✓` 한 줄 요약만
 3. **스코프 드리프트 처리** (plan 표 **전에**) — 실제 작업이 작업 항목을 벗어났으면 되묻는다:
    (a) 이 브랜치에 **새 K로 이어붙이기** / (b) **작업 항목에 추가**(승인 후 이슈 또는 note 수정) /
-   (c) **별도 작업으로 분리**(`/wtflow-issue` 또는 새 adhoc 워크트리).
+   (c) **별도 작업으로 분리**(`/wtflow:issue` 또는 새 adhoc 워크트리).
    추측 금지 — 선택에 따라 K 번호·체크박스 동기화가 갈린다
 4. **델타 plan 표** — 잔여 항목 + 신규 스코프만. 완료 K 번호는 고정, 신규는 **`max(mirror KKK)+1`** 부터
    (mirror 는 이 브랜치에만 있어 타 작업 K 오염 불가). 재사용·재배치 안 함
@@ -284,20 +286,20 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 
 ## K 매핑과 이후 흐름
 
-- **Step 번호 = K 번호 = 작업 항목 번호.** 커밋은 `/wtflow-commit <설명> -K <N>` 이고
+- **Step 번호 = K 번호 = 작업 항목 번호.** 커밋은 `/wtflow:commit <설명> -K <N>` 이고
   **K=분기, 그 안 태스크마다 커밋해 누적**한다(한 항목을 커밋 없이 한 덩어리로 진행 금지 —
   사용자가 batch 를 명시했을 때만 예외). mirror 는 `<accumulator>-00N`
 - 4단계 이상 또는 1주 이상 예상 → 통합 브랜치 + accumulator 패턴 권장. 1-2단계면 분해 없이 커밋 1회
-- 각 step 구현이 끝나면 `/wtflow-commit` 은 **모델이 자율 실행**(커밋+미러 자동)하되 **커밋 후 멈춘다**
-  — 여러 K 를 이어 순회하려면 사용자가 `/wtflow-auto` 를 호출(모델 자율 다중-K 순회 금지)
+- 각 step 구현이 끝나면 `/wtflow:commit` 은 **모델이 자율 실행**(커밋+미러 자동)하되 **커밋 후 멈춘다**
+  — 여러 K 를 이어 순회하려면 사용자가 `/wtflow:auto` 를 호출(모델 자율 다중-K 순회 금지)
 - **K 완료 시 작업 문서의 체크박스 자동 체크** — plan 의 K 매핑이 곧 체크박스 순서이므로 K 를
   항목 번호에 정확히 고정할 것. push·MR 생성 시점만 사용자 결정
 - plan 은 자주 틀린다 — 진행 중 자연어로 재조정 가능. 그 시점부터 K 번호만 일관되게 유지하고,
-  다음 `/wtflow-commit` 호출에 새 K 번호를 직접 지정한다
+  다음 `/wtflow:commit` 호출에 새 K 번호를 직접 지정한다
 
 ## 비고
 
 - note 는 훅이 심링크로 꽂아두므로 그냥 읽으면 된다. **이슈 note·마일스톤 note 의 형식과 생성은
-  `/wtflow-issue` 계약 12 · `/wtflow-milestone` 몫**이고 이 스킬은 계약 표만 갱신한다.
+  `/wtflow:issue` 계약 12 · `/wtflow:milestone` 몫**이고 이 스킬은 계약 표만 갱신한다.
   **adhoc note 만은 이 스킬이 주인**이다 — 만들 곳이 달리 없다
 - 워크트리 브랜치는 origin 에 push 안 함(로컬 전용 작업 공간). origin 에 노출되는 건 mirror 분기뿐

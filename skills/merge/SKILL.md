@@ -1,5 +1,5 @@
 ---
-name: wtflow-merge
+name: merge
 description: >-
   아직 develop 에 안 들어간 작업 브랜치들을 develop 으로 머지하고 충돌을 해소한다.
   "디벨롭에 머지해줘", "안 머지된 거 머지해줘", "충돌 풀어서 develop 에 올려줘" 같은
@@ -9,11 +9,13 @@ description: >-
 disable-model-invocation: true
 ---
 
-# /wtflow-merge — 작업 브랜치를 develop 으로 머지
+# /wtflow:merge — 작업 브랜치를 develop 으로 머지
+
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
 
 ## 호출
 
-`/wtflow-merge [이슈번호…] [-r <repo>…]`
+`/wtflow:merge [이슈번호…] [-r <repo>…]`
 
 인자 없으면 현재 맥락의 마일스톤 관련 브랜치를 대상으로 삼되, **범위를 먼저 표로 보고**한다.
 
