@@ -70,5 +70,6 @@ claude --plugin-dir ./claude-wtflow
   ```
   ln -s ~/.claude/plugins/*/wtflow/bin/wtflow-clean ~/.local/bin/wtflow-clean
   ```
+  ⚠️ **예전 `install.sh` 로 설치했었다면 `~/.local/bin/wtflow-clean` 을 먼저 지운다.** 그쪽이 PATH 앞이라 플러그인 사본을 가려서, 업데이트해도 옛 스크립트가 계속 실행된다.
 - `link-worktree-local.sh` 는 워크트리에 `CLAUDE.md`·`.claude/*`·`.env*` 처럼 gitignore 돼 따라오지 않는 로컬 파일도 함께 걸어준다. 언어·프레임워크 무관, 원본에 없으면 건너뛰고 어떤 경우에도 세션을 막지 않는다.
 - 기본 브랜치는 `develop`, 없으면 `main` 으로 자동 폴백한다.
