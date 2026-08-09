@@ -1,7 +1,8 @@
 # 커밋 컨벤션
 
-커밋 메시지를 짓는 스킬(`commit`·`auto`)이 시작 전에 읽는다.
-브랜치 이름·K 모델·note 계층은 여기 없다 — `worktree-discipline.md` 에 있다.
+커밋 메시지를 짓는 `commit`·`auto` 가 시작 전에 읽는다.
+
+브랜치 이름·K 모델·note 계층은 이 문서에 없다. `worktree-discipline.md` 를 본다.
 
 ## Subject — `<type>(<scope>): <한글 요약>`
 

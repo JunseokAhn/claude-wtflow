@@ -1,9 +1,9 @@
 # 워크트리 작업 규율
 
-wtflow 스킬들이 공유하는 규율 — 브랜치 이름, K 모델, note 계층. **plan·commit·auto·progress·merge 가
-시작 전에 읽는다.**
+wtflow 스킬이 공유하는 규율. 브랜치 이름, K 모델, note 계층을 담는다.
+**`plan`·`commit`·`auto`·`progress`·`merge` 가 시작 전에 읽는다.**
 
-커밋 메시지를 어떻게 짓는지는 여기 없다 — `commit-convention.md` 에 있다.
+커밋 메시지 형식은 이 문서에 없다. `commit-convention.md` 를 본다.
 
 ## 워크트리 안에서의 행동 정책
 
