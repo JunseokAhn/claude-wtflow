@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "wtflow",
+  "description": "워크트리 기반 작업 규율 스킬셋",
+  "owner": {
+    "name": "junseok",
+    "github": "JunseokAhn"
+  },
+  "plugins": [
+    {
+      "name": "wtflow",
+      "source": "./",
+      "description": "워크트리를 파고 작업 항목(K)마다 분기, 태스크마다 커밋으로 누적하는 작업 규율. GitLab 이슈 연동은 옵션."
+    }
+  ]
+}

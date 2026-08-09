@@ -1,0 +1,17 @@
+{
+  "name": "wtflow",
+  "description": "git worktree 위의 작업을 작업 항목(K) 단위로 분기하고 태스크마다 커밋으로 누적하는 작업 규율 스킬셋. 이슈로도, 이슈 없이도 시작한다.",
+  "version": "0.1.0",
+  "author": {
+    "name": "junseok"
+  },
+  "homepage": "https://github.com/JunseokAhn/claude-wtflow",
+  "repository": "https://github.com/JunseokAhn/claude-wtflow",
+  "keywords": [
+    "worktree",
+    "git",
+    "commit",
+    "workflow",
+    "워크트리"
+  ]
+}
