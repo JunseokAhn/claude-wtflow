@@ -75,7 +75,7 @@
   <text x="66" y="373" class="note"><tspan font-weight="700" fill="#334155">/wtflow:progress</tspan>  —  커밋마다 진행 현황 표 (읽기 전용 · 커밋/푸시 안 함)</text>
 
   <rect x="678" y="346" width="412" height="44" rx="10" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.3"/>
-  <text x="694" y="373" class="note"><tspan font-weight="700" fill="#334155">/wtflow:merge · wtflow-clean</tspan>  —  develop 머지 → 워크트리·브랜치 정리</text>
+  <text x="694" y="373" class="note"><tspan font-weight="700" fill="#334155">/wtflow:merge · /wtflow:clean</tspan>  —  develop 머지 → 워크트리·브랜치 정리</text>
 
   <!-- legend: core vs adapter -->
   <text x="50" y="416" class="note"><tspan class="gl">◆ GitLab</tspan> = 이슈 어댑터 (① · /wtflow:milestone · ②의 이슈 모드 — glab 필요)  ·  <tspan fill="#0f766e" font-weight="700">이슈 없이 ②부터 시작하면 전부 호스트 무관</tspan></text>
