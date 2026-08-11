@@ -7,11 +7,15 @@ disable-model-invocation: true
 
 # /wtflow:clean — 워크트리·브랜치 정리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델)를 읽는다.**
+**참조 문서를 읽지 않는다.** 다른 스킬과 달리 이 스킬은 브랜치 이름 규칙을 적용하지 않는다 —
+역추적·mirror 매칭·보존 판정은 전부 스크립트 안에 있다. 필요한 한 가지 사실만 여기 적어 둔다:
 
-작업이 끝난 워크트리와 거기 딸린 accumulator·mirror 를 지운다. 실제 삭제는 플러그인이 PATH 에
-올려주는 `wtflow-clean` 스크립트가 하고, 이 스킬은 **받은 인자를 그대로 넘겨 한 번 실행하고
-그 출력을 원문으로 옮기는 역할**만 맡는다.
+> accumulator(=워크트리 브랜치)는 이슈 작업이면 `<prefix>/#<N>-<slug>`, 이슈 없는 작업이면
+> `<prefix>/+<slug>` 이고, mirror 는 그 뒤에 `-<KKK>`(3자리)가 붙은 것이다.
+
+작업이 끝난 워크트리와 거기 딸린 accumulator·mirror 를 지운다. 실제 삭제는 `wtflow-clean`
+스크립트가 하고, 이 스킬은 **받은 인자를 그대로 넘겨 한 번 실행하고 그 출력을 원문으로
+옮기는 역할**만 맡는다.
 
 **확인을 덮지 않는다.** 이 명령은 사용자만 호출할 수 있고(`disable-model-invocation`), 호출
 자체가 이미 삭제 의사 표시다. 그 위에 미리보기와 승인을 한 겹 더 얹으면 얻는 안전은 없고
@@ -79,6 +83,10 @@ disable-model-invocation: true
 
 ## 비고
 
-- 스크립트 본체는 `${CLAUDE_PLUGIN_ROOT}/bin/wtflow-clean` 이고 플러그인이 활성인 동안 PATH 에 있다.
-  로직을 이 스킬에 옮겨 적지 않는다 — 옵션이 늘거나 바뀌면 스크립트 하나만 고치면 되게 둔다
+- 스크립트 본체는 `${CLAUDE_PLUGIN_ROOT}/bin/wtflow-clean` 이다. 로직을 이 스킬에 옮겨 적지 않는다
+  — 옵션이 늘거나 바뀌면 스크립트 하나만 고치면 되게 둔다
+- **PATH 범위** — 플러그인은 `bin/` 을 **Claude Code 가 실행하는 셸의** PATH 에만 올린다. 그래서
+  이 스킬은 `wtflow-clean` 을 맨 이름으로 부를 수 있지만, **사용자의 터미널에는 자동으로 등록되지
+  않는다**(그쪽은 별개 프로세스라 그 환경변수를 물려받지 않는다). 사용자가 셸에서 직접 쓰고 싶다면
+  PATH 에 있는 디렉토리로 심링크를 걸어야 한다 — 안내는 README 에 있다
 - 정리 후 남은 워크트리 목록은 `git worktree list` 로 확인한다
