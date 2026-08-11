@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:plan — 워크트리 작업 시작
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지)를 읽는다.**
 
 ## 작업 문서
 
@@ -104,7 +104,9 @@ disable-model-invocation: true
    컨텍스트로 표시. 코드 분석 시작 안내만 하고 수정은 사용자 승인 후
 
 8. **plan 출력** — 작업 정의 + 계약 6 의 계획 문서 + **코드 분석 결과**로 작업 단계 추정
-   (`## plan 출력 형식`). 자동 실행 안 함, 가이드 용도
+   (`## plan 출력 형식`). 자동 실행 안 함, 가이드 용도.
+   **어느 K 가 사전문답 대상인지도 이때 표시**한다(`### 사전문답 대상 표시`) — 착수 후에 정하면
+   이미 구현이 시작돼 `learning-protocol.md` 의 `## 1. 예측 후 공개` 가 성립하지 않는다
 
 9. **note 반영 (저장)** — plan 표를 낸 뒤 note 를 갱신한다. 세션이 끊기거나 컨텍스트가 압축돼도
    K별 계약·파일 위치가 남아 재플랜의 근거가 된다.
@@ -233,7 +235,24 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 | Step | 설명 | 관련 파일/위치 | 권장 호출 |
 |------|------|----------------|-----------|
 | 1 | <한 줄 요약> | `path/to/file.kt:42`, `path/to/other.kt` | `/wtflow:commit "<커밋 메시지>" -K 1` |
-| 2 | ... | ... | `/wtflow:commit "..." -K 2` |
+| 2 ❓ | ... | ... | `/wtflow:commit "..." -K 2` |
+
+### 사전문답 대상 표시
+
+`learning-protocol.md` 의 `## 켜는 자리 / 끄는 자리` 로 각 K 를 가르고, **착수 전에 멈출 K 의
+Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을지 예고한다.
+
+```
+❓ K2 — auth/token.ts:88 을 보고 "무엇이 문제고 무엇으로 바꿀지" 를 먼저 답하신 뒤 진행합니다.
+```
+
+- 대상은 **도메인 판단·설계 선택·낯선 API 가 든 K 뿐**이다. 삭제·정리·보일러플레이트는 안 붙인다.
+  전부에 붙으면 규율이 아니라 마찰이다
+- 사용자가 "급해" / "그냥 해줘" 라고 하면 `❓` 를 걷고 평소대로 민다 — 되묻지 않는다
+- `/wtflow:auto` 로 순회할 때는 `❓` 가 있어도 **멈추지 않는다**(auto 는 무중단이 목적).
+  대신 예측 문제를 브리핑 뒤로 모아 낸다
+- 표시는 plan 출력·대화 전용이다. **작업 문서의 `작업 항목` 체크리스트엔 넣지 않는다**
+  (`--done` 이 켜는 줄의 형태가 깨진다)
 
 ### step 분할 감각 (작업 항목을 새로 만들 때)
 
