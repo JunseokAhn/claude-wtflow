@@ -34,10 +34,11 @@ claude --plugin-dir ./claude-wtflow
   /wtflow:auto       plan 의 K 자율 순회 (구현 → 검증 → /wtflow:commit → 완료 시 /wtflow:briefing)
   /wtflow:progress   K 진행 현황 표 + 이슈↔note drift 보고 (읽기 전용)
   /wtflow:briefing   작업 전체를 설계문서형 브리핑으로 정리 (git·대화 근거, 읽기 전용)
-  /wtflow:merge      안 머지된 작업 브랜치를 기본 브랜치로 (충돌 해소 + 빌드 검증)
+  /wtflow:merge      기본 브랜치 최신본을 작업 브랜치로 (충돌 해소 + 빌드 검증)
   /wtflow:clean      워크트리·브랜치 정리 (확인 없이 한 번에 실행. -n 이면 대상만 보여준다)
 
 이슈 어댑터 — 옵션 · GitLab (glab 필요)
+  /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성 (본문은 briefing --mr)
   /wtflow:issue      이슈 생성 + 이슈 note 작성
   /wtflow:milestone  여러 이슈에 걸친 공통 계약 note + 이슈 분할 생성
                      (/wtflow:plan 의 이슈 모드도 glab 필요. adhoc 모드는 불필요)
@@ -68,7 +69,8 @@ claude --plugin-dir ./claude-wtflow
 ## 비고
 
 - 이슈 어댑터(`/wtflow:issue`·`/wtflow:milestone`, `/wtflow:plan` 의 이슈 모드) → `glab` CLI 필요. 코어는 의존성 없음
-- `/wtflow:clean`·`/wtflow:merge` → 로컬 분기·워크트리만 조작. origin 은 건드리지 않고 push 는 사용자 몫
+- `/wtflow:clean`·`/wtflow:merge` → 로컬 분기·워크트리만 조작. origin 은 건드리지 않는다
+- `/wtflow:mr` → **origin 을 건드리는 유일한 명령.** 작업 브랜치를 올리고 MR 을 연다. 기본 브랜치는 리뷰를 거쳐서만 바뀐다
 - 기본 브랜치 → `develop`, 없으면 `main` 으로 자동 폴백
 - `link-worktree-local.sh` → gitignore 돼 워크트리에 안 따라오는 `CLAUDE.md`·`.claude/*`·`.env*` 를 심링크로 연결. 언어·프레임워크 무관, 원본에 없으면 건너뜀
 - `/wtflow:clean` 이 부르는 `wtflow-clean` 스크립트는 **Claude 의 Bash 툴 PATH 에만** 올라간다. 사용자 셸은 별개 프로세스라 그 환경변수를 물려받지 않으므로, 터미널에서 직접 치려면 PATH 에 있는 디렉토리로 심링크를 따로 건다
