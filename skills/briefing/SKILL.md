@@ -1,8 +1,7 @@
 ---
 name: briefing
-description: 완료·진행 작업을 커밋·diff 기반 구조화 브리핑으로 출력(읽기 전용, 날조 금지). 인자 --mr/--detail/--no-fence. "MR용/작업 브리핑" 요청에. 사용자만 호출.
+description: 완료·진행 작업을 커밋·diff 기반 구조화 브리핑으로 출력(읽기 전용, 날조 금지). 인자 --mr/--detail/--no-fence. "MR용/작업 브리핑" 요청에. 사용자 호출 + wtflow:auto 가 순회를 마칠 때 자율 호출, MR 본문이 필요한 자리에서는 --mr 로 자율 호출.
 allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
-disable-model-invocation: true
 ---
 
 # /wtflow:briefing — 작업 브리핑 생성
@@ -125,3 +124,5 @@ disable-model-invocation: true
 
 - 섹션은 작업 성질에 맞게 가감 (인프라 변경 없으면 영향범위 단순화, 결정 없으면 7·8번 생략 등). **틀 강요 < 정확성**
 - 표·체크박스·해시는 실제 git/대화에서 — 그럴듯한 채움 금지
+- **자율 호출 자리는 지시다 — 다만 차단 장치는 없다.** description 에 적은 "순회를 마칠 때 / MR 본문이 필요한 자리" 는 이 스킬을 읽는 쪽이 **지켜야 하는 지시**다. 그와 별개로, 그 밖에서의 호출을 툴 레이어에서 막는 장치는 없다 — 막는 수단은 `disable-model-invocation` 하나뿐이고 그건 자율 호출을 통째로 차단해 자율 순회의 마지막 단계를 깨뜨린다. 그래서 쓰지 않는다
+- 자율 호출로 부담이 없는 근거: 이 스킬은 읽기 전용이라 커밋·push·외부 전송이 없다. 잘못 불려도 손실은 출력 길이뿐이다
