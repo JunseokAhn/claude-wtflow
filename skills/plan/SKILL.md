@@ -303,3 +303,4 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
   `/wtflow:issue` 계약 12 · `/wtflow:milestone` 몫**이고 이 스킬은 계약 표만 갱신한다.
   **adhoc note 만은 이 스킬이 주인**이다 — 만들 곳이 달리 없다
 - 워크트리 브랜치는 origin 에 push 안 함(로컬 전용 작업 공간). origin 에 노출되는 건 mirror 분기뿐
+  — **예외는 `/wtflow:mr` 하나다.** MR 은 소스 브랜치가 origin 에 있어야 성립하므로 그 명령이 accumulator 를 올린다
