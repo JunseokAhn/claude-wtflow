@@ -31,7 +31,9 @@
 #
 # 위치 인자:
 #   숫자(이슈번호 N) → 브랜치/위치와 무관하게 이슈 N 의 브랜치들을 역추적 (예: wtflow-clean 42)
-#   그 외(작업브랜치) → 그 브랜치(및 같은 이슈번호 브랜치)를 대상으로
+#   작업브랜치명      → 그 브랜치(및 같은 이슈번호 브랜치)를 대상으로
+#   작업 이름(slug)   → 이슈 없는 작업 <prefix>/+<slug> 를 접두사 없이 지목 (예: wtflow-clean dark-mode)
+#                      하나로 좁혀지지 않거나 없는 이름이면 중단한다 — 조용히 통과시키지 않는다
 #   생략             → 현재 체크아웃된 브랜치를 대상으로
 #
 # 워크트리 브랜치가 곧 이슈 마커다(별도 마커 브랜치 없음) — 그래서 기본 정리 대상이다.
@@ -198,11 +200,52 @@ resolve_by_number() {
   printf '%s\n' "$wt_br"
 }
 
+# 이슈 없는 작업(<prefix>/+<slug>) → 작업 이름만으로 브랜치 역추적.
+# 정확히 하나로 좁혀지지 않으면 die 한다 — 없는 이름을 삭제 대상으로 적은 계획을 내면
+# 실제로는 아무것도 안 지워졌는데 정리된 것으로 오해하게 된다.
+resolve_by_slug() {
+  local slug="$1" esc cands n with_wt m alt
+  esc=$(printf '%s' "$slug" | sed -e 's#[][\.^$*+?(){}|]#\\&#g')
+  # 후보: accumulator <prefix>/+<slug> 만. 미러(-NNN)는 이름이 안 맞아 자연히 빠진다.
+  cands=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
+    | grep -E "^[^/]+/\+${esc}$" || true)
+  n=$(printf '%s\n' "$cands" | grep -c . || true)
+  if [ "$n" -eq 1 ]; then
+    printf '%s\n' "$cands"; return 0
+  elif [ "$n" -gt 1 ]; then
+    # prefix 만 다른 동명 작업이 여럿 — 워크트리가 붙은 쪽으로 좁혀본다
+    with_wt=$(printf '%s\n' "$cands" | while IFS= read -r b; do
+      [ -n "$b" ] || continue
+      wt_lines | awk -F'\t' -v b="$b" '$2==b && index($1,"/.claude/worktrees/")>0 {print b; exit}'
+    done)
+    m=$(printf '%s\n' "$with_wt" | grep -c . || true)
+    if [ "$m" -eq 1 ]; then printf '%s\n' "$with_wt"; return 0; fi
+    # 이슈번호와 달리 여기서는 전부 쓸어담을 근거가 없다(같은 이름의 다른 작업일 수 있다) → 중단
+    note "작업 이름 '$slug' 에 해당하는 브랜치가 여럿입니다:"
+    printf '%s\n' "$cands" | sed 's/^/    /' >&2
+    die "어느 것인지 브랜치명을 그대로 지정하세요."
+  fi
+  # 이슈 작업 브랜치로만 존재하면, 그건 번호로 지목하는 쪽이 맞다고 알려준다
+  alt=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
+    | grep -E "^[^/]+/#[0-9]+-${esc}$" || true)
+  if [ -n "$alt" ]; then
+    note "'$slug' 는 이슈 작업 브랜치입니다:"
+    printf '%s\n' "$alt" | sed 's/^/    /' >&2
+    die "이슈번호로 지정하세요 (예: wtflow-clean 42)."
+  fi
+  die "작업 이름 '$slug' 에 해당하는 브랜치를 찾지 못했습니다 (브랜치명을 그대로 주거나, 이슈 작업이면 번호를 주세요)."
+}
+
 # 대상 작업 브랜치 결정
 marker_only=0    # 워크트리는 없고 브랜치만 남은 상태
 if [ -n "$target_arg" ]; then
   case "$target_arg" in
-    *[!0-9]*) target_branch="$target_arg" ;;        # 숫자 아님 → 브랜치명
+    *[!0-9]*) # 숫자 아님 → 있는 브랜치명이면 그대로, 아니면 작업 이름(slug)으로 역추적
+              if git -C "$main_top" show-ref --verify --quiet "refs/heads/$target_arg"; then
+                target_branch="$target_arg"
+              else
+                target_branch=$(resolve_by_slug "$target_arg") || exit 1
+              fi ;;
     *)        # 순수 숫자 → 이슈번호. return 2 = 마커만 남음(이미 정리됨)
               target_branch=$(resolve_by_number "$target_arg"); rb=$?
               case "$rb" in

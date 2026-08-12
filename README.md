@@ -35,7 +35,7 @@ claude --plugin-dir ./claude-wtflow
   /wtflow:progress   K 진행 현황 표 + 이슈↔note drift 보고 (읽기 전용)
   /wtflow:briefing   작업 전체를 설계문서형 브리핑으로 정리 (git·대화 근거, 읽기 전용)
   /wtflow:merge      안 머지된 작업 브랜치를 기본 브랜치로 (충돌 해소 + 빌드 검증)
-  /wtflow:clean      워크트리·브랜치 정리 (dry-run 으로 대상 확인 후 삭제)
+  /wtflow:clean      워크트리·브랜치 정리 (확인 없이 한 번에 실행. -n 이면 대상만 보여준다)
 
 이슈 어댑터 — 옵션 · GitLab (glab 필요)
   /wtflow:issue      이슈 생성 + 이슈 note 작성
@@ -71,8 +71,14 @@ claude --plugin-dir ./claude-wtflow
 - `/wtflow:clean`·`/wtflow:merge` → 로컬 분기·워크트리만 조작. origin 은 건드리지 않고 push 는 사용자 몫
 - 기본 브랜치 → `develop`, 없으면 `main` 으로 자동 폴백
 - `link-worktree-local.sh` → gitignore 돼 워크트리에 안 따라오는 `CLAUDE.md`·`.claude/*`·`.env*` 를 심링크로 연결. 언어·프레임워크 무관, 원본에 없으면 건너뜀
-- `/wtflow:clean` 이 부르는 `wtflow-clean` 스크립트는 **Claude 의 Bash 툴 PATH 에만** 올라간다. 터미널에서 직접 치려면 심링크를 따로 건다
+- `/wtflow:clean` 이 부르는 `wtflow-clean` 스크립트는 **Claude 의 Bash 툴 PATH 에만** 올라간다. 사용자 셸은 별개 프로세스라 그 환경변수를 물려받지 않으므로, 터미널에서 직접 치려면 PATH 에 있는 디렉토리로 심링크를 따로 건다
 
+  ```sh
+  # 설치 경로를 먼저 확인한다 (마켓플레이스 이름과 버전이 경로에 들어간다)
+  ls -d ~/.claude/plugins/cache/*/wtflow/*/bin
+
+  # 그중 하나를 골라 건다. ~/.local/bin 이 PATH 에 있어야 한다
+  ln -sf ~/.claude/plugins/cache/<마켓플레이스>/wtflow/<버전>/bin/wtflow-clean ~/.local/bin/wtflow-clean
   ```
-  ln -s ~/.claude/plugins/*/wtflow/bin/wtflow-clean ~/.local/bin/wtflow-clean
-  ```
+
+  경로에 버전이 들어 있어 **플러그인을 업데이트하면 다시 걸어야 한다.** 이 저장소를 클론해 뒀다면 그쪽(`<클론경로>/bin/wtflow-clean`)으로 거는 편이 버전에 흔들리지 않는다. 스크립트는 플러그인 파일에 의존하지 않아 단독으로 돈다 (git 저장소 안에서 실행하면 된다)
