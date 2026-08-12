@@ -9,18 +9,14 @@ git worktree 를 작업 공간으로 쓰면서 작업 항목마다 분기를 두
 ## 설치
 
 ```
-/plugin marketplace add JunseokAhn/claude-wtflow
-/plugin install wtflow@claude-kit
+/plugin marketplace add JunseokAhn/claude-wtflow      ← 마켓플레이스 등록 (소스 레포)
+/plugin install wtflow@claude-kit                     ← 플러그인 설치 (플러그인@마켓플레이스)
 ```
 
 스킬·훅·정리 스크립트가 한 번에 붙는다. 심링크를 걸거나 `settings.json` 을 편집할 일은 없다.
 
-개발 중 로컬에서 시험하려면 클론한 디렉토리를 그대로 지목한다.
-
-```
-git clone https://github.com/JunseokAhn/claude-wtflow.git
-claude --plugin-dir ./claude-wtflow
-```
+⚠️ **두 줄의 이름이 다르다.** 등록에는 **저장소** 이름(`claude-wtflow`), 설치에는 **마켓플레이스**
+이름(`claude-kit`)이 들어간다. 등록 단계에 `claude-kit` 을 넣으면 그런 저장소가 없어 실패한다.
 
 ## 스킬
 
@@ -83,4 +79,4 @@ claude --plugin-dir ./claude-wtflow
   ln -sf ~/.claude/plugins/cache/<마켓플레이스>/wtflow/<버전>/bin/wtflow-clean ~/.local/bin/wtflow-clean
   ```
 
-  경로에 버전이 들어 있어 **플러그인을 업데이트하면 다시 걸어야 한다.** 이 저장소를 클론해 뒀다면 그쪽(`<클론경로>/bin/wtflow-clean`)으로 거는 편이 버전에 흔들리지 않는다. 스크립트는 플러그인 파일에 의존하지 않아 단독으로 돈다 (git 저장소 안에서 실행하면 된다)
+  경로에 버전이 들어 있어 **플러그인을 업데이트하면 다시 걸어야 한다.** 스크립트는 플러그인 파일에 의존하지 않아 단독으로 돈다 (git 저장소 안에서 실행하면 된다)
