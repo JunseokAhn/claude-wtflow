@@ -43,7 +43,6 @@ wtflow가 자동으로 브랜치를 생성합니다.
 | 작업항목2 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-002` | commit3 |
 | 작업항목3 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-003` | commit4<br>commit5 |
 
-```
 
 ## 작업계획 공유
 
