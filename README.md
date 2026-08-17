@@ -69,6 +69,7 @@ git worktree 를 작업 공간으로 쓰면서 작업 항목마다 분기를 두
 - `/wtflow:mr` → **origin 을 건드리는 유일한 명령.** 작업 브랜치를 올리고 MR 을 연다. 기본 브랜치는 리뷰를 거쳐서만 바뀐다
 - 기본 브랜치 → `develop`, 없으면 `main` 으로 자동 폴백
 - `link-worktree-local.sh` → gitignore 돼 워크트리에 안 따라오는 `CLAUDE.md`·`.claude/*`·`.env*` 를 심링크로 연결. 언어·프레임워크 무관, 원본에 없으면 건너뜀
+- `guard-body-edit.sh` → 이슈·MR 본문을 스킬 밖에서 고치는 `glab issue update`·`gh issue edit`·`glab mr update`·`gh pr edit` 호출을 막는다(본문 플래그가 붙었을 때만). 재작성은 `/wtflow:issue --rewrite`·`/wtflow:mr --rewrite` 로 — 거기에만 템플릿 준수·분량 확인이 걸려 있다
 - `/wtflow:clean` 이 부르는 `wtflow-clean` 스크립트는 **Claude 의 Bash 툴 PATH 에만** 올라간다. 사용자 셸은 별개 프로세스라 그 환경변수를 물려받지 않으므로, 터미널에서 직접 치려면 PATH 에 있는 디렉토리로 심링크를 따로 건다
 
   ```sh
