@@ -63,6 +63,6 @@ else
   exit 0
 fi
 
-printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s 본문을 스킬 밖에서 고치려 했습니다. 재작성에는 지켜야 할 계약이 있습니다 — 저장소 템플릿 준수, 절·줄 수 변화 미리보기, 사용자 확인. 직접 호출하면 그게 전부 통과됩니다.\\n\\n%s 를 대신 쓰세요.\\n\\n체크박스 동기화라면 명령 앞에 %s 를 붙여 호출하세요(wtflow:commit 전용)."}}\n' \
-  "$target" "$route" "$SENTINEL_CHECKBOX"
+printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"%s 본문을 스킬 밖에서 고치려 했습니다. 재작성에는 지켜야 할 계약이 있습니다 — 저장소 템플릿 준수, 절·줄 수 변화 미리보기, 사용자 확인. 직접 호출하면 그게 전부 통과됩니다.\\n\\n%s 를 대신 쓰세요.\\n\\n이미 그 재작성 모드를 타고 계약(브리핑 재수집·상한 재검사·사용자 확인)을 전부 통과한 마지막 쓰기라면 prefix 가 빠진 것입니다 — 명령 앞에 %s 를 붙이세요. 계약을 건너뛰고 붙이면 예외가 그대로 우회로가 됩니다.\\n\\n체크박스 동기화(`- [ ]` 한 줄만 켜는 wtflow:commit)라면 %s 를 붙이세요."}}\n' \
+  "$target" "$route" "$SENTINEL_REWRITE" "$SENTINEL_CHECKBOX"
 exit 0
