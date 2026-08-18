@@ -8,8 +8,8 @@ claude cli로 병렬작업을 수행할 때 필요한 요청들을 스킬로 만
 ## 설치
 
 ```
-/plugin marketplace add JunseokAhn/claude-wtflow      ← 마켓플레이스 등록 (소스 레포)
-/plugin install wtflow@claude-kit                     ← 플러그인 설치 (플러그인@마켓플레이스)
+/plugin marketplace add JunseokAhn/claude-wtflow 
+/plugin install wtflow@claude-kit
 ```
 
 
@@ -51,8 +51,7 @@ wtflow가 자동으로 브랜치를 생성합니다.
 
 ```
 ~/.claude/notes/<group>/
-  _milestone/<iid>-<slug>.md  여러 이슈·레포가 공유하는 계약
-  <repo>/issue-<N>.md         이슈 하나의 계획 (K별 계약·파일 위치)
-  <repo>/adhoc-<slug>.md      이슈 없이 시작한 작업의 계획 + 작업 항목 체크리스트
+  <repo>/issue-<N>.md         착수 전 계약·배경의 1회 스냅샷 (issue 가 쓴다)
+  _milestone/<iid>-<slug>.md  여러 이슈·레포가 공유하는 계약 (milestone 이 쓴다)
 ```
 
