@@ -12,6 +12,18 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/guard-body-edit.sh",
+            "statusMessage": "이슈·MR 본문 수정 경로 확인 중"
+          }
+        ]
+      }
+    ],
     "CwdChanged": [
       {
         "matcher": "*",

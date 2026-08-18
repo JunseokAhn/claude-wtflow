@@ -1,13 +1,13 @@
 ---
 name: commit
 description: 워크트리 작업단위 로컬 커밋 + accumulator-K 분기. 인자 -K/--done/--push/--no-test. 한 K 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 K 진행 여부에만; 다중 K 순회는 wtflow:auto.
-allowed-tools: Bash(git *), Bash(glab *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
+allowed-tools: Bash(git *), Bash(glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/commit-convention.md`(메시지 형식)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/commit-convention.md`(메시지 형식), `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답)를 읽는다.**
 
 ## 호출
 
@@ -84,6 +84,15 @@ disable-model-invocation: false
 
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 K`, 이슈 없는 작업이면 `mirror -00N 생성/전진` 으로 대신)
 
+   **이전 K 의 설계 선택이 이번 커밋에서 대가를 드러냈으면 청구서를 함께 낸다**
+   (`learning-protocol.md` `## 6. 청구서`). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
+   대가가 아직 안 왔으면 안 왔다고 적는다 — 없는 청구서를 지어내면 다음 예측이 무의미해진다.
+
+   ```
+   청구서 — K1 에서 B(판정 분리)를 고르셨고 "호출자가 늘면 A 가 먼저 무너진다" 고 예측하셨습니다.
+            이번 테스트 K 에서 판정만 단독 테스트 6케이스로 덮었고 스텁은 0줄이었습니다. 예측대로입니다.
+   ```
+
 8. **진행 현황 자동 출력** — 요약 직후 `/wtflow:progress --quiet` 1회 호출해 갱신된 K 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
 
 ## 결정·중단 트리거
@@ -95,7 +104,7 @@ disable-model-invocation: false
 - 아키텍처 트레이드오프 발견 → 옵션 비교만 제시, 결정 대기
 - 스코프 확장 필요 → 진행 전 보고
 - 파괴적 동작(force-push, 다른 브랜치 reset, amend/rebase 등 history 재작성, 운영 영향) → 명시적 동의 전 금지. 수정은 항상 새 commit(계약 3)
-- 체크박스 동기화 실패(이슈번호 추출 불가 / glab 실패 / 항목 수 < K / 순서 모호) → **경고만 하고 커밋은 그대로 완료**. 수동 체크 안내, 엉뚱한 항목을 추측해 체크하지 말 것. ⚠️ 이슈 없는 작업은 실패가 아니라 **해당 없음**이라 경고도 내지 않는다
+- 체크박스 동기화 실패(이슈번호 추출 불가 / glab 실패 / 항목 수 < K / 순서 모호 / 훅이 막음) → **경고만 하고 커밋은 그대로 완료**. 수동 체크 안내, 엉뚱한 항목을 추측해 체크하지 말 것. ⚠️ 이슈 없는 작업은 실패가 아니라 **해당 없음**이라 경고도 내지 않는다
 
 ## 짧은 변형
 
@@ -122,8 +131,20 @@ mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 �
 0. **모드 판정** — accumulator 이름이 `/+<slug>` 면 **여기서 끝**(체크할 문서 없음, 경고도 없음).
    `/#<N>` 일 때만 1로 간다
 1. **이슈번호 추출** — accumulator 의 `/#` 뒤 정수 = N (repo 는 git remote 자동). 불가면 경고·skip
-2. **이슈 본문 로드** — `glab issue view <N> --output json` 의 `description`.
-   쓰기는 `glab issue update <N> -d "<전체 본문>"`
+2. **이슈 본문 로드·쓰기**
+
+   | 로드 | 쓰기 |
+   |---|---|
+   | `glab issue view <N> --output json` 의 `description` | `WTFLOW_CHECKBOX_SYNC=1 glab issue update <N> -d "<전체 본문>"` |
+
+   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` prefix 를 빼지 않는다.** 이슈 본문을 고치는 호출은 훅
+   (`hooks/guard-body-edit.sh`)이 막는다 — 재작성에는 템플릿 준수·미리보기·확인 계약이 걸려야
+   하는데 `glab issue update` 직접 호출은 그걸 전부 건너뛰기 때문이다. **여기만 예외**인 이유는
+   본문을 다시 쓰는 게 아니라 `- [ ]` **한 줄을 켜는 것**이라서다. 훅은 명령 문자열만 보므로,
+   호출자가 이 prefix 로 스스로를 밝히는 것 말고 정당한 호출을 구별할 방법이 없다.
+   - 그러니 **이 prefix 를 붙인 호출은 실제로 체크박스 한 줄만 바꿔야 한다.** 같은 호출에
+     본문 손질을 얹으면 예외를 우회로로 쓰는 것이다 — 본문을 고칠 일이면 `/wtflow:issue --rewrite`
+   - 훅이 막았다는 응답을 받으면 prefix 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 3. **K번째 항목** — `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트에서 **위에서 K번째** `- [ ]`/`- [x]` 줄. 항목 수 < K·섹션 모호 → 경고·skip(추측 금지)
 4. **그 줄만 토글** `- [ ]`→`- [x]` (나머지 본문 보존, 이미 `[x]` 면 no-op). 실패 시 경고만, 커밋 흐름 안 막음
 5. **요약에 명시** — "이슈 #N 항목 K 체크", 또는 실패 사유
