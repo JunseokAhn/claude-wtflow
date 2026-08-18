@@ -23,13 +23,16 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 ## 파일 배치
 
-**wtflow 가 파일로 남기는 note 는 이것 하나뿐이다.** 이슈별 계획은 파일이 아니라 `/wtflow:plan` 의
-세션 출력이 갖는다(`references/worktree-discipline.md`).
+둘 다 note 이고 범위만 다르다. **한 뿌리에 두므로 마일스톤 유무·레포 차이가 경로 차이로만 흡수된다.**
 
 ```
 ~/.claude/notes/<group>/
   _milestone/<iid>-<slug>.md      ← 이 스킬이 만든다. 여러 이슈·레포가 공유하는 단일 실체
+  <repo>/issue-<N>.md             ← wtflow:issue 계약 8 이 이슈당 1회 만든다
 ```
+
+**둘 다 쓰고 나면 갱신 의무가 없다.** 이슈 note 는 착수 전 1회 스냅샷이고, 마일스톤 note 만
+진행 중 고쳐진다(그게 이 문서가 존재하는 이유다 — 여러 이슈가 같은 실체를 봐야 한다).
 
 - **단일 실체가 핵심이다.** 마일스톤 note 는 진행 중 고쳐지고 그 수정이 **다른 브랜치·다른
   세션에서 즉시 읽혀야** 한다. 브랜치에 커밋하면 사본이 갈라져 이걸 못 지킨다
@@ -88,8 +91,9 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
         glab api --method PUT "projects/<group>%2F<repo>/issues/<N>" -f milestone_id=<글로벌 id>
         ```
         ⚠️ **이 배정이 이슈↔마일스톤 note 를 잇는 유일한 채널이다** — `/wtflow:plan` 계약 6 이
-        여기서 iid 를 읽어 마일스톤 문서를 워크트리에 건다. 배정을 빠뜨리면 그 이슈는 계약을 못 본다
-   - c. `이슈 분할` 표에 의존 관계 행 추가
+        여기서 iid 를 읽어 마일스톤 문서를 찾는다. 배정을 빠뜨리면 그 이슈는 계약을 못 본다
+   - c. 이슈 note 는 a 가 이미 썼다. **다시 쓰지 않는다**(덮어쓰면 앞의 것이 사라진다)
+   - d. `이슈 분할` 표에 의존 관계 행 추가
    - ⚠️ **브랜치는 여기서 만들지 않는다** — 이름 유도도 생성도 `/wtflow:plan` 몫이다.
      `worktree/` prefix 는 쓰지 않는다 (CLAUDE.md `브랜치 이름 규칙`)
 
