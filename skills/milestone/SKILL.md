@@ -1,6 +1,6 @@
 ---
 name: milestone
-description: 여러 이슈에 걸친 마일스톤 note 작성·갱신 + 이슈 분할 생성. 페이로드·타입·에러코드를 ~/.claude/notes 에 한 벌로 두고 각 이슈 note 가 참조. "마일스톤 계획/여러 이슈로 쪼개줘" 요청에.
+description: 여러 이슈에 걸친 마일스톤 note 작성·갱신 + 이슈 분할 생성. 페이로드·타입·에러코드를 ~/.claude/notes 에 한 벌로 두고 각 이슈의 plan 이 심링크로 읽는다. "마일스톤 계획/여러 이슈로 쪼개줘" 요청에.
 allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *), Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill
 ---
 
@@ -23,18 +23,19 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 ## 파일 배치
 
-둘 다 note 이고 범위만 다르다. **한 뿌리에 두므로 마일스톤 유무·레포 차이가 경로 차이로만 흡수된다.**
+**wtflow 가 파일로 남기는 note 는 이것 하나뿐이다.** 이슈별 계획은 파일이 아니라 `/wtflow:plan` 의
+세션 출력이 갖는다(`references/worktree-discipline.md`).
 
 ```
-~/.claude/notes/<group>/          ← 훅이 이걸 통째로 워크트리의 .claude/notes 로 심링크
-  _milestone/<iid>-<slug>.md      ← 이 스킬이 만든다. 여러 이슈·레포가 공유
-  <repo>/issue-<N>.md             ← wtflow:issue 계약 12 가 만든다
+~/.claude/notes/<group>/
+  _milestone/<iid>-<slug>.md      ← 이 스킬이 만든다. 여러 이슈·레포가 공유하는 단일 실체
 ```
 
-- **심링크가 핵심이다.** 마일스톤 note 는 진행 중 고쳐지고 그 수정이 **다른 브랜치·다른 세션에서
-  즉시 읽혀야** 한다. 브랜치에 커밋하면 사본이 갈라져 이걸 못 지킨다 — 단일 실체 + 심링크뿐이다
-- 그룹 단위로만 건다(통짜면 무관한 그룹까지 보인다). 마일스톤이 없어도 이슈 note 가 같은 트리에
-  있으므로 경로는 동일하다
+- **단일 실체 + 심링크가 핵심이다.** 마일스톤 note 는 진행 중 고쳐지고 그 수정이 **다른 브랜치·다른
+  세션에서 즉시 읽혀야** 한다. 브랜치에 커밋하면 사본이 갈라져 이걸 못 지킨다
+- **워크트리로 거는 건 `/wtflow:plan` 계약 6 이다** — 이슈의 마일스톤 배정에서 유도해 **그 문서
+  하나만** `.claude/notes/milestone.md` 로 건다. 디렉토리를 통째로 걸면 여러 마일스톤 중 어느 것이
+  이 이슈의 계약인지 알 수 없다
 - `~/.claude` 는 글로벌 gitignore 대상이라 git·MR 에 안 잡힌다
 
 ## 계약 (보장되어야 하는 것)
@@ -76,24 +77,20 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
    뒤늦게 튀어나와 분할을 다시 짜게 된다
 
 8. **이슈 생성 + 마일스톤 배정** — 승인된 각 이슈마다:
-   - a. `Skill(wtflow:issue)` 호출 — **마일스톤 맥락은 인자로만 넘긴다** (산문으로 설명하면
-        그 스킬이 단독 이슈와 구분하지 못한다):
+   - a. `Skill(wtflow:issue)` 호출 — **이슈 본문에 들어갈 것만 넘긴다**:
         ```
-        /wtflow:issue <설명> -R <group>/<repo> \
-          --milestone-note ~/.claude/notes/<group>/_milestone/<iid>-<slug>.md \
-          --sections "역할 경계, BE 엣지 계약"
+        /wtflow:issue <설명> -R <group>/<repo>
         ```
-        **이슈 본문은 짧게.** 넘긴 절 이름은 **이슈 note 에만** 들어간다.
-        ⚠️ **GitLab 이슈에는 절 이름·문서 경로를 넣지 않는다 — `참고 자료` 섹션에도.** 깨진 포인터다
-        (wtflow:issue 계약 4). 계약 전문도 넘기지 않는다 — note 는 가리키기만 해야 한다
+        **이슈 본문은 짧게.** ⚠️ **GitLab 이슈에는 절 이름·문서 경로를 넣지 않는다 —
+        `참고 자료` 섹션에도.** 깨진 포인터다 (wtflow:issue 계약 4). 계약 전문도 넘기지 않는다
    - b. 배정 — `-m` 의 제목 해석이 그룹 마일스톤에서 불확실하므로 **글로벌 ID 로 명시**:
         ```
         glab api --method PUT "projects/<group>%2F<repo>/issues/<N>" -f milestone_id=<글로벌 id>
         ```
-   - c. 이슈 note 는 a 가 이미 만들었다. **다시 쓰지 않는다**(덮어쓰면 앞의 것이 사라진다)
-   - d. `이슈 분할` 표에 의존 관계 행 추가
-   - ⚠️ **브랜치는 여기서 만들지 않는다** — wtflow:issue 가 note frontmatter `branch:` 에
-     이름(`<prefix>/#<N>-<slug>`)만 적어두고, 실제 생성은 `/wtflow:plan` 몫이다.
+        ⚠️ **이 배정이 이슈↔마일스톤 note 를 잇는 유일한 채널이다** — `/wtflow:plan` 계약 6 이
+        여기서 iid 를 읽어 마일스톤 문서를 워크트리에 건다. 배정을 빠뜨리면 그 이슈는 계약을 못 본다
+   - c. `이슈 분할` 표에 의존 관계 행 추가
+   - ⚠️ **브랜치는 여기서 만들지 않는다** — 이름 유도도 생성도 `/wtflow:plan` 몫이다.
      `worktree/` prefix 는 쓰지 않는다 (CLAUDE.md `브랜치 이름 규칙`)
 
 9. **최종 출력** — 결과 표 ③ + 문서 경로 + 다음 단계(`/wtflow:plan <N>`)
@@ -158,7 +155,6 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 ## 마일스톤 note 형식
 
-이슈 note(`/wtflow:issue` 의 `## 이슈 note 형식`)와 같은 뼈대에 범위만 넓다.
 **발행 문서가 아니라 마일스톤 내내 고쳐 쓰는 현행 계약**이라 분량 제한이 없다:
 
 ```markdown
@@ -186,8 +182,8 @@ web_url: <마일스톤 URL>
 ```
 
 - 표에 담기는 건 **규격**이지 구현이 아니다 — 함수 본문·쿼리를 옮겨오지 않는다
-- 이슈 note 는 이 문서를 `milestone_note` 로 가리키기만 한다. 계약을 복사하면 원본이 바뀔 때
-  사본이 조용히 낡는다
+- **이 문서가 계약의 유일한 원본이다.** 각 이슈는 `/wtflow:plan` 이 건 심링크로 이 파일을 직접
+  읽는다 — 어디에도 복사본이 없으므로 여기를 고치면 모든 이슈가 즉시 현행을 본다
 - **`위험과 대응` 의 대응이 별도 작업이면 분할 표에 올린다.** 위험 검토가 새 이슈를 낳는 일이
   흔하다 — 마이그레이션 안전장치, 하위호환 가드, 롤백 경로 같은 것들이다. 위험만 적고 작업으로
   올리지 않으면 그 대응은 아무도 하지 않는다
