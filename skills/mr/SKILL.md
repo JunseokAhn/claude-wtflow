@@ -1,7 +1,7 @@
 ---
 name: mr
 description: 작업 브랜치를 origin 에 올리고 MR 을 생성한다 + 이미 열린 MR 의 본문을 재작성한다. "MR 올려줘", "머지 리퀘스트 올려줘", "리뷰 올려줘", "MR 본문 다시 써줘" 요청에. 제목은 커밋 컨벤션을 따르고 본문은 브리핑 압축본을 쓴다. MR 본문을 바꾸는 유일한 경로 — glab mr update 직접 호출 금지. 사용자만 호출.
-allowed-tools: Bash(glab *), Bash(git *), Read, AskUserQuestion, Skill
+allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Read, AskUserQuestion, Skill
 disable-model-invocation: true
 ---
 
@@ -121,12 +121,20 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 | 3 force-push 금지 | 그대로 |
 | 4 중복 MR 방지 | **전제가 뒤집힌다** — 열린 MR 이 있어야 성립한다 |
 | 5 push→생성 순서 | 적용 안 함 |
-| 6 비대화형 | 그대로 — `glab mr update <iid> -d "$(cat <본문파일>)" [-t "<제목>"]` |
+| 6 비대화형 | 그대로 — `WTFLOW_BODY_REWRITE=1 glab mr update <iid> -d "$(cat <본문파일>)" [-t "<제목>"]` |
 | 7 이슈 연결 | 이미 엮여 있다. `-i` 를 다시 주지 않는다 |
 | 8 draft | 적용 안 함 (draft 전환은 `--draft`/`--ready` 로 별개) |
 | 9 본문 = 브리핑 압축본 | **그대로 적용** — 아래 |
 | 10 본문은 파일 경유 | 그대로 |
 | 11 브리핑 없으면 안 만듦 | **그대로 — 손으로 지어낸 요약으로 기존 본문을 덮어쓰지 않는다** |
+
+⚠️ **6 의 `WTFLOW_BODY_REWRITE=1` prefix 를 빼지 않는다.** MR 본문을 고치는 호출은 훅
+(`hooks/guard-body-edit.sh`)이 막고, 이 prefix 가 "계약을 다 탄 재작성" 임을 밝히는 유일한
+수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다.
+
+- 그러니 **이 prefix 를 붙인 호출은 브리핑 재수집·상한 재검사·확인을 실제로 거친 뒤여야 한다.**
+  건너뛰고 붙이면 예외가 그대로 우회로가 된다
+- 훅이 막았다는 응답을 받으면 prefix 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 
 ### 본문은 옛 본문을 손보는 게 아니라 다시 받는다
 
