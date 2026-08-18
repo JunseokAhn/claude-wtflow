@@ -4,8 +4,7 @@ description: >-
   기본 브랜치(develop, 없으면 main)의 최신 상태를 현재 작업 브랜치로 가져와 충돌을 해소하고
   커밋한다. "디벨롭 최신 받아줘", "충돌 풀어줘", "develop 가져와서 맞춰줘" 같은 요청에 사용한다.
   기본 브랜치를 바꾸지 않으므로 리뷰를 건너뛸 위험이 없다. origin 반영·MR 은 wtflow:mr 몫.
-  사용자만 호출.
-disable-model-invocation: true
+  wtflow:mr 이 MR 을 만들기 전에 자율 호출한다.
 ---
 
 # /wtflow:merge — 기본 브랜치 최신본을 작업 브랜치로
