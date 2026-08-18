@@ -31,10 +31,12 @@ git worktree 를 작업 공간으로 쓰면서 작업 항목마다 분기를 두
   /wtflow:progress   K 진행 현황 표 (읽기 전용)
   /wtflow:briefing   작업 전체를 설계문서형 브리핑으로 정리 (git·대화 근거, 읽기 전용)
   /wtflow:merge      기본 브랜치 최신본을 작업 브랜치로 (충돌 해소 + 빌드 검증)
+                     /wtflow:mr 이 MR 생성 전에 자동으로 부른다
   /wtflow:clean      워크트리·브랜치 정리 (확인 없이 한 번에 실행. -n 이면 대상만 보여준다)
 
 이슈 어댑터 — 옵션 · GitLab (glab 필요)
-  /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성 (본문은 briefing --mr)
+  /wtflow:mr         기본 브랜치 최신본 반영 → 작업 브랜치를 origin 에 올리고 MR 생성
+                     (본문은 briefing --mr)
   /wtflow:issue      이슈 생성 + 착수 전 계약을 이슈 note 로 1회 기록
   /wtflow:milestone  여러 이슈에 걸친 공통 계약 note + 이슈 분할 생성
                      (/wtflow:plan 의 이슈 모드도 glab 필요. adhoc 모드는 불필요)
