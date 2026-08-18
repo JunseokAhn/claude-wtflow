@@ -44,8 +44,14 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    ```
    - **기본 브랜치를 체크아웃하지 않는다** — 어디에 나와 있는지 찾을 필요도, 임시 워크트리를 팔
      이유도 없다. 현재 워크트리 안에서 끝난다
-   - **메시지를 손대지 않는다.** 기본 메시지 `Merge branch 'origin/<기본브랜치>' into <현재 브랜치>`
-     가 그대로 읽히는 이력이 된다. 현재 브랜치는 accumulator 이므로 이름에 K 가 섞이지 않는다
+   - **메시지를 손대지 않는다.** git 기본 메시지
+     `Merge remote-tracking branch 'origin/<기본브랜치>' into <현재 브랜치>` 가 그대로 읽히는
+     이력이 된다. 현재 브랜치는 accumulator 이므로 이름에 K 가 섞이지 않는다
+   - ⚠️ **`remote-tracking` 이 들어가는 건 정상이다** — 원격추적 ref 를 머지할 때 git 이 붙인다.
+     `Merge branch 'develop' into …` 은 **로컬** 브랜치를 머지해야 나오는데, 그러려면 develop 을
+     체크아웃해 pull 해야 한다(워크트리 이탈 금지 위반). 체크아웃 없이 로컬 ref 만 갱신하는
+     `git fetch origin develop:develop` 도 develop 이 다른 워킹트리에 체크아웃돼 있으면 git 이
+     거부한다. **결과물은 어느 쪽이든 같다** — tree 와 흡수한 커밋이 동일하고 메시지만 갈린다
 3. **`--no-ff` 고정.** 머지 커밋이 남아야 언제 최신본을 흡수했는지 이력에 보인다
 4. **충돌 해소 후 빌드로 검증한다.** 해소가 끝이 아니다:
    컴파일 언어 → `compileJava`/`compileTestJava` 등, TS → `npx tsc --noEmit`, Python → 구문 파싱.
