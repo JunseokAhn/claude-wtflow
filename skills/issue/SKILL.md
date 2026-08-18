@@ -1,7 +1,7 @@
 ---
 name: issue
 description: GitLab 어댑터(glab 필요) — 이슈 생성·본문 재작성 + 착수 전 계약을 이슈 note 로 1회 기록 (브랜치·워크트리·K 분해는 wtflow:plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 와 "이슈 본문 다시 써줘/갱신해줘/반영해줘" 의도에 자율 호출. 이슈 본문을 바꾸는 유일한 경로 — glab issue update 직접 호출 금지. prefix·라벨3종 자동, 이슈 본문은 "무엇/왜" + 큰 틀 작업 항목만 담아 자족적으로 유지.
-allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
+allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
 ---
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
@@ -127,7 +127,7 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write
 | 3 제목 생성 | **제목을 바꿀 때만.** 생성과 같은 Subject 규칙 |
 | 4 본문 작성 | **그대로 적용** — 템플릿 헤더 고정, 서술 절은 목록, 근본원인·코드경로·설계 금지, 자족성 |
 | 5 사용자 확인 | **질문 축이 바뀐다** — 아래 `### 확인 질문` |
-| 6 glab 호출 | `create` 대신 `glab issue update <N> -d "<전체 본문>" [-t "<새 제목>"]` |
+| 6 glab 호출 | `create` 대신 `WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "<전체 본문>" [-t "<새 제목>"]` |
 | 7 번호 수집 | **적용 안 함** — 이미 정해져 있다 |
 | 8 note | **적용 안 함** — note 는 이슈 생성 때 1회 쓰는 스냅샷이라 재작성에서 손대지 않는다 |
 
@@ -141,8 +141,14 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write
 4. **반영** — 본문은 파일을 거쳐 넘긴다. 줄바꿈·백틱·따옴표가 섞이므로 인자에 직접 이어붙이지 않는다
    (`wtflow:mr` 계약 10 과 같은 이유):
    ```
-   glab issue update <N> -d "$(cat <본문파일>)"
+   WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "$(cat <본문파일>)"
    ```
+   ⚠️ **`WTFLOW_BODY_REWRITE=1` prefix 를 빼지 않는다.** 본문을 고치는 호출은 훅
+   (`hooks/guard-body-edit.sh`)이 막고, 이 prefix 가 "계약을 다 탄 재작성" 임을 밝히는
+   유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다.
+   - 그러니 **이 prefix 를 붙인 호출은 1~3 을 실제로 거친 뒤여야 한다.** 미리보기·확인을
+     건너뛰고 붙이면 예외가 그대로 우회로가 된다
+   - 훅이 막았다는 응답을 받으면 prefix 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
 
 ### 확인 질문
