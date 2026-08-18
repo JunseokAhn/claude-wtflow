@@ -5,9 +5,9 @@
 # (또는 .git/info/exclude) 된 파일이 워크트리에 없어서, Claude 가 프로젝트 지시문과 로컬
 # 설정 없이 도는 문제를 막는다.
 #
-# wtflow note 는 여기서 걸지 않는다 — 남은 note 는 마일스톤 계약 하나뿐이고, 그건 그룹에 여러 개
-# 쌓이므로 "어느 것이 이 이슈의 계약인가" 를 이 훅이 알 수 없다. 그 식별은 이슈의 마일스톤 배정을
-# 읽을 수 있는 /wtflow:plan 계약 6 이 하고, 해당 문서 하나만 .claude/notes/milestone.md 로 건다.
+# wtflow note 는 여기서 걸지 않는다 — 남은 note 는 마일스톤 계약 하나뿐이고, /wtflow:plan 계약 6 이
+# 이슈의 마일스톤 배정에서 경로를 조립해 홈 원본(~/.claude/notes/<group>/_milestone/)을 직접 읽는다.
+# 워크트리에 걸어줄 이유가 없다.
 #
 # 언어·프레임워크를 가리지 않는다. 판별은 오직 "linked worktree 인가"이며, 원본에 없는
 # 파일은 건너뛰고 대상에 이미 있으면 손대지 않는다. 어떤 경우에도 exit 0 이라 세션을 막지 않는다.
@@ -50,9 +50,9 @@ link_one "CLAUDE.md"
 link_one ".claude/docs"
 link_one ".claude/settings.local.json"
 
-# ⚠️ .claude/notes 는 여기서 건드리지 않는다. /wtflow:plan 계약 6 이 그 안에 milestone.md 를
-# 만들어야 하는데, 이 훅이 .claude/notes 를 홈 그룹 디렉토리로 걸어두면 그 파일이 홈 원본 안에
-# 생겨 모든 워크트리가 같은 milestone.md 를 공유하게 된다.
+# ⚠️ .claude/notes 는 여기서 건드리지 않는다. 마일스톤 note 를 읽는 유일한 소비자(/wtflow:plan
+# 계약 6)가 홈 절대경로로 직접 읽으므로 워크트리 심링크에 소비자가 없다. 예전엔 그룹 디렉토리를
+# 통째로 걸었는데, 빈 그룹 디렉토리를 mkdir 로 만들어두는 부작용까지 있어 함께 걷어냈다.
 
 # 로컬 환경 파일 — 이름이 프로젝트마다 다르므로 원본에 실재하는 것만 훑는다.
 # .env.example 은 추적 파일이라 워크트리에 이미 있다.

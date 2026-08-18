@@ -1,7 +1,7 @@
 ---
 name: plan
 description: 워크트리·분기 셋업 + 마일스톤 계약 로드 + K 작업계획 출력. 이슈번호로도, 이슈 없이 작업 설명만으로도(adhoc) 시작 가능 — 이슈 모드만 glab 필요. 인자 -b/-p/-r. "이슈 N 작업 시작/plan", "이슈 없이 이거 작업 시작" 요청에. 사용자만 호출.
-allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ln *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree, AskUserQuestion
+allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree, AskUserQuestion
 disable-model-invocation: true
 ---
 
@@ -96,28 +96,21 @@ disable-model-invocation: true
      컨벤션을 깨고 mirror 가 붙을 곳을 잃는다
 
 6. **마일스톤 계약 로드 (plan 출력 전 필수)** — 여러 이슈가 공유하는 계약이 이미 있는지 본다.
-   **워크트리 안 고정 경로 `.claude/notes/milestone.md` 하나만 본다.**
 
-   - a. **있으면 Read** — plan 표의 근거. 심링크 실체라 다른 세션이 고친 것도 항상 현행으로 보인다.
-        여기서 끝, 조회 없음
-   - b. **없고 이슈 작업이면 딱 한 번 유도한다** — `glab issue view <N> --output json` 의
-        `milestone.iid` 로 `~/.claude/notes/<group>/_milestone/<iid>-*.md` 를 찾아
-        **그 파일 하나만** 워크트리에 건다:
-        ```
-        mkdir -p .claude/notes
-        ln -s ~/.claude/notes/<group>/_milestone/<iid>-<slug>.md .claude/notes/milestone.md
-        ```
-        배정된 마일스톤이 없거나 대응 파일이 없으면 **아무것도 만들지 않고 넘어간다**
-   - c. adhoc 은 유도하지 않는다 — 이슈가 없어 배정을 읽을 곳이 없다. a 의 심링크가 이미 있으면
-        그건 읽는다(사용자가 직접 걸어둔 것)
+   - a. **이슈 작업** — 계약 1 에서 이미 받아온 이슈 조회 응답의 `milestone.iid` 로 경로를
+        조립해 **홈의 원본을 그대로 Read** 한다:
+        `~/.claude/notes/<group>/_milestone/<iid>-*.md`
+        배정이 없거나 대응 파일이 없으면 마일스톤은 없는 것이다 — 넘어간다
+   - b. **adhoc** — 이슈가 없어 배정을 읽을 곳이 없다. 사용자가 경로를 직접 주면 그것만 읽는다
    - 로드한 계약은 plan 표의 "관련 파일/위치"·각 K 설명에 반영하고, 계약과 충돌하는 분해를 내지 않는다
 
    ⚠️ **마일스톤 목록을 훑지 않는다** — `_milestone/` 디렉토리를 글롭해 "아마 이거겠지" 로 고르는 것
    금지. 이 이슈의 계약인지는 **배정**만이 답할 수 있고, 무관한 마일스톤을 계약으로 오인하면
    plan 전체가 틀어진다. 배정이 없으면 마일스톤은 없는 것이다.
 
-   **Why 심링크인가** — 식별(어느 마일스톤이 이 이슈 것인가)은 b 에서 **한 번만** 일어나고, 그
-   답이 워크트리 디스크에 남는다. 재플랜·다른 세션은 a 로 끝나 조회도 모호함도 없다.
+   **왜 사본도 심링크도 두지 않나** — 배정은 계약 1 의 이슈 조회에 딸려 오므로 경로를 아는 데
+   드는 추가 비용이 0이다. 워크트리에 심링크를 굳혀두면 마일스톤이 재배정됐을 때 옛 파일을 가리킨
+   채 남는다. 매번 배정에서 조립해 홈 원본을 읽으면 항상 현행이고, 워크트리에 남는 상태도 없다.
 
 7. **작업 정의 출력** — 작업 문서의 내용(이슈 본문 / adhoc 의 확정된 목표·범위·제외)을 후속 작업의
    컨텍스트로 표시. 코드 분석 시작 안내만 하고 수정은 사용자 승인 후
@@ -165,7 +158,7 @@ disable-model-invocation: true
   `wtflow:commit --done` 은 켤 체크박스가 없어 **이슈 작업 전용**이다
 - 세션이 끊기면 항목 텍스트는 복구되지 않는다. K 번호와 커밋은 남으므로 `/wtflow:plan` 을 다시
   불러 잔여 항목만 새로 세운다(`## 재플랜 모드`)
-- 마일스톤 계약이 필요하면 `.claude/notes/milestone.md` 심링크를 직접 걸어둔다(계약 6-c)
+- 마일스톤 계약이 필요하면 그 note 경로를 직접 알려준다(계약 6-b)
 
 ### 이슈로 승격
 
