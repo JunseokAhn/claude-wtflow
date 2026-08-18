@@ -24,18 +24,18 @@ git worktree 를 작업 공간으로 쓰면서 작업 항목마다 분기를 두
 
 ```
 코어 — 호스트 무관 (GitHub·GitLab·이슈 없어도 동작)
-  /wtflow:plan       워크트리·브랜치 셋업 + note 로드 + plan(작업 항목 = K) 매핑
+  /wtflow:plan       워크트리·브랜치 셋업 + 마일스톤 계약 로드 + plan(작업 항목 = K) 매핑
                      이슈번호로도, 이슈 없이 작업 설명만으로도(adhoc) 시작
   /wtflow:commit     태스크 단위 커밋 + mirror 분기(…-00N) 누적
   /wtflow:auto       plan 의 K 자율 순회 (구현 → 검증 → /wtflow:commit → 완료 시 /wtflow:briefing)
-  /wtflow:progress   K 진행 현황 표 + 이슈↔note drift 보고 (읽기 전용)
+  /wtflow:progress   K 진행 현황 표 (읽기 전용)
   /wtflow:briefing   작업 전체를 설계문서형 브리핑으로 정리 (git·대화 근거, 읽기 전용)
   /wtflow:merge      기본 브랜치 최신본을 작업 브랜치로 (충돌 해소 + 빌드 검증)
   /wtflow:clean      워크트리·브랜치 정리 (확인 없이 한 번에 실행. -n 이면 대상만 보여준다)
 
 이슈 어댑터 — 옵션 · GitLab (glab 필요)
   /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성 (본문은 briefing --mr)
-  /wtflow:issue      이슈 생성 + 이슈 note 작성
+  /wtflow:issue      이슈 생성 + 착수 전 계약을 이슈 note 로 1회 기록
   /wtflow:milestone  여러 이슈에 걸친 공통 계약 note + 이슈 분할 생성
                      (/wtflow:plan 의 이슈 모드도 glab 필요. adhoc 모드는 불필요)
 ```
@@ -64,17 +64,22 @@ K 당 5~15분이 늘어나므로 **배울 게 있는 이슈에서만** 켠다. �
                               이슈 작업              이슈 없는 작업 (adhoc)
 워크트리 브랜치 (accumulator)  <prefix>/#<N>-<slug>   <prefix>/+<slug>      (plan 이 생성)
 작업 항목 K 의 mirror 분기     …-<KKK> 를 뒤에 붙인다  (동일)                (commit 이 생성)
-작업 문서 (목표·작업 항목)      이슈 본문              adhoc-<slug>.md
+작업 항목의 진실원             이슈 본문 체크리스트    plan 출력 + mirror 분기
 
 ~/.claude/notes/<group>/
-  _milestone/<iid>-<slug>.md  여러 이슈·레포가 공유하는 계약
-  <repo>/issue-<N>.md         이슈 하나의 계획 (K별 계약·파일 위치)
-  <repo>/adhoc-<slug>.md      이슈 없이 시작한 작업의 계획 + 작업 항목 체크리스트
+  <repo>/issue-<N>.md         착수 전 계약·배경의 1회 스냅샷 (issue 가 쓴다)
+  _milestone/<iid>-<slug>.md  여러 이슈·레포가 공유하는 계약 (milestone 이 쓴다)
 ```
 
-두 경우의 차이는 `#<N>` 자리에 `+` 가 들어가는 것뿐이고, K 분해·mirror·커밋·정리 규칙은 같다. 갈리는 지점은 작업 항목 체크리스트의 위치 하나다(이슈 본문이냐 adhoc note 냐).
+두 경우의 차이는 `#<N>` 자리에 `+` 가 들어가는 것뿐이고, K 분해·mirror·커밋·정리 규칙은 같다. 갈리는 지점은 작업 항목이 어디 사느냐 하나다 — 이슈가 있으면 본문 체크리스트가 진실원이고, 없으면 이 세션의 plan 출력이 항목 텍스트를, mirror 분기가 K 번호와 진행 상태를 나눠 갖는다.
 
-이슈 본문에는 "무엇/왜"만 남기고 페이로드·타입·에러코드 같은 상세는 note 로 뺀다. note 를 git 밖(홈)에 단일 실체로 두고 워크트리에는 심링크로 꽂으므로, 진행 중 고친 계약이 다른 브랜치·세션에서도 즉시 읽힌다. 그 심링크는 플러그인이 자동 등록하는 `hooks/link-worktree-local.sh` 가 건다.
+이슈 본문에는 "무엇/왜"만 남기고 페이로드·타입·에러코드 같은 상세는 note 로 뺀다. **두 note 는 갱신 성격이 반대다** — 이슈 note 는 `/wtflow:issue` 가 이슈당 한 번 쓰고 아무도 안 고치는 스냅샷이고, 마일스톤 note 는 여러 이슈가 같은 실체를 봐야 해서 진행 중 고쳐진다. `plan` 은 둘 다 읽기만 한다.
+
+계획 파일이 부담이었던 건 존재해서가 아니라 진행 내내 갱신해야 해서였다. 이슈 note 는 쓰는 자리를 한 번뿐인 지점으로 옮겨 그 비용을 없앴고, 대가로 낡을 수 있다 — 어긋나면 이슈 본문이 이긴다.
+
+**작업 항목(K)은 파일로 남기지 않는다.** `/wtflow:plan` 이 `EnterWorktree` 로 같은 세션을 워크트리에 밀어넣으므로 plan 출력이 그대로 살아 있고, 세션이 끊겨도 K 번호와 커밋은 mirror 분기에 남는다.
+
+어느 마일스톤이 이 이슈의 계약인지는 **이슈의 마일스톤 배정**이 답한다. `/wtflow:plan` 이 이슈를 조회할 때 딸려 오는 마일스톤 식별자로 경로를 조립해 홈 원본을 직접 읽는다 — 워크트리에 사본도 심링크도 두지 않으므로, 어느 세션에서 열어도 같은 실체를 보고 진행 중 고친 계약이 즉시 읽힌다.
 
 ## 비고
 
