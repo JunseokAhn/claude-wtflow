@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/commit-convention.md`(메시지 형식), `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md`(저장소 → 사용자 전역 → 기본값 탐색 순서) 를 먼저 읽고 그 순서대로 `commit-convention.md` 를 읽는다.**
 
 ## 호출
 

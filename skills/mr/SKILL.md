@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:mr — 작업 브랜치로 MR 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md`(MR 제목·본문 형식)를 읽는다.** 제목 규칙은 그 문서가 `${CLAUDE_PLUGIN_ROOT}/references/commit-convention.md` 의 `## Subject` 를 가리킨다.
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md`(저장소 → 사용자 전역 → 기본값 탐색 순서) 를 읽고, 그 순서대로 `pr-convention.md`(MR 제목·본문 형식)를 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
 
 작업이 끝난 브랜치를 origin 에 올리고 MR 을 연다. `/wtflow:merge` 와 **방향이 갈린다**:
 
@@ -41,7 +41,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    - **mirror(`-<KKK>`)를 소스로 쓰지 않는다** — K 단위 조각이라 통짜 MR 이 안 된다
    - push 는 이 명령이 부를 때만. 다른 스킬은 여전히 accumulator 를 올리지 않는다
    - 되돌리기: MR 을 닫고 `git push origin --delete '<accumulator>'`
-2. **제목은 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md` 의 `## 제목` 을 따른다** — 커밋 컨벤션의 `## Subject` 그대로이고,
+2. **제목은 `pr-convention.md` 의 `## 제목` 을 따른다** — 커밋 컨벤션의 `## Subject` 그대로이고,
    이슈가 있으면 이슈 제목을 그대로 쓰는 것이 기본이다
 3. **force-push 하지 않는다.** 이미 올라간 브랜치가 갈라져 있으면 멈추고 보고한다
 
@@ -89,7 +89,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    ```
    Skill(wtflow:briefing) → /wtflow:briefing <base>..HEAD --mr --no-fence
    ```
-   - `--mr` 은 MR description 압축본이다. **형식과 분량은 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md` 가 정한다** —
+   - `--mr` 은 MR description 압축본이다. **형식과 분량은 `pr-convention.md` 가 정한다** —
      저장소 MR 템플릿이 있으면 그 절 구성이 이기고, 없으면 헤더 6개 고정. 본문 40줄 상한.
      여기 사본을 두지 않는다(사본은 갈라진다)
    - ⚠️ **받은 본문을 그 상한과 대조하고 넘으면 다시 쓴다.** `Skill()` 은 브리핑을 만들어
@@ -156,7 +156,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 Skill(wtflow:briefing) → /wtflow:briefing <base>..HEAD --mr --no-fence
 ```
 
-- 형식·분량은 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md` 가 정한다. **여기 사본을 두지 않는다**
+- 형식·분량은 `pr-convention.md` 가 정한다. **여기 사본을 두지 않는다**
 - ⚠️ **받은 본문을 상한과 대조하고 넘으면 다시 쓴다.** 계약 9 와 같은 이유이고, **재작성에서 더 잘
   깨진다** — 그 시점엔 대화에 근거가 잔뜩 쌓여 있어 "버리기 아깝다" 가 세진다
 - 사용자가 특정 절만 고치라고 지목했으면 그 절만 고친다. 그때도 상한은 다시 센다

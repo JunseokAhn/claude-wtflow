@@ -6,7 +6,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Ba
 
 # /wtflow:briefing — 작업 브리핑 생성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md`(MR 제목·본문 형식)도 함께 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md`(저장소 → 사용자 전역 → 기본값 탐색 순서) 를 읽고 그 순서대로 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
 
 ## 호출
 
@@ -16,7 +16,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Ba
   - 워크트리면 `<accumulator base>..HEAD` (wtflow:commit accumulator 또는 `origin/develop`/`origin/main` merge-base)
   - 그 외 현재 브랜치의 `develop`/`main` 대비 범위
 - `-t <제목>`: 문서 제목. 미지정 시 브랜치명/이슈에서 추론
-- `--mr`: 전체 통합본 대신 **MR description 압축본** — 형식·상한은 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md` 를 따른다 (`### MR description 압축본`)
+- `--mr`: 전체 통합본 대신 **MR description 압축본** — 형식·상한은 `pr-convention.md` 를 따른다 (`### MR description 압축본`)
 - `--no-table`: 기술 선택 표(7번) 생략
 - `--detail`: 작업 항목을 커밋별 세부 체크리스트로 확장 (기본은 "무엇/왜" 한 줄 요약)
 - `--no-fence`: 출력 전체를 감싸는 코드펜스를 제거하고 평범한 마크다운으로 출력 (기본은 전체 한 펜스 — 계약 6). 터미널 렌더로 정독하기 좋으나 복사 시 헤더·표 구조가 깨질 수 있음
@@ -98,7 +98,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Ba
 
 ### MR description 압축본 (`--mr`)
 
-형식은 전부 `${CLAUDE_PLUGIN_ROOT}/references/pr-convention.md` 가 갖는다 — 저장소 MR 템플릿 우선 규칙, 템플릿이 없을 때의 기본 절 구성,
+형식은 전부 `pr-convention.md` 가 갖는다 — 저장소 MR 템플릿 우선 규칙, 템플릿이 없을 때의 기본 절 구성,
 셀 수 있는 상한, UI 가 이미 보여주는 것 금지, 덜어낸 근거를 어디로 가리키나.
 **여기 사본을 두지 않는다** — 두 벌이 되면 한쪽만 고쳐져 갈린다.
 

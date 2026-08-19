@@ -6,7 +6,7 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md`(라벨·제목·본문·템플릿·확인 절차)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md`(저장소 → 사용자 전역 → 기본값 탐색 순서) 를 먼저 읽고 그 순서대로 `issue-convention.md` 를 읽는다.**
 
 ## 트리거
 
@@ -46,13 +46,13 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
    - 테스트 → `test:`
    - 그 외·모호 → `chore:` (사용자 확인)
 
-2. **라벨 3종 결정** — `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 의 `## 라벨 인벤토리` 와 `## prefix → 라벨 매핑`
+2. **라벨 3종 결정** — `issue-convention.md` 의 `## 라벨 인벤토리` 와 `## prefix → 라벨 매핑`
 
-3. **제목 생성** — `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 의 `## 제목 규칙`
+3. **제목 생성** — `issue-convention.md` 의 `## 제목 규칙`
 
-4. **본문 작성** — `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 의 `## 본문 작성 규칙` 과 `## 본문 템플릿`
+4. **본문 작성** — `issue-convention.md` 의 `## 본문 작성 규칙` 과 `## 본문 템플릿`
 
-5. **사용자 확인 한 번** — `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 의 `## 확인 절차` → `### 생성`
+5. **사용자 확인 한 번** — `issue-convention.md` 의 `## 확인 절차` → `### 생성`
 
 6. **glab으로 생성** — `-R` 미지정 시 **현재 디렉토리 git remote 의 레포 기준**으로 생성한다 (자동, 묻지 않음. glab 기본 동작과 동일). 사용자가 `-R`/"repo는 X" 로 명시했을 때만 다른 레포 사용:
    ```
@@ -114,9 +114,9 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 
 1. **현재 본문을 먼저 읽는다** — `glab issue view <N> --output json` 의 `description`·`title`.
    실패하면 중단·보고. ⚠️ **읽지 않고 쓰지 않는다** — `-d` 는 전체 본문 치환이라 통째로 덮어쓰게 된다
-2. **템플릿을 읽는다** — `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
+2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
    **임의로 맞추지 않는다.** 어긋난 절은 3의 미리보기에 드러내고 사용자가 정한다
-3. **미리보기 + 확인** — `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 의 `## 확인 절차` → `### 재작성`
+3. **미리보기 + 확인** — `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
 4. **반영** — 본문은 파일을 거쳐 넘긴다. 줄바꿈·백틱·따옴표가 섞이므로 인자에 직접 이어붙이지 않는다
    (`wtflow:mr` 계약 10 과 같은 이유):
    ```
@@ -183,5 +183,5 @@ created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는
 ## 비고
 
 - 이슈 컨벤션(라벨 인벤토리·prefix 매핑·제목 규칙·본문 규칙·템플릿·확인 절차)은
-  `${CLAUDE_PLUGIN_ROOT}/references/issue-convention.md` 가 갖는다 — **여기 사본을 두지 않는다.** 저장소가 그 문서를 갈아끼우면 이 스킬은
+  `issue-convention.md` 가 갖는다 — **여기 사본을 두지 않는다.** 저장소가 그 문서를 갈아끼우면 이 스킬은
   그대로 새 규칙으로 돈다

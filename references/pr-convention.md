@@ -1,5 +1,8 @@
 # PR·MR 컨벤션
 
+> **이 문서는 탐색 순서의 마지막 층(플러그인 기본값)이다.** 저장소 `.wtflow/` 나
+> `~/.claude/wtflow/` 에 같은 이름의 파일이 있으면 그쪽 `##` 절이 이긴다 — `${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md`.
+
 MR(GitLab)·PR(GitHub) 의 제목과 본문 형식. **`/wtflow:mr` 과 `/wtflow:briefing --mr` 이 읽는다.**
 
 커밋 메시지 형식은 `commit-convention.md`, 이슈 형식은 `issue-convention.md`,
