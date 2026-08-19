@@ -1,7 +1,7 @@
 # 커밋 컨벤션
 
-> **이 문서는 탐색 순서의 마지막 층(플러그인 기본값)이다.** 저장소 `.wtflow/` 나
-> `~/.claude/wtflow/` 에 같은 이름의 파일이 있으면 그쪽 `##` 절이 이긴다 — `${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md`.
+> **이 문서는 기본값이다 — 맨 아래 층이다.** 저장소나 사용자 쪽에 같은 항목을 정해둔 것이
+> 있으면 그쪽이 이긴다. 어디를 보고 무엇이 이기는지는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`.
 
 커밋 메시지를 짓는 `commit`·`auto` 가 시작 전에 읽는다.
 
@@ -22,7 +22,7 @@
 **이슈 제목도 같은 규칙이다** — 위 Subject 규칙을 이슈 제목에 그대로 쓴다. 한쪽만 고치면 갈린다.
 
 **사용자 CLAUDE.md 의 지시가 이 문서를 이긴다** — 저장소·사용자 전역 층과의 관계는
-`${CLAUDE_PLUGIN_ROOT}/references/convention-lookup.md` 가 정한다. 여기 다시 적지 않는다.
+`${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md` 가 정한다. 여기 다시 적지 않는다.
 
 ## 요약은 "코드 변경" 이 아니라 "기능/동작 변경"
 
