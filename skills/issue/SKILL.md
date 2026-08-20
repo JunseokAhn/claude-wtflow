@@ -1,6 +1,6 @@
 ---
 name: issue
-description: GitLab 어댑터(glab 필요) — 이슈 생성·본문 재작성 + 착수 전 계약을 이슈 note 로 1회 기록 (브랜치·워크트리·K 분해는 wtflow:plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 와 "이슈 본문 다시 써줘/갱신해줘/반영해줘" 의도에 자율 호출. 이슈 본문을 바꾸는 유일한 경로 — glab issue update 직접 호출 금지. prefix·라벨3종 자동, 이슈 본문은 "무엇/왜" + 큰 틀 작업 항목만 담아 자족적으로 유지.
+description: GitLab 어댑터(glab 필요) — 이슈 생성·본문 재작성 + 착수 전 계약을 이슈 note 로 1회 기록 (브랜치·워크트리·K 분해는 wtflow:plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 와 "이슈 본문 다시 써줘/갱신해줘/반영해줘" 의도에 자율 호출. 이슈 본문을 바꾸는 유일한 경로 — glab issue update 직접 호출 금지. prefix 자동, 이슈 본문은 "무엇/왜" + 큰 틀 작업 항목만 담아 자족적으로 유지.
 allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
 ---
 
@@ -46,7 +46,7 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
    - 테스트 → `test:`
    - 그 외·모호 → `chore:` (사용자 확인)
 
-2. **라벨 3종 결정** — `issue-convention.md` 의 `## 라벨 인벤토리` 와 `## prefix → 라벨 매핑`
+2. **라벨 결정** — `issue-convention.md` 의 `## 라벨`. 지정된 규칙이 없으면 라벨 없이 간다
 
 3. **제목 생성** — `issue-convention.md` 의 `## 제목 규칙`
 
@@ -56,7 +56,7 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 
 6. **glab으로 생성** — `-R` 미지정 시 **현재 디렉토리 git remote 의 레포 기준**으로 생성한다 (자동, 묻지 않음. glab 기본 동작과 동일). 사용자가 `-R`/"repo는 X" 로 명시했을 때만 다른 레포 사용:
    ```
-   glab issue create -t "<제목>" -l "<라벨1>,<라벨2>,<라벨3>" [-d "<본문>"] [-R <repo>]
+   glab issue create -t "<제목>" [-l "<라벨>[,<라벨>...]"] [-d "<본문>"] [-R <repo>]
    ```
    재작성이면 `create` 가 아니라 `update` 다 — `## 재작성 모드` 를 따른다
 
@@ -102,7 +102,7 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 | 생성 계약 | 재작성에서 |
 |---|---|
 | 1 prefix 추정 | **제목을 바꿀 때만.** 본문만 고치면 건드리지 않는다 |
-| 2 라벨 3종 | **적용 안 함** — 이미 붙어 있다. 사용자가 명시할 때만 조정 |
+| 2 라벨 | **적용 안 함** — 이미 붙어 있다. 사용자가 명시할 때만 조정 |
 | 3 제목 생성 | **제목을 바꿀 때만.** 컨벤션 문서의 `## 제목 규칙` 그대로 |
 | 4 본문 작성 | **그대로 적용** — 컨벤션 문서의 `## 본문 작성 규칙` · `## 본문 템플릿` |
 | 5 사용자 확인 | **질문 축이 바뀐다** — 컨벤션 문서의 `## 확인 절차` → `### 재작성` |
@@ -172,8 +172,7 @@ created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는
 ## 짧은 변형
 
 - "fix 로" / "feat 로" → prefix 강제
-- "긴급" / "우선순위 높음" → 우선순위 조정
-- "쉬움"/"낮음" → `난이도:낮음`, "어려움"/"높음" → `난이도:높음`
+- "긴급" / "우선순위 높음" / "쉬움" → 저장소에 그 뜻의 라벨이 있으면 그것을 붙인다
 - "repo는 X" → `-R X`
 - "본문 자세히" → 본문에 맥락 추가 (단, 계약 4 의 서술 절 규칙은 유지 — 상세는 note 로)
 - "note 빼고" / "이슈만" → 계약 8 생략
@@ -182,6 +181,6 @@ created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는
 
 ## 비고
 
-- 이슈 컨벤션(라벨 인벤토리·prefix 매핑·제목 규칙·본문 규칙·템플릿·확인 절차)은
+- 이슈 컨벤션(라벨·제목 규칙·본문 규칙·템플릿·확인 절차)은
   `issue-convention.md` 가 갖는다 — **여기 사본을 두지 않는다.** 저장소가 그 문서를 갈아끼우면 이 스킬은
   그대로 새 규칙으로 돈다

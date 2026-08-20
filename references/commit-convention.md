@@ -7,17 +7,18 @@
 
 브랜치 이름·K 모델·note 계층은 이 문서에 없다. `worktree-discipline.md` 를 본다.
 
-## Subject — `<type>(<scope>): <한글 요약>`
+## Subject
 
-- **type 은 영어 conventional prefix** (`fix` / `feat` / `refactor` / `chore` / `docs` / `test` / `perf` / `style`)
-- **scope 도 영어** (도메인/기능 영역: `auth` / `cart` / `search` / `profile` 등)
-- **요약은 한글** — 사용자가 영문 subject 를 즉시 지적함
+기본 형식은 [Conventional Commits](https://www.conventionalcommits.org) —
+`<type>(<scope>): <요약>`. **저장소가 다른 형식을 쓰고 있으면 그것을 따른다.**
+
+- `type` 은 그 표준이 정한 값 (`feat` / `fix` / `refactor` / `chore` / `docs` / `test` / `perf` / `style`)
+- `scope` 는 도메인·기능 영역. 저장소가 이미 쓰는 표기를 그대로 쓴다
+- **요약의 언어와 어투는 규정하지 않는다** — 쓰기 직전 `git log --pretty=%s -n 15` 로
+  저장소가 실제로 쓰는 언어·어투를 보고 거기 맞춘다
 - 72자 이내, 마침표 없음
-- **명사구로 끝낸다** (`…추가` · `…제거` · `…전환` · `…갱신` · `…해제` · `…정리` · `…방지`). **서술형 종결 금지** — `~한다` · `~하도록 함` · `~옮김` · `~막음`
-- **두 변경이면 접속사 말고 `+`** — ✅ `feat(auth): 토큰 자동 갱신 도입 + 만료 시 재로그인 제거` / ❌ `feat(auth): 토큰을 자동 갱신하고 재로그인을 없앰`
-- **보충은 괄호 하나까지** — `fix(cache): 동시 요청 시 중복 계산 방지 (요청 단위 잠금)`
-- **식별자·영어는 원문 유지** — 코드에 있는 이름(상수·함수·API·설정 키)은 그대로 쓴다. 억지로 한글화하면 검색이 안 된다
-- 의심스러우면 작성 직전 `git log --pretty=%s -n 15` 로 다수 언어 확인
+- **식별자는 원문 유지** — 코드에 있는 이름(상수·함수·API·설정 키)은 번역하지 않는다.
+  번역하면 검색이 안 된다
 
 **이슈 제목도 같은 규칙이다** — 위 Subject 규칙을 이슈 제목에 그대로 쓴다. 한쪽만 고치면 갈린다.
 
@@ -27,7 +28,7 @@
 ## 요약은 "코드 변경" 이 아니라 "기능/동작 변경"
 
 - ✅ `fix(auth): 토큰 만료 시 재로그인 없이 자동 갱신`
-- ✅ `fix(cart): 수량 변경 시 합계 즉시 갱신`
+- ✅ `fix(cart): refresh the total as soon as quantity changes` — 언어는 저장소를 따른다
 - ❌ `fix(auth): useSession 훅에서 token null 처리 추가`
   → 코드가 뭘 했는지 말고, **사용자/시스템 관점에서 뭐가 달라졌는지** 적기
 - 예외: **동작 변화가 전혀 없는** 순수 내부 정리(이름변경·파일이동·포맷·dead code 제거)만 코드 변경 자체를 제목으로 (`refactor(store): persist 대상에서 임시 캐시 제거`)
@@ -35,7 +36,7 @@
 
 ## 본문 (권장, 강제 아님)
 
-필요할 때만 다음 섹션 가볍게 — 한글:
+필요할 때만 다음 섹션 가볍게 (제목과 같은 언어로):
 
 - 1단락 문제 상황 + 수정 내용
 - `Why` — 근본 원인 / 맥락
@@ -43,7 +44,3 @@
 - `테스트` — 실행한 검증 (`npx tsc --noEmit`, `npm run lint` 등)
 
 trivial 한 변경은 subject 만으로 충분, body 강요하지 말 것.
-
-## 영문 commit prefix 만은 유지
-
-한글 subject 라도 `fix:` / `feat:` 같은 prefix 는 영어. tooling 호환 + 다수 OSS 컨벤션.
