@@ -79,7 +79,7 @@ disable-model-invocation: true
    - ⚠️ prefix 에 **`worktree/` 를 쓰지 않는다** — 이 이름이 그대로 mirror base 이고 머지 커밋
      메시지에 남는다
    - 경로엔 `#`·`+` 를 넣지 않는다 (`#` 는 셸 주석 문자라 따옴표가 빠지면 조용히 잘린다)
-   - slug 는 제목/작업 설명의 한국어를 의미 기반 영어 kebab-case 로(최대 5단어).
+   - slug 는 제목/작업 설명을 의미 기반 영어 kebab-case 로 옮긴 것(최대 5단어).
      **adhoc 은 slug 가 유일 식별자**라 기존 accumulator 와 겹치면 되묻는다(`-2` 자동 접미 금지)
 
 4. **브랜치 + 워크트리 생성**
