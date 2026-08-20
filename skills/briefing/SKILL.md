@@ -98,7 +98,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Ba
 
 ### MR description 압축본 (`--mr`)
 
-형식은 전부 `pr-convention.md` 가 갖는다 — 저장소 MR 템플릿 우선 규칙, 템플릿이 없을 때의 기본 절 구성,
+형식은 전부 `pr-convention.md` 가 갖는다 — 저장소 MR 템플릿 우선 규칙, 템플릿이 없을 때의 기본 템플릿,
 셀 수 있는 상한, UI 가 이미 보여주는 것 금지, 덜어낸 근거를 어디로 가리키나.
 **여기 사본을 두지 않는다** — 두 벌이 되면 한쪽만 고쳐져 갈린다.
 
