@@ -40,7 +40,7 @@ disable-model-invocation: true
 | `"<작업 설명>"` | adhoc — 이슈를 찾지도, 만들지도 않는다 (`## adhoc 작업 시작`) |
 | 없음 | 워크트리 안이면 현재 accumulator 에서 자동 추론. 워크트리 **밖**이면 무슨 작업인지 한 줄 되묻고 그 답으로 adhoc 진입 |
 | `-b <base>` | 분기 베이스. 미지정 시 `origin/develop`(없으면 `origin/main`) |
-| `-p <prefix>` | 브랜치 prefix (accumulator·mirror 공통). 미지정 시 이슈 종류 라벨(`종류:버그`→`fix` / `종류:기능`→`feat` / `종류:리팩터링`→`refactor` / 그 외 `chore`) > adhoc 은 작업 성격 추론 |
+| `-p <prefix>` | 브랜치 prefix (accumulator·mirror 공통). 미지정 시 이슈 제목의 conventional prefix(`fix:`→`fix` / `feat:`→`feat` …). 제목에 prefix 가 없으면 작업 성격 추론 — adhoc 도 같다 |
 | `-r <repo>` | glab repo (예 `<org>/<repo>`). 미지정 시 git remote 에서 추론 |
 
 ## 계약 (보장되어야 하는 것)
