@@ -1,7 +1,7 @@
 ---
 name: briefing
 description: 완료·진행 작업을 커밋·diff 기반 구조화 브리핑으로 출력(읽기 전용, 날조 금지). 인자 --mr/--detail/--no-fence. "MR용/작업 브리핑" 요청에. 사용자 호출 + wtflow:auto 가 순회를 마칠 때 자율 호출, MR 본문이 필요한 자리에서는 --mr 로 자율 호출.
-allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
+allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
 ---
 
 # /wtflow:briefing — 작업 브리핑 생성

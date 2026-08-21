@@ -59,6 +59,36 @@ CLI 하위명령이 없거나 호스트마다 모델이 다른 작업(마일스�
   같은 형태는 `hooks/guard-body-edit.sh` 가 잡지 못하므로, 훅이 막지 않는다는 것이
   계약을 안 타도 된다는 뜻이 아니다. 이슈 본문은 `wtflow:issue` 의 재작성 모드로만 바꾼다
 
+## 이슈 명령 대응 — 스킬은 이 표를 보고 부른다
+
+각 스킬 본문에 한 호스트의 명령을 박아두지 않는다. **하는 일(왼쪽 열)로 찾아 이 표에서 꺼낸다.**
+
+| 하는 일 | GitHub (`gh`) | GitLab (`glab`) | Gitea (`tea`) |
+|---|---|---|---|
+| 이슈 본문·제목 조회 | `gh issue view <N> --json body,title` | `glab issue view <N> --output json` | `tea issue <N> --output json` |
+| 이슈 생성 | `gh issue create -t … -l … -F <파일>` | `glab issue create -t … -l … -d "…"` | `tea issue create -t … -l …` |
+| 이슈 본문 쓰기 | `gh issue edit <N> --body-file <파일>` | `glab issue update <N> -d "$(cat <파일>)"` | `tea issue edit <N>` |
+| 라벨 목록 | `gh label list` | `glab label list -R <repo>` | `tea label ls` |
+
+⚠️ **응답 필드 이름이 다르다 — 명령만 갈아끼우면 깨진다:**
+
+| | 본문 | 번호 |
+|---|---|---|
+| GitHub | **`body`** | `number` |
+| GitLab | **`description`** | `iid` |
+
+`gh issue view <N> --json description` 은 존재하지 않는 필드라 그 자리에서 실패한다.
+`gh` 의 `--json` 은 필드를 **명시해야** 하고(`--output json` 처럼 통째로 주지 않는다),
+없는 이름을 주면 쓸 수 있는 필드 목록과 함께 에러를 낸다.
+
+⚠️ **본문 쓰기는 어느 호스트든 계약 대상이다** — `wtflow:issue` 의 재작성 모드,
+또는 `wtflow:commit` 의 체크박스 동기화만이 정당한 경로다(`hooks/guard-body-edit.sh`).
+센티넬 prefix 는 명령을 갈아끼워도 그대로 붙인다.
+
+- `gh` 는 본문을 파일로 넘기는 옵션이 있다(`--body-file`, 단축 `-F`). `glab` 에는 없어
+  `-d "$(cat <파일>)"` 로 넘긴다 — 줄바꿈·백틱·따옴표 때문에 인자에 직접 이어붙이지 않는다
+- 표에 없는 하는 일(마일스톤 등)은 `## CLI 로 안 되는 것은 API 로 내려간다` 로 간다
+
 ## 호스트마다 갈리는 건 명령 이름만이 아니다
 
 명령만 갈아끼우면 되는 줄 알고 접근하면 깨진다. 아래로 갈수록 대응이 안 되고 **정책을 정해야 한다:**
