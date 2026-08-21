@@ -6,7 +6,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Ba
 
 # /wtflow:briefing — 작업 브리핑 생성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 ## 호출
 

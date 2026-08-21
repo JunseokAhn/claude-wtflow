@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:plan — 워크트리 작업 시작
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 ## 작업 문서
 

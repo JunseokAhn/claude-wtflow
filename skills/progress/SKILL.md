@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:progress — 워크트리 K 진행 현황
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 작업 항목(K)별 진행 상태를 표 하나로 보여준다. **읽기 전용** — 조회만 하고 어떤 변경도 하지 않는다.
 

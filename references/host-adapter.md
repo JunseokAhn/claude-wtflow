@@ -1,0 +1,75 @@
+# 이슈 호스트 어댑터
+
+이슈를 읽고 쓰는 스킬이 공유하는 규칙. **어느 호스트인지 판별하는 자리를 여기 하나로 둔다.**
+**`issue`·`plan`·`progress`·`commit`·`milestone`·`briefing` 이 시작 전에 읽는다.**
+
+브랜치 이름·K 모델·note 계층은 `worktree-discipline.md`, 커밋 메시지 형식은
+`commit-convention.md` 를 본다.
+
+## 판별은 remote 주소 하나로 — 묻지 않는다
+
+`git remote get-url origin` 의 호스트 부분만 본다. `-R <repo>` 처럼 다른 저장소를 명시받았으면
+그 주소로 판별한다.
+
+| remote 호스트 | 호스트 | CLI |
+|---|---|---|
+| `github.com` | GitHub | `gh` |
+| `gitlab.com` | GitLab | `glab` |
+| Gitea·Forgejo·Codeberg | Gitea 계열 | `tea` |
+| 그 외 | 판별 실패 | 아래 `## 판별이 안 되면 묻는다` |
+
+- **자체호스팅은 주소만으로 못 가른다.** `gitlab.example.com` 처럼 이름에 단서가 있으면 그걸 쓴다
+- `tea` 는 Gitea 서버용으로 만들어졌다. Forgejo·Codeberg 는 Gitea 에서 갈라져 나온 것이라
+  대체로 통하지만 **공식 문서가 보장하지는 않는다** — 실패하면 API 로 내려간다
+
+## 판별이 안 되면 묻는다 — CLI 를 하나씩 시험하지 않는다
+
+주소에 단서가 없으면 사용자에게 어느 호스트인지 묻고 멈춘다.
+`gh` → 실패 → `glab` → 실패 → `tea` 순으로 찔러보지 않는다.
+
+**Why:** 실패한 호출이 남기는 것이 호스트마다 다르다. 조회는 대개 무해하지만 생성·수정이
+섞이면 어디까지 반영됐는지 알 수 없게 된다. 판별은 쓰기 전에 끝나 있어야 한다.
+
+## CLI 가 실패하면 에러를 읽는다 — 다른 CLI 로 재시도하지 않는다
+
+각 CLI 는 남의 호스트에서 실패할 때 이유를 밝힌다. `glab` 은 설정된 remote 까지 찍어준다:
+
+```
+ERROR: could not determine base repository: none of the git remotes
+configured for this repository point to a known GitLab host.
+Configured remotes: github.com
+```
+
+이 메시지가 곧 판별 결과다. 읽고 이 문서의 표로 돌아온다.
+
+## CLI 로 안 되는 것은 API 로 내려간다
+
+CLI 하위명령이 없거나 호스트마다 모델이 다른 작업(마일스톤이 대표적)은 raw API 를 쓴다.
+**통로가 호스트마다 다르고, Gitea 계열에는 아예 없다:**
+
+| CLI | raw API 통로 |
+|---|---|
+| `gh` | `gh api` |
+| `glab` | `glab api` |
+| `tea` | **없음** — `curl` + 토큰 |
+| 판별 실패 | 해당 없음 (위에서 이미 멈춘다) |
+
+- 표에 없는 호스트(Bitbucket 등)도 CLI 가 없으니 전부 이 경로다
+- ⚠️ **API 로 내려가도 본문 쓰기는 그대로 계약 대상이다.** `gh api --method PATCH … -f body=`
+  같은 형태는 `hooks/guard-body-edit.sh` 가 잡지 못하므로, 훅이 막지 않는다는 것이
+  계약을 안 타도 된다는 뜻이 아니다. 이슈 본문은 `wtflow:issue` 의 재작성 모드로만 바꾼다
+
+## 호스트마다 갈리는 건 명령 이름만이 아니다
+
+명령만 갈아끼우면 되는 줄 알고 접근하면 깨진다. 아래로 갈수록 대응이 안 되고 **정책을 정해야 한다:**
+
+| 갈리는 층 | 예 | 대응 |
+|---|---|---|
+| 명령 이름 | `glab issue update` ↔ `gh issue edit` | 표로 대응된다 |
+| 플래그 | `-d` ↔ `--body` · `--body-file`(단축 `-F`) | 표로 대응된다 |
+| 응답 필드 이름 | GitLab `description` ↔ GitHub `body` | 표로 대응된다 |
+| 개념 자체 | GitLab 그룹 마일스톤 — GitHub 에 없음 | **대응이 없다 — 정책** |
+| 값 자체 | 라벨 `종류:*` — 저장소마다 있을 수도 없을 수도 | **대응이 없다 — 정책** |
+
+⚠️ **아래 두 줄을 표로 풀려고 하지 않는다.** 없는 것을 억지로 대응시키면 조용히 틀린 값이
+들어간다. 없으면 없다고 적고, 그때 무엇을 할지를 정해 둔다.

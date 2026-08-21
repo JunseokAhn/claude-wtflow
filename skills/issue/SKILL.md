@@ -6,7 +6,7 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 ## 트리거
 
