@@ -1,12 +1,12 @@
 ---
 name: briefing
 description: 완료·진행 작업을 커밋·diff 기반 구조화 브리핑으로 출력(읽기 전용, 날조 금지). 인자 --mr/--detail/--no-fence. "MR용/작업 브리핑" 요청에. 사용자 호출 + wtflow:auto 가 순회를 마칠 때 자율 호출, MR 본문이 필요한 자리에서는 --mr 로 자율 호출.
-allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
+allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), Bash(ls *), Bash(pwd *), Bash(grep *), Read, Glob, Grep
 ---
 
 # /wtflow:briefing — 작업 브리핑 생성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 읽고 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 읽고 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
 
 ## 호출
 

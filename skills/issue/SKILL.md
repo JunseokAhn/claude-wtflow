@@ -1,12 +1,12 @@
 ---
 name: issue
-description: GitLab 어댑터(glab 필요) — 이슈 생성·본문 재작성 + 착수 전 계약을 이슈 note 로 1회 기록 (브랜치·워크트리·K 분해는 wtflow:plan 몫). "이슈 만들어줘/등록/GitLab에 올려줘" 와 "이슈 본문 다시 써줘/갱신해줘/반영해줘" 의도에 자율 호출. 이슈 본문을 바꾸는 유일한 경로 — glab issue update 직접 호출 금지. prefix 자동, 이슈 본문은 "무엇/왜" + 큰 틀 작업 항목만 담아 자족적으로 유지.
-allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
+description: 이슈 생성·본문 재작성 + 착수 전 계약을 이슈 note 로 1회 기록 (브랜치·워크트리·K 분해는 wtflow:plan 몫). GitHub·GitLab·Gitea 를 remote 주소로 가려 부른다. "이슈 만들어줘/등록/GitHub에 올려줘/GitLab에 올려줘" 와 "이슈 본문 다시 써줘/갱신해줘/반영해줘" 의도에 자율 호출. 이슈 본문을 바꾸는 유일한 경로 — 이슈 수정 명령 직접 호출 금지. prefix 자동, 이슈 본문은 "무엇/왜" + 큰 틀 작업 항목만 담아 자족적으로 유지.
+allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1 gh *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(WTFLOW_BODY_REWRITE=1 tea *), Bash(git *), Bash(mkdir *), Bash(ls *), Read, Write, Glob, AskUserQuestion
 ---
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
 
 ## 트리거
 
@@ -20,7 +20,8 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 - 자연어: "이슈 본문 다시 써줘", "이슈 #14 갱신", "이슈 내용 고쳐줘", "이슈에 <내용> 반영해줘" 등
 - 슬래시: `/wtflow:issue --rewrite <N> [-t "<새 제목>"] [-R <group>/<repo>]`
 
-⚠️ **이슈 본문을 바꾸는 경로는 재작성 모드 하나다.** `glab issue update -d` 를 직접 부르지 않는다 —
+⚠️ **이슈 본문을 바꾸는 경로는 재작성 모드 하나다.** 이슈 수정 명령(`glab issue update -d` ·
+`gh issue edit --body`)을 직접 부르지 않는다 —
 훅이 막는다(`hooks/guard-body-edit.sh`). 유일한 예외는 wtflow:commit 의 체크박스 동기화다.
 
 ## 마일스톤은 이 스킬의 관심사가 아니다
@@ -54,11 +55,13 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 
 5. **사용자 확인 한 번** — `issue-convention.md` 의 `## 확인 절차` → `### 생성`
 
-6. **glab으로 생성** — `-R` 미지정 시 **현재 디렉토리 git remote 의 레포 기준**으로 생성한다 (자동, 묻지 않음. glab 기본 동작과 동일). 사용자가 `-R`/"repo는 X" 로 명시했을 때만 다른 레포 사용:
-   ```
-   glab issue create -t "<제목>" [-l "<라벨>[,<라벨>...]"] [-d "<본문>"] [-R <repo>]
-   ```
-   재작성이면 `create` 가 아니라 `update` 다 — `## 재작성 모드` 를 따른다
+6. **생성** — 먼저 `host-adapter.md` 의 `## 판별은 remote 주소 하나로` 로 호스트를 정하고,
+   `## 이슈 명령 대응` 의 `이슈 생성` 행을 쓴다. `-R` 미지정 시 **현재 디렉토리 git remote 의
+   레포 기준**으로 생성한다 (자동, 묻지 않음 — 세 CLI 의 공통 기본 동작). 사용자가 `-R`/"repo는 X"
+   로 명시했을 때만 다른 레포 사용.
+   - **본문은 파일로 넘긴다**(`gh` 는 `-F`, `glab` 은 `-d "$(cat …)"`) — 줄바꿈·백틱·따옴표가
+     인자에서 깨진다
+   - 재작성이면 생성이 아니다 — `## 재작성 모드` 를 따른다
 
 7. **이슈 생성 결과 수집**: 이슈 번호 + URL
 
@@ -94,7 +97,7 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 ## 재작성 모드 (`--rewrite <N>`)
 
 이미 있는 이슈의 **본문(필요하면 제목)을 다시 쓴다.** 조사하며 문제 정의가 바뀌었을 때 쓴다.
-이 모드가 없으면 재작성이 스킬 밖 `glab issue update` 직접 호출로 새어나가고, 생성 때 걸리던
+이 모드가 없으면 재작성이 스킬 밖 이슈 수정 명령 직접 호출로 새어나가고, 생성 때 걸리던
 계약이 통째로 통과된다.
 
 ### 계약을 어디까지 다시 타나
@@ -106,21 +109,24 @@ allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Ba
 | 3 제목 생성 | **제목을 바꿀 때만.** 컨벤션 문서의 `## 제목 규칙` 그대로 |
 | 4 본문 작성 | **그대로 적용** — 컨벤션 문서의 `## 본문 작성 규칙` · `## 본문 템플릿` |
 | 5 사용자 확인 | **질문 축이 바뀐다** — 컨벤션 문서의 `## 확인 절차` → `### 재작성` |
-| 6 glab 호출 | `create` 대신 `WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "<전체 본문>" [-t "<새 제목>"]` |
+| 6 호스트 호출 | 생성이 아니라 **이슈 본문 쓰기** 행(`host-adapter.md`)을 쓰고, 앞에 `WTFLOW_BODY_REWRITE=1` prefix. 제목도 바꾸면 `-t "<새 제목>"` 을 함께 |
 | 7 번호 수집 | **적용 안 함** — 이미 정해져 있다 |
 | 8 note | **적용 안 함** — note 는 이슈 생성 때 1회 쓰는 스냅샷이라 재작성에서 손대지 않는다 |
 
 ### 절차
 
-1. **현재 본문을 먼저 읽는다** — `glab issue view <N> --output json` 의 `description`·`title`.
-   실패하면 중단·보고. ⚠️ **읽지 않고 쓰지 않는다** — `-d` 는 전체 본문 치환이라 통째로 덮어쓰게 된다
+1. **현재 본문을 먼저 읽는다** — 이슈 본문·제목 조회(`host-adapter.md` 의 `## 이슈 명령 대응`).
+   ⚠️ 본문 필드 이름이 GitHub 은 `body`, GitLab 은 `description` 이다.
+   실패하면 중단·보고. ⚠️ **읽지 않고 쓰지 않는다** — 본문 쓰기는 어느 호스트든 전체 치환이라
+   통째로 덮어쓰게 된다
 2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
    **임의로 맞추지 않는다.** 어긋난 절은 3의 미리보기에 드러내고 사용자가 정한다
 3. **미리보기 + 확인** — `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
 4. **반영** — 본문은 파일을 거쳐 넘긴다. 줄바꿈·백틱·따옴표가 섞이므로 인자에 직접 이어붙이지 않는다
    (`wtflow:mr` 계약 10 과 같은 이유):
    ```
-   WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "$(cat <본문파일>)"
+   WTFLOW_BODY_REWRITE=1 gh   issue edit   <N> --body-file <본문파일>      # GitHub
+   WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "$(cat <본문파일>)"      # GitLab
    ```
    ⚠️ **`WTFLOW_BODY_REWRITE=1` prefix 를 빼지 않는다.** 본문을 고치는 호출은 훅
    (`hooks/guard-body-edit.sh`)이 막고, 이 prefix 가 "계약을 다 탄 재작성" 임을 밝히는
@@ -159,7 +165,8 @@ created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는
 
 ## 결정·중단 트리거
 
-- glab 인증 실패 → 보고 후 중단
+- 호스트 CLI 인증 실패 → 보고 후 중단. **다른 호스트의 CLI 로 재시도하지 않는다**
+- 호스트 판별 실패(remote 주소에 단서 없음) → 묻고 대기 (`host-adapter.md`)
 - 현재 디렉토리가 git 워킹트리 아님 + `-R` 미지정 → repo 명시 요청
 - prefix 추정 불가 + 사용자 미응답 → 묻기
 - 사용자가 확인 단계에서 거부 → 중단
