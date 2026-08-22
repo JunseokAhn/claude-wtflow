@@ -40,7 +40,7 @@ disable-model-invocation: true
 | `"<작업 설명>"` | adhoc — 이슈를 찾지도, 만들지도 않는다 (`## adhoc 작업 시작`) |
 | 없음 | 워크트리 안이면 현재 accumulator 에서 자동 추론. 워크트리 **밖**이면 무슨 작업인지 한 줄 되묻고 그 답으로 adhoc 진입 |
 | `-b <base>` | 분기 베이스. 미지정 시 `origin/develop`(없으면 `origin/main`) |
-| `-p <prefix>` | 브랜치 prefix (accumulator·mirror 공통). 미지정 시 이슈 종류 라벨(`종류:버그`→`fix` / `종류:기능`→`feat` / `종류:리팩터링`→`refactor` / 그 외 `chore`) > adhoc 은 작업 성격 추론 |
+| `-p <prefix>` | 브랜치 prefix (accumulator·mirror 공통). 미지정 시 이슈 제목의 conventional prefix(`fix:`→`fix` / `feat:`→`feat` …). 제목에 prefix 가 없으면 작업 성격 추론 — adhoc 도 같다 |
 | `-r <repo>` | 대상 저장소 (예 `<org>/<repo>`). 미지정 시 git remote 에서 추론 |
 
 ## 계약 (보장되어야 하는 것)
@@ -80,7 +80,7 @@ disable-model-invocation: true
    - ⚠️ prefix 에 **`worktree/` 를 쓰지 않는다** — 이 이름이 그대로 mirror base 이고 머지 커밋
      메시지에 남는다
    - 경로엔 `#`·`+` 를 넣지 않는다 (`#` 는 셸 주석 문자라 따옴표가 빠지면 조용히 잘린다)
-   - slug 는 제목/작업 설명의 한국어를 의미 기반 영어 kebab-case 로(최대 5단어).
+   - slug 는 제목/작업 설명을 의미 기반 영어 kebab-case 로 옮긴 것(최대 5단어).
      **adhoc 은 slug 가 유일 식별자**라 기존 accumulator 와 겹치면 되묻는다(`-2` 자동 접미 금지)
 
 4. **브랜치 + 워크트리 생성**
