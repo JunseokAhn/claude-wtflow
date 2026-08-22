@@ -1,7 +1,7 @@
 ---
 name: milestone
-description: 여러 이슈에 걸친 마일스톤 note 작성·갱신 + 이슈 분할 생성. 페이로드·타입·에러코드를 ~/.claude/notes 에 한 벌로 두고 각 이슈의 plan 이 심링크로 읽는다. "마일스톤 계획/여러 이슈로 쪼개줘" 요청에.
-allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *), Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill
+description: 여러 이슈에 걸친 마일스톤 note 작성·갱신 + 이슈 분할 생성. 페이로드·타입·에러코드를 ~/.claude/notes 에 한 벌로 두고 각 이슈의 plan 이 그 경로를 조립해 읽는다. "마일스톤 계획/여러 이슈로 쪼개줘" 요청에.
+allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *), Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill
 ---
 
 # /wtflow:milestone — 마일스톤 계약 문서
@@ -14,10 +14,10 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 ## 호출
 
-`/wtflow:milestone [<제목 또는 iid>] [-g <group>] [--new] [--no-issue]`
+`/wtflow:milestone [<제목 또는 식별자>] [-g <group>] [--new] [--no-issue]`
 
-- `<제목 또는 iid>`: 대상 마일스톤. 미지정 시 활성 목록에서 `AskUserQuestion` 으로 선택
-- `-g <group>`: GitLab 그룹. 미지정 시 remote 에서 추론 (`<org>/<repo>` → `<org>`)
+- `<제목 또는 식별자>`: 대상 마일스톤. 미지정 시 활성 목록에서 `AskUserQuestion` 으로 선택
+- `-g <group>`: 그룹·조직 path. 미지정 시 remote 에서 추론 (`<org>/<repo>` → `<org>`)
 - `--new`: 목록 조회 없이 새 마일스톤 생성으로 직행
 - `--no-issue`: 문서만 쓰고 이슈 분할(계약 7~8) 생략
 
@@ -27,7 +27,7 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 ```
 ~/.claude/notes/<group>/
-  _milestone/<iid>-<slug>.md      ← 이 스킬이 만든다. 여러 이슈·레포가 공유하는 단일 실체
+  _milestone/<식별자>-<slug>.md   ← 이 스킬이 만든다. 여러 이슈·레포가 공유하는 단일 실체
   <repo>/issue-<N>.md             ← wtflow:issue 계약 8 이 이슈당 1회 만든다
 ```
 
@@ -36,7 +36,7 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 - **단일 실체가 핵심이다.** 마일스톤 note 는 진행 중 고쳐지고 그 수정이 **다른 브랜치·다른
   세션에서 즉시 읽혀야** 한다. 브랜치에 커밋하면 사본이 갈라져 이걸 못 지킨다
-- **읽는 건 `/wtflow:plan` 계약 6 이다** — 이슈의 마일스톤 배정에서 iid 를 얻어 위 경로를 조립해
+- **읽는 건 `/wtflow:plan` 계약 6 이다** — 이슈의 마일스톤 배정에서 식별자를 얻어 위 경로를 조립해
   이 파일을 직접 Read 한다. 워크트리에 사본도 심링크도 만들지 않으므로 여기를 고치면 모든 이슈가
   즉시 현행을 본다
 - `~/.claude` 는 글로벌 gitignore 대상이라 git·MR 에 안 잡힌다
@@ -45,24 +45,44 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 1. **그룹 판별** — `git remote get-url origin` 에서 group path. 실패 시 `-g` 요청
 
-2. **마일스톤 목록 조회** — ⚠️ `projects/:id/milestones` 만으로는 **그룹 마일스톤이 안 나온다**(빈 배열).
-   반드시 `include_parent_milestones=true`:
-   ```
-   glab api "projects/:id/milestones?include_parent_milestones=true&state=active&per_page=50"
-   ```
-   `id`(글로벌 ID)·`iid`·`title`·`group_id`·`web_url` 보관. 대상 미지정이면 목록 + "새로 만들기" 를 물음
+2. **마일스톤 목록 조회** — 먼저 `host-adapter.md` 의 `## 마일스톤` 으로 **이 호스트에 계층이
+   있는지**부터 가른다. 계층 유무로 조회 대상이 갈린다:
+
+   | 호스트 | 조회 |
+   |---|---|
+   | GitLab | `glab api "projects/:id/milestones?include_parent_milestones=true&state=active&per_page=50"` |
+   | GitHub | `gh api repos/<owner>/<repo>/milestones?state=open` |
+   | Gitea | `tea milestones ls` |
+
+   ⚠️ **GitLab 에서 `include_parent_milestones=true` 를 빼면 그룹 마일스톤이 안 나온다**(빈 배열).
+   `title`·`web_url` 과 **그 호스트의 식별자**(GitLab `id`+`iid` / GitHub `number` / Gitea `id`)를
+   보관. 대상 미지정이면 목록 + "새로 만들기" 를 물음
 
 3. **(신규 시) 마일스톤 생성** — 제목·설명 초안을 보기로 제시(+ `직접 입력`). 승인 후에만:
-   ```
-   glab api --method POST "groups/<group>/milestones" -f title="<제목>" -f description="<한 줄>"
-   ```
 
-4. **문서 경로 확정** — `~/.claude/notes/<group>/_milestone/<iid>-<slug>.md`
-   (`<slug>`: 제목을 의미 기반 영어 kebab-case, 최대 5단어). 있으면 **갱신 모드** — Read 후 병합,
-   통째로 덮어쓰지 않는다
+   | 호스트 | 생성 |
+   |---|---|
+   | GitLab | `glab api --method POST "groups/<group>/milestones" -f title="<제목>" -f description="<한 줄>"` |
+   | GitHub | `gh api --method POST repos/<owner>/<repo>/milestones -f title="<제목>" -f description="<한 줄>"` |
+   | Gitea | `tea milestones create --title "<제목>" --description "<한 줄>"` |
 
-5. **현재 이슈 수집** — `glab api "groups/<group_id>/milestones/<글로벌 id>/issues?per_page=100"`.
-   레포는 `web_url` 에서 파싱. **읽기 전용 대조용**이다(진실원은 GitLab). 직후 분할 표 ② 출력
+   ⚠️ **계층이 없는 호스트에서는 저장소마다 같은 제목으로 만든다.** 조직 레벨 마일스톤을 만들
+   방법을 찾지 말 것 — 없는 계층이다(`host-adapter.md`). 여러 저장소를 묶는 건 아래 note 가 맡는다
+
+4. **문서 경로 확정** — `~/.claude/notes/<group>/_milestone/<식별자>-<slug>.md`
+   (`<식별자>`: GitLab `iid` / GitHub `number` / Gitea `id`. `<slug>`: 제목을 의미 기반 영어
+   kebab-case, 최대 5단어). 있으면 **갱신 모드** — Read 후 병합, 통째로 덮어쓰지 않는다
+
+5. **현재 이슈 수집** — 읽기 전용 대조용이다(진실원은 호스트). 직후 분할 표 ② 출력
+
+   | 호스트 | 조회 |
+   |---|---|
+   | GitLab | `glab api "groups/<group_id>/milestones/<글로벌 id>/issues?per_page=100"` — 레포는 `web_url` 에서 파싱 |
+   | GitHub | `gh issue list --milestone "<제목>" --json number,title,url` — **저장소 하나 안에서만** |
+   | Gitea | `tea issues ls --milestones "<제목>"` — **저장소 하나 안에서만** |
+
+   ⚠️ **계층이 없는 호스트에서는 이 조회가 저장소 하나만 덮는다.** 여러 저장소에 걸친 현황은
+   호스트가 답해주지 못하므로 **note 의 이슈 표가 유일한 대조본**이다 — 그래서 그 표를 비워두지 않는다
 
 6. **공통 계약 작성 — 여기가 본체다. 날조 금지**
    - 출처는 **대화에서 실제로 정한 것 + 코드·스펙 파일**뿐. 근거 없는 칸은 `(미정)`
@@ -84,14 +104,19 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
         ```
         /wtflow:issue <설명> -R <group>/<repo>
         ```
-        **이슈 본문은 짧게.** ⚠️ **GitLab 이슈에는 절 이름·문서 경로를 넣지 않는다 —
+        **이슈 본문은 짧게.** ⚠️ **이슈에는 절 이름·문서 경로를 넣지 않는다 —
         `참고 자료` 섹션에도.** 깨진 포인터다 (wtflow:issue 계약 4). 계약 전문도 넘기지 않는다
-   - b. 배정 — `-m` 의 제목 해석이 그룹 마일스톤에서 불확실하므로 **글로벌 ID 로 명시**:
-        ```
-        glab api --method PUT "projects/<group>%2F<repo>/issues/<N>" -f milestone_id=<글로벌 id>
-        ```
+   - b. 배정 — 호스트별로 갈린다:
+
+        | 호스트 | 배정 |
+        |---|---|
+        | GitLab | `glab api --method PUT "projects/<group>%2F<repo>/issues/<N>" -f milestone_id=<글로벌 id>` — `-m` 의 제목 해석이 그룹 마일스톤에서 불확실해 **글로벌 ID 로 명시** |
+        | GitHub | `gh issue edit <N> --milestone "<제목>"` — 저장소 안에 하나뿐이라 제목으로 충분 |
+        | Gitea | `tea issues edit <N> --milestone "<제목>"` |
+
         ⚠️ **이 배정이 이슈↔마일스톤 note 를 잇는 유일한 채널이다** — `/wtflow:plan` 계약 6 이
-        여기서 iid 를 읽어 마일스톤 문서를 찾는다. 배정을 빠뜨리면 그 이슈는 계약을 못 본다
+        여기서 식별자를 읽어 마일스톤 문서를 찾는다. 배정을 빠뜨리면 그 이슈는 계약을 못 본다.
+        읽는 식별자 이름이 호스트마다 다르다(`host-adapter.md` 의 `## 마일스톤`)
    - c. 이슈 note 는 a 가 이미 썼다. **다시 쓰지 않는다**(덮어쓰면 앞의 것이 사라진다)
    - d. `이슈 분할` 표에 의존 관계 행 추가
    - ⚠️ **브랜치는 여기서 만들지 않는다** — 이름 유도도 생성도 `/wtflow:plan` 몫이다.
@@ -149,10 +174,11 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 | 정보 | 진실원 | 문서에 적나 |
 |------|--------|-------------|
 | K 진행·완료 | 이슈 체크박스 + mirror 분기 `-00N` | ❌ |
-| K 제목·작업 항목 | GitLab 이슈 본문 | ❌ 번호만 참조 |
-| 이슈 제목·open/closed | GitLab | △ 대조용, 어긋나면 GitLab 이 이김 |
+| K 제목·작업 항목 | 이슈 본문 | ❌ 번호만 참조 |
+| 이슈 제목·open/closed | 호스트 | △ 대조용, 어긋나면 호스트가 이김 |
 | 페이로드·타입·에러코드 | **이 문서** | ✅ 본체 |
-| 이슈 간 의존 순서 | **이 문서** | ✅ GitLab 에 없는 정보 |
+| 이슈 간 의존 순서 | **이 문서** | ✅ 어느 호스트에도 없는 정보 |
+| 여러 저장소가 한 마일스톤에 묶인다는 사실 | **이 문서** (계층 없는 호스트) | ✅ `repos:` |
 
 체크박스·완료 칼럼·진행률을 넣는 순간 `wtflow:commit --done` 이 참조하는 이슈 체크박스와
 어긋나 엉뚱한 항목이 체크된다.
@@ -163,10 +189,12 @@ allowed-tools: Bash(glab *), Bash(git *), Bash(ls *), Bash(mkdir *), Bash(pwd *)
 
 ```markdown
 ---
-milestone: <GitLab 제목 그대로>
-milestone_id: <글로벌 id>      # 이슈 배정용 (iid 아님)
-iid: <그룹 내 iid>
+milestone: <호스트에 등록된 제목 그대로>
+host: github | gitlab | gitea
+milestone_id: <글로벌 id>      # GitLab 전용, 이슈 배정용 (iid 아님). 다른 호스트는 생략
+ref: <경로에 쓴 식별자>        # GitLab iid / GitHub number / Gitea id
 group: <group path>
+repos: [<repo>, …]            # 계층이 없는 호스트에서 같은 제목을 나눠 가진 저장소들
 web_url: <마일스톤 URL>
 ---
 
@@ -194,7 +222,9 @@ web_url: <마일스톤 URL>
 
 ## 결정·중단 트리거
 
-- glab 인증 실패 / 그룹 추론 실패 → 보고 후 중단
+- 호스트 CLI 인증 실패 / 그룹 추론 실패 / 호스트 판별 실패 → 보고 후 중단
+- 계층이 없는 호스트인데 **여러 저장소에 걸친 마일스톤**을 요청받음 → 저장소마다 같은 제목으로
+  만들고 `repos:` 로 묶겠다고 알린 뒤 진행. 조직 레벨 마일스톤을 만들 방법을 찾지 않는다
 - `include_parent_milestones=true` 없이 조회해 빈 목록을 얻고 "마일스톤 없음" 단정 → **금지**. 재조회
 - 계약 핵심(페이로드·에러코드)이 대화에 근거 없음 → `(미정)` 후 1회 되묻기. 지어내지 말 것
 - 마일스톤 생성·이슈 생성·배정은 외부 반영 → 각각 승인 후에만

@@ -100,9 +100,12 @@ disable-model-invocation: true
    - a. **이슈 note** — `~/.claude/notes/<group>/<repo>/issue-<N>.md` 가 있으면 Read.
         `/wtflow:issue` 가 이슈를 만들 때 한 번 쓴 스냅샷으로, 페이로드 계약·타입·에러코드가 들어 있다.
         없으면 없는 대로 — 적을 게 없던 이슈다
-   - b. **마일스톤 note** — 계약 1 에서 이미 받아온 이슈 조회 응답의 `milestone.iid` 로 경로를
+   - b. **마일스톤 note** — 계약 1 에서 이미 받아온 이슈 조회 응답의 마일스톤 식별자로 경로를
         조립해 **홈의 원본을 그대로 Read** 한다:
-        `~/.claude/notes/<group>/_milestone/<iid>-*.md`
+        `~/.claude/notes/<group>/_milestone/<식별자>-*.md`
+        ⚠️ **식별자 이름이 호스트마다 다르다** — GitLab `iid` · GitHub `number` · Gitea `id`
+        (`host-adapter.md` 의 `## 마일스톤`). GitHub 응답에서 `iid` 를 찾으면 비어 있고,
+        그러면 마일스톤이 없는 것으로 잘못 판정한다
         배정이 없거나 대응 파일이 없으면 마일스톤은 없는 것이다 — 넘어간다
    - c. **adhoc** — 이슈가 없어 a 도 b 도 없다. 사용자가 경로를 직접 주면 그것만 읽는다
    - 로드한 계약은 plan 표의 "관련 파일/위치"·각 K 설명에 반영하고, 계약과 충돌하는 분해를 내지 않는다
