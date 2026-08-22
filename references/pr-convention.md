@@ -34,12 +34,12 @@ MR(GitLab)·PR(GitHub) 의 제목과 본문 형식. **`/wtflow:mr` 과 `/wtflow:
 4. **`Closes #<N>` 같은 이슈 연결 줄이 템플릿에 있으면 채운다.** glab 의 `-i` 로 이슈를 엮더라도
    본문의 그 줄을 비워 두지 않는다 — 템플릿이 요구한 자리다
 5. 템플릿이 없으면 **플러그인 기본 템플릿**을 그대로 쓴다 —
-   `${CLAUDE_PLUGIN_ROOT}/templates/pull_request.md` 를 Read 해서 그 절 구성으로 채운다
+   `${CLAUDE_PLUGIN_ROOT}/templates/pull-request/default.md` 를 Read 해서 그 절 구성으로 채운다
 
 ## 기본 템플릿 (저장소 템플릿이 없을 때)
 
 **절 이름을 이 문서에 박지 않는다.** 기본 본문은 갈아끼울 수 있는 파일 하나에 있다 —
-`${CLAUDE_PLUGIN_ROOT}/templates/pull_request.md`. 저장소가 자기 템플릿을 두면 그것이 이기고
+`${CLAUDE_PLUGIN_ROOT}/templates/pull-request/default.md`. 저장소가 자기 템플릿을 두면 그것이 이기고
 (위 `## 본문`), 없을 때만 이 파일을 Read 해서 쓴다.
 
 - 절마다 `<!-- ... -->` 로 무엇을 적는지 적혀 있다. **그 주석은 지우지 않는다**
