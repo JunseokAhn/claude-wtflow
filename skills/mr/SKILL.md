@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:mr — 작업 브랜치로 MR 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 읽고, `pr-convention.md`(MR 제목·본문 형식)를 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고, `pr-convention.md`(MR 제목·본문 형식)를 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
 
 작업이 끝난 브랜치를 origin 에 올리고 MR 을 연다. `/wtflow:merge` 와 **방향이 갈린다**:
 
@@ -80,7 +80,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    않는다**(터미널이 아니라 도구를 통해 실행되므로). 멈춘 채 타임아웃되거나 빈 값으로 통과한다
 
 7. **이슈가 있으면 `-i <이슈번호>` 를 함께 넘긴다** — MR 과 이슈가 엮이고, `-t` 가 없으면 제목을
-   이슈에서 가져온다. `-t` 가 주어지면 그것이 이긴다
+   이슈에서 가져온다. `-t` 가 주어지면 그것이 우선한다
    - 라벨을 이슈에서 가져오려면 `--copy-issue-labels` 를 붙인다(`-i` 와 함께만 동작)
 
 8. **`--draft` 는 사용자가 줬을 때만.** 임의로 Draft 로 만들지 않는다
@@ -90,7 +90,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    Skill(wtflow:briefing) → /wtflow:briefing <base>..HEAD --mr --no-fence
    ```
    - `--mr` 은 MR description 압축본이다. **형식과 분량은 `pr-convention.md` 가 정한다** —
-     저장소 MR 템플릿이 있으면 그 절 구성이 이기고, 없으면 플러그인 기본 템플릿. 본문 40줄 상한.
+     저장소 MR 템플릿이 있으면 그 절 구성이 우선하고, 없으면 플러그인 기본 템플릿. 본문 40줄 상한.
      여기 사본을 두지 않는다(사본은 갈라진다)
    - ⚠️ **받은 본문을 그 상한과 대조하고 넘으면 다시 쓴다.** `Skill()` 은 브리핑을 만들어
      돌려주는 게 아니라 **지시문을 로드하고 제어를 되돌려주는** 것이라, 여기서 세지 않으면

@@ -1,7 +1,7 @@
 # PR·MR 컨벤션
 
 > **이 문서는 기본값이다 — 맨 아래 층이다.** 저장소나 사용자 쪽에 같은 항목을 정해둔 것이
-> 있으면 그쪽이 이긴다. 어디를 보고 무엇이 이기는지는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`.
+> 있으면 그쪽이 우선한다. 어디를 보고 무엇이 우선하는지는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`.
 
 MR(GitLab)·PR(GitHub) 의 제목과 본문 형식. **`/wtflow:mr` 과 `/wtflow:briefing --mr` 이 읽는다.**
 
@@ -16,7 +16,7 @@ MR(GitLab)·PR(GitHub) 의 제목과 본문 형식. **`/wtflow:mr` 과 `/wtflow:
 
 이슈가 있으면 **이슈 제목을 그대로 쓰는 것이 기본이다** — 같은 규칙으로 쓰였기 때문이다.
 
-## 본문 — 저장소 MR 템플릿이 있으면 그것이 이긴다
+## 본문 — 저장소 MR 템플릿이 있으면 그것이 우선한다
 
 이슈 본문이 저장소 이슈 템플릿을 따르는 것과 같은 규칙이다(`issue-convention.md` `## 본문 템플릿`).
 리뷰어가 보는 문서라 팀 형식이 우선한다.
@@ -39,7 +39,7 @@ MR(GitLab)·PR(GitHub) 의 제목과 본문 형식. **`/wtflow:mr` 과 `/wtflow:
 ## 기본 템플릿 (저장소 템플릿이 없을 때)
 
 **절 이름을 이 문서에 박지 않는다.** 기본 본문은 갈아끼울 수 있는 파일 하나에 있다 —
-`${CLAUDE_PLUGIN_ROOT}/templates/pull-request/default.md`. 저장소가 자기 템플릿을 두면 그것이 이기고
+`${CLAUDE_PLUGIN_ROOT}/templates/pull-request/default.md`. 저장소가 자기 템플릿을 두면 그것이 우선하고
 (위 `## 본문`), 없을 때만 이 파일을 Read 해서 쓴다.
 
 - 절마다 `<!-- ... -->` 로 무엇을 적는지 적혀 있다. **그 주석은 지우지 않는다**
