@@ -12,7 +12,7 @@ disable-model-invocation: true
 ## 작업 문서
 
 이 스킬이 만드는 것은 결국 **워크트리 하나 + 작업 항목 목록 하나**다. 작업 항목(K)이 어디 사는지가
-두 경우로 갈린다 — **이슈가 있으면 이슈 본문, 없으면 이 세션의 plan 출력**이다.
+두 경우로 나뉜다 — **이슈가 있으면 이슈 본문, 없으면 이 세션의 plan 출력**이다.
 
 | | 이슈 작업 | 이슈 없는 작업 (adhoc) |
 |---|---|---|
@@ -24,8 +24,8 @@ disable-model-invocation: true
 
 - **accumulator 이름이 유일한 입력이다.** `/#` 뒤 정수면 이슈 작업, `/+` 뒤 문자열이면 adhoc.
   이 해석은 wtflow:commit·progress·auto 도 똑같이 쓴다
-- **갈리는 건 "작업 항목이 어디 사나" 뿐**이다. K 분해·mirror·커밋·auto 순회는 두 경우가 완전히 같다
-- `+` 는 "이슈 없음" 마커이자 accumulator 자동탐지의 걸쇠다. `~`·`^` 는 git refname 금지문자라 못 쓴다
+- **다른 건 "작업 항목이 어디 사나" 뿐**이다. K 분해·mirror·커밋·auto 순회는 두 경우가 완전히 같다
+- `+` 는 "이슈 없음" 마커이자 accumulator 를 자동으로 찾을 때 이슈 작업(`#`)과 구분하는 구분자이기도 하다. `~`·`^` 는 git refname 금지문자라 못 쓴다
 
 ⚠️ **plan 은 어떤 파일도 쓰지 않는다.** 이 스킬이 `EnterWorktree` 로 같은 세션을 워크트리에
 밀어넣으므로 plan 출력이 그대로 살아 있고, 세션이 끊겨도 K 번호와 커밋은 mirror 분기에 남는다.
@@ -45,7 +45,7 @@ disable-model-invocation: true
 
 ## 계약 (보장되어야 하는 것)
 
-1. **대상 확정** — 인자 형태로 이슈/adhoc 을 가르고(위 표), 작업 문서를 확보한다.
+1. **대상 확정** — 인자 형태로 이슈/adhoc 을 구분하고(위 표), 작업 문서를 확보한다.
    - 이슈 작업 → 이슈 조회로 제목·라벨·본문(명령은 `host-adapter.md` 의 `## 이슈 명령 대응`).
      **실패 시 중단·보고** — 다른 호스트의 CLI 로 재시도하지 않는다
    - adhoc → 이슈 CLI 를 부르지 않는다. `## adhoc 작업 시작` 의 질문으로 목표·범위를 확정하고,
@@ -54,7 +54,7 @@ disable-model-invocation: true
      ```
      git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
      ```
-     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<KKK>` 유무로 가른다) → HEAD 와 ancestry 를
+     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<KKK>` 유무로 구분한다) → HEAD 와 ancestry 를
      공유하는 것이 accumulator
 
 2. **워크트리 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재가 main 워킹트리가
@@ -75,7 +75,7 @@ disable-model-invocation: true
 
 3. **이름 안 제시 + 사용자 확인 한 번** — accumulator 이름은 위 `## 작업 문서` 표 그대로.
    - **여기가 이 브랜치의 유일한 소유 지점이다** — 이름 유도도 생성도 전부 이 스킬이 한다.
-     wtflow:issue 는 이름을 정하지 않는다(정해도 넘길 채널이 없어 slug 만 갈린다)
+     wtflow:issue 는 이름을 정하지 않는다(정해도 넘길 채널이 없어 slug 만 어긋난다)
    - `#` 때문에 브랜치명은 **항상 따옴표로 감싼다**(adhoc 도 형태를 맞춘다)
    - ⚠️ prefix 에 **`worktree/` 를 쓰지 않는다** — 이 이름이 그대로 mirror base 이고 머지 커밋
      메시지에 남는다
@@ -126,7 +126,7 @@ disable-model-invocation: true
 
    ⚠️ **여기서 끝이다 — plan 표를 파일로 저장하지 않는다.** 이슈 작업이면 작업 항목의 진실원은
    이미 이슈 본문이고, adhoc 이면 이 출력 + mirror 분기가 곧 기록이다. 파일을 하나 더 두면
-   그 순간부터 둘이 갈린다.
+   그 순간부터 둘이 어긋난다.
 
 ## adhoc 작업 시작
 
@@ -224,7 +224,7 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 
 ### 사전문답 대상 표시
 
-`learning-protocol.md` 의 `## 켜는 자리 / 끄는 자리` 로 각 K 를 가르고, **착수 전에 멈출 K 의
+`learning-protocol.md` 의 `## 켜는 자리 / 끄는 자리` 로 각 K 를 구분하고, **착수 전에 멈출 K 의
 Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을지 예고한다.
 
 ```
@@ -296,7 +296,7 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
 3. **스코프 드리프트 처리** (plan 표 **전에**) — 실제 작업이 작업 항목을 벗어났으면 되묻는다:
    (a) 이 브랜치에 **새 K로 이어붙이기** / (b) **작업 항목에 추가**(이슈 작업이면 승인 후 이슈 본문
    수정, adhoc 이면 이번 plan 표에 추가) / (c) **별도 작업으로 분리**(`/wtflow:issue` 또는 새 adhoc
-   워크트리). 추측 금지 — 선택에 따라 K 번호·체크박스 동기화가 갈린다
+   워크트리). 추측 금지 — 선택에 따라 K 번호·체크박스 동기화가 달라진다
 4. **델타 plan 표** — 잔여 항목 + 신규 스코프만. 완료 K 번호는 고정, 신규는 **`max(mirror KKK)+1`** 부터
    (mirror 는 이 브랜치에만 있어 타 작업 K 오염 불가). 재사용·재배치 안 함
 5. **출력 순서** — ① 완료 현황(✓) → ② (드리프트 시) 처리 선택 → ③ 델타 plan 표
