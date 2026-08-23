@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 ## 호출
 
@@ -28,7 +28,7 @@ disable-model-invocation: false
 
 > **체크박스가 있느냐를 accumulator 이름이 정한다.** `/#` 뒤 정수 → 이슈 #N 본문에 체크리스트가
 > 있다. `/+` 뒤 문자열 → **체크리스트가 없다** — 완료는 mirror 분기 `<accumulator>-<KKK>` 의 존재로만
-> 드러난다. 커밋·분기·테스트 규율은 두 경우가 완전히 같고, 체크박스 동기화(계약 6)만 갈린다.
+> 드러난다. 커밋·분기·테스트 규율은 두 경우가 완전히 같고, 체크박스 동기화(계약 6)만 다르다.
 
 ## 한 번 호출 = 한 K, 그리고 멈춤 (자율 다중 K 금지)
 
@@ -84,12 +84,12 @@ disable-model-invocation: false
 
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 K`, 이슈 없는 작업이면 `mirror -00N 생성/전진` 으로 대신)
 
-   **이전 K 의 설계 선택이 이번 커밋에서 대가를 드러냈으면 청구서를 함께 낸다**
-   (`learning-protocol.md` `## 6. 청구서`). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
-   대가가 아직 안 왔으면 안 왔다고 적는다 — 없는 청구서를 지어내면 다음 예측이 무의미해진다.
+   **이전 K 의 설계 선택이 이번 커밋에서 유지보수 비용을 드러냈으면 얼마였는지 함께 보고한다**
+   (`learning-protocol.md` `## 6. 유지보수 비용`). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
+   비용이 아직 안 왔으면 안 왔다고 적는다 — 없는 비용을 지어내면 다음 예측이 무의미해진다.
 
    ```
-   청구서 — K1 에서 B(판정 분리)를 고르셨고 "호출자가 늘면 A 가 먼저 무너진다" 고 예측하셨습니다.
+   비용 — K1 에서 B(판정 분리)를 고르셨고 "호출자가 늘면 A 를 먼저 고쳐야 한다" 고 예측하셨습니다.
             이번 테스트 K 에서 판정만 단독 테스트 6케이스로 덮었고 스텁은 0줄이었습니다. 예측대로입니다.
    ```
 
@@ -135,20 +135,20 @@ mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 �
 
    | 로드 | 쓰기 |
    |---|---|
-   | 이슈 본문 조회 | 이슈 본문 쓰기 앞에 `WTFLOW_CHECKBOX_SYNC=1` prefix |
+   | 이슈 본문 조회 | 이슈 본문 쓰기 앞에 환경변수 `WTFLOW_CHECKBOX_SYNC=1` |
 
    **명령과 본문 필드 이름은 `host-adapter.md` 의 `## 이슈 명령 대응` 에서 꺼낸다** — 여기 박지
-   않는다. 본문 필드가 GitHub 은 `body`, GitLab 은 `description` 이라 이름째로 갈린다.
+   않는다. 본문 필드가 GitHub 은 `body`, GitLab 은 `description` 이라 이름째로 다르다.
 
-   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` prefix 를 빼지 않는다.** 이슈 본문을 고치는 호출은 훅
+   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` 환경변수를 빼지 않는다.** 이슈 본문을 고치는 호출은 훅
    (`hooks/guard-body-edit.sh`)이 막는다 — 재작성에는 템플릿 준수·미리보기·확인 계약이 걸려야
-   하는데 이슈 수정 명령 직접 호출은 그걸 전부 건너뛰기 때문이다. **prefix 는 호스트와 무관하게
+   하는데 이슈 수정 명령 직접 호출은 그걸 전부 건너뛰기 때문이다. **환경변수는 호스트와 무관하게
    똑같이 붙인다** — 훅이 `glab issue update` 와 `gh issue edit` 를 다 잡는다. **여기만 예외**인 이유는
    본문을 다시 쓰는 게 아니라 `- [ ]` **한 줄을 켜는 것**이라서다. 훅은 명령 문자열만 보므로,
-   호출자가 이 prefix 로 스스로를 밝히는 것 말고 정당한 호출을 구별할 방법이 없다.
-   - 그러니 **이 prefix 를 붙인 호출은 실제로 체크박스 한 줄만 바꿔야 한다.** 같은 호출에
+   호출자가 이 환경변수로 스스로를 밝히는 것 말고 정당한 호출을 구별할 방법이 없다.
+   - 그러니 **이 환경변수를 붙인 호출은 실제로 체크박스 한 줄만 바꿔야 한다.** 같은 호출에
      본문 손질을 얹으면 예외를 우회로로 쓰는 것이다 — 본문을 고칠 일이면 `/wtflow:issue --rewrite`
-   - 훅이 막았다는 응답을 받으면 prefix 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
+   - 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 3. **K번째 항목** — `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트에서 **위에서 K번째** `- [ ]`/`- [x]` 줄. 항목 수 < K·섹션 모호 → 경고·skip(추측 금지)
 4. **그 줄만 토글** `- [ ]`→`- [x]` (나머지 본문 보존, 이미 `[x]` 면 no-op). 실패 시 경고만, 커밋 흐름 안 막음
 5. **요약에 명시** — "이슈 #N 항목 K 체크", 또는 실패 사유

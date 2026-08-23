@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # /wtflow:auto — 워크트리 작업 항목 자율 순회
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — `--no-ask` 가 없으면 순회 중에도 낸다)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — `--no-ask` 가 없으면 순회 중에도 낸다)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 `/wtflow:plan` 이 만든 plan 의 작업 항목(K)들을 **사람이 K마다 끼어들지 않아도** 끝까지 돌린다.
 각 K = 구현 → 가벼운 검증 → `/wtflow:commit` 로컬 커밋. **commit 메커니즘은 직접 짜지 않고 `/wtflow:commit` 에 위임**한다(분기·테스트·누적 contract 단일화).
@@ -76,16 +76,16 @@ K 오름차순으로 반복:
 
 **사전문답은 순회 중에도 낸다(기본).** plan 이 `❓` 를 붙인 K 는 **그 K 를 시작하기 전에** 멈추고
 묻는다(`references/learning-protocol.md` `## 1. 예측 후 공개` · `## 4. 설계 선택은 두 안을 나란히` ·
-`## 5. 변경 압력 예측`). 무중단이 이 스킬의 목적이지만, 판단이 든 자리까지 건너뛰면 순회가 끝났을 때
+`## 5. 변경 시나리오`). 무중단이 이 스킬의 목적이지만, 판단이 든 자리까지 건너뛰면 순회가 끝났을 때
 작업자가 쥔 게 없다. `❓` 가 없는 K 는 묻지 않고 그대로 지나간다.
 
 - 한 K 의 문항은 **한 번의 `AskUserQuestion` 호출에 최대 3문항**으로 모은다(`## 사전문답은 전부
-  AskUserQuestion 으로 낸다`). 설계 선택 보기에만 `(추천)`, 예측·변경 압력 보기에는 붙이지 않는다
+  AskUserQuestion 으로 낸다`). 설계 선택 보기에만 `(추천)`, 예측·변경 시나리오 보기에는 붙이지 않는다
 - 답을 받으면 그 자리에서 채점하고 곧바로 구현으로 넘어간다. **"다음 K 로 갈까요?" 는 묻지 않는다**
   — 순회를 끝까지 도는 것은 이 스킬을 부른 시점에 이미 정해졌다
 
 **`--no-ask` 면 순회 중에는 묻지 않는다.** `❓` K 라도 멈추지 않고, 임의로 정하고 넘어간 설계 선택을
-근거와 함께 적어 뒀다가 마지막 브리핑 뒤에 **골랐어야 할 두 안 + 변경 압력 예측으로 모아 낸다**.
+근거와 함께 적어 뒀다가 마지막 브리핑 뒤에 **골랐어야 할 두 안 + 변경 시나리오 예측으로 모아 낸다**.
 이 사후 모음도 산문이 아니라 `AskUserQuestion` 이고 한 번의 호출에 최대 3문항이다 — 안 멈춘 것이지
 안 묻는 게 아니다.
 

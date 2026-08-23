@@ -6,7 +6,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), B
 
 # /wtflow:briefing — 작업 브리핑 생성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 읽고 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
 
 ## 호출
 
@@ -100,7 +100,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), B
 
 형식은 전부 `pr-convention.md` 가 갖는다 — 저장소 MR 템플릿 우선 규칙, 템플릿이 없을 때의 기본 템플릿,
 셀 수 있는 상한, UI 가 이미 보여주는 것 금지, 덜어낸 근거를 어디로 가리키나.
-**여기 사본을 두지 않는다** — 두 벌이 되면 한쪽만 고쳐져 갈린다.
+**여기 사본을 두지 않는다** — 두 벌이 되면 한쪽만 고쳐져 어긋난다.
 
 ⚠️ 상한은 **쓰고 나서 세어 본다.** 여기서 세지 않으면 형식을 검사하는 지점이 아예 없다.
 

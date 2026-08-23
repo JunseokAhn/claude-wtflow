@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 이기는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
 
 ## 트리거
 
@@ -109,7 +109,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 | 3 제목 생성 | **제목을 바꿀 때만.** 컨벤션 문서의 `## 제목 규칙` 그대로 |
 | 4 본문 작성 | **그대로 적용** — 컨벤션 문서의 `## 본문 작성 규칙` · `## 본문 템플릿` |
 | 5 사용자 확인 | **질문 축이 바뀐다** — 컨벤션 문서의 `## 확인 절차` → `### 재작성` |
-| 6 호스트 호출 | 생성이 아니라 **이슈 본문 쓰기** 행(`host-adapter.md`)을 쓰고, 앞에 `WTFLOW_BODY_REWRITE=1` prefix. 제목도 바꾸면 `-t "<새 제목>"` 을 함께 |
+| 6 호스트 호출 | 생성이 아니라 **이슈 본문 쓰기** 행(`host-adapter.md`)을 쓰고, 앞에 환경변수 `WTFLOW_BODY_REWRITE=1` 을 붙인다. 제목도 바꾸면 `-t "<새 제목>"` 을 함께 |
 | 7 번호 수집 | **적용 안 함** — 이미 정해져 있다 |
 | 8 note | **적용 안 함** — note 는 이슈 생성 때 1회 쓰는 스냅샷이라 재작성에서 손대지 않는다 |
 
@@ -128,12 +128,12 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
    WTFLOW_BODY_REWRITE=1 gh   issue edit   <N> --body-file <본문파일>      # GitHub
    WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "$(cat <본문파일>)"      # GitLab
    ```
-   ⚠️ **`WTFLOW_BODY_REWRITE=1` prefix 를 빼지 않는다.** 본문을 고치는 호출은 훅
-   (`hooks/guard-body-edit.sh`)이 막고, 이 prefix 가 "계약을 다 탄 재작성" 임을 밝히는
+   ⚠️ **`WTFLOW_BODY_REWRITE=1` 환경변수를 빼지 않는다.** 본문을 고치는 호출은 훅
+   (`hooks/guard-body-edit.sh`)이 막고, 이 환경변수가 "계약을 다 탄 재작성" 임을 밝히는
    유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다.
-   - 그러니 **이 prefix 를 붙인 호출은 1~3 을 실제로 거친 뒤여야 한다.** 미리보기·확인을
+   - 그러니 **이 환경변수를 붙인 호출은 1~3 을 실제로 거친 뒤여야 한다.** 미리보기·확인을
      건너뛰고 붙이면 예외가 그대로 우회로가 된다
-   - 훅이 막았다는 응답을 받으면 prefix 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
+   - 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
 
 ## 이슈 note 형식
