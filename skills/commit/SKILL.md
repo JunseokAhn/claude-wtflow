@@ -53,7 +53,7 @@ disable-model-invocation: false
    | `package.json`, `scripts.test` 없음 | `npm run lint` + (`tsconfig.json` 있으면) `npx tsc --noEmit` |
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
-3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 Why / 변경 / 테스트 결과. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
