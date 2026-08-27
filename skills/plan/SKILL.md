@@ -1,18 +1,18 @@
 ---
 name: plan
-description: 워크트리·분기 셋업 + 계획 note 로드(읽기 전용) + K 작업계획 출력. 이슈번호로도, 이슈 없이 작업 설명만으로도(adhoc) 시작 가능 — 이슈 모드만 glab 필요. 인자 -b/-p/-r. "이슈 N 작업 시작/plan", "이슈 없이 이거 작업 시작" 요청에. 사용자만 호출.
-allowed-tools: Bash(git *), Bash(glab *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree, AskUserQuestion
+description: 워크트리·분기 셋업 + 계획 note 로드(읽기 전용) + K 작업계획 출력. 이슈번호로도, 이슈 없이 작업 설명만으로도(adhoc) 시작 가능 — 이슈 모드만 호스트 CLI(gh·glab·tea) 필요. 인자 -b/-p/-r. "이슈 N 작업 시작/plan", "이슈 없이 이거 작업 시작" 요청에. 사용자만 호출.
+allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), Bash(mkdir *), Bash(ls *), Bash(pwd *), Read, Glob, Grep, EnterWorktree, AskUserQuestion
 disable-model-invocation: true
 ---
 
 # /wtflow:plan — 워크트리 작업 시작
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 ## 작업 문서
 
 이 스킬이 만드는 것은 결국 **워크트리 하나 + 작업 항목 목록 하나**다. 작업 항목(K)이 어디 사는지가
-두 경우로 갈린다 — **이슈가 있으면 이슈 본문, 없으면 이 세션의 plan 출력**이다.
+두 경우로 나뉜다 — **이슈가 있으면 이슈 본문, 없으면 이 세션의 plan 출력**이다.
 
 | | 이슈 작업 | 이슈 없는 작업 (adhoc) |
 |---|---|---|
@@ -20,12 +20,13 @@ disable-model-invocation: true
 | 식별자 | 이슈번호 `N` | `slug` |
 | accumulator (=워크트리 브랜치) | `<prefix>/#<N>-<slug>` | `<prefix>/+<slug>` |
 | 워크트리 경로 | `.claude/worktrees/<N>-<slug>` | `.claude/worktrees/<slug>` |
-| **작업 항목 (진실원)** | 이슈 본문 체크리스트 (glab) | plan 출력 + mirror 분기 `<accumulator>-<KKK>` |
+| **작업 항목 (진실원)** | 이슈 본문 체크리스트 | plan 출력 + mirror 분기 `<accumulator>-<KKK>` |
 
 - **accumulator 이름이 유일한 입력이다.** `/#` 뒤 정수면 이슈 작업, `/+` 뒤 문자열이면 adhoc.
   이 해석은 wtflow:commit·progress·auto 도 똑같이 쓴다
-- **갈리는 건 "작업 항목이 어디 사나" 뿐**이다. K 분해·mirror·커밋·auto 순회는 두 경우가 완전히 같다
-- `+` 는 "이슈 없음" 마커이자 accumulator 자동탐지의 걸쇠다. `~`·`^` 는 git refname 금지문자라 못 쓴다
+- **다른 건 "작업 항목이 어디 사나" 뿐**이다. K 분해·mirror·커밋·auto 순회는 두 경우가 완전히 같다
+- `+` 는 "이슈 없음" 마커다. accumulator 를 자동으로 찾을 때 이슈 작업(`#`)과 구분하는 구분자이기도 하다.
+  `~`·`^` 는 git refname 금지문자라 못 쓴다
 
 ⚠️ **plan 은 어떤 파일도 쓰지 않는다.** 이 스킬이 `EnterWorktree` 로 같은 세션을 워크트리에
 밀어넣으므로 plan 출력이 그대로 살아 있고, 세션이 끊겨도 K 번호와 커밋은 mirror 분기에 남는다.
@@ -40,20 +41,21 @@ disable-model-invocation: true
 | `"<작업 설명>"` | adhoc — 이슈를 찾지도, 만들지도 않는다 (`## adhoc 작업 시작`) |
 | 없음 | 워크트리 안이면 현재 accumulator 에서 자동 추론. 워크트리 **밖**이면 무슨 작업인지 한 줄 되묻고 그 답으로 adhoc 진입 |
 | `-b <base>` | 분기 베이스. 미지정 시 `origin/develop`(없으면 `origin/main`) |
-| `-p <prefix>` | 브랜치 prefix (accumulator·mirror 공통). 미지정 시 이슈 종류 라벨(`종류:버그`→`fix` / `종류:기능`→`feat` / `종류:리팩터링`→`refactor` / 그 외 `chore`) > adhoc 은 작업 성격 추론 |
-| `-r <repo>` | glab repo (예 `<org>/<repo>`). 미지정 시 git remote 에서 추론 |
+| `-p <prefix>` | 브랜치 prefix (accumulator·mirror 공통). 미지정 시 이슈 제목의 conventional prefix(`fix:`→`fix` / `feat:`→`feat` …). 제목에 prefix 가 없으면 작업 성격 추론 — adhoc 도 같다 |
+| `-r <repo>` | 대상 저장소 (예 `<org>/<repo>`). 미지정 시 git remote 에서 추론 |
 
 ## 계약 (보장되어야 하는 것)
 
-1. **대상 확정** — 인자 형태로 이슈/adhoc 을 가르고(위 표), 작업 문서를 확보한다.
-   - 이슈 작업 → `glab issue view <N> -R <repo>` 로 제목·라벨·본문. **실패 시 중단·보고**
-   - adhoc → `glab` 을 부르지 않는다. `## adhoc 작업 시작` 의 질문으로 목표·범위를 확정하고,
+1. **대상 확정** — 인자 형태로 이슈/adhoc 을 구분하고(위 표), 작업 문서를 확보한다.
+   - 이슈 작업 → 이슈 조회로 제목·라벨·본문(명령은 `host-adapter.md` 의 `## 이슈 명령 대응`).
+     **실패 시 중단·보고** — 다른 호스트의 CLI 로 재시도하지 않는다
+   - adhoc → 이슈 CLI 를 부르지 않는다. `## adhoc 작업 시작` 의 질문으로 목표·범위를 확정하고,
      그게 이슈 본문 자리를 대신한다. 워크트리 안이면 mirror 분기로 기존 K 진행을 읽는다
    - 인자 없음 + 워크트리 안 → accumulator 에서 추론. **accumulator 탐지**:
      ```
      git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
      ```
-     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<KKK>` 유무로 가른다) → HEAD 와 ancestry 를
+     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<KKK>` 유무로 구분한다) → HEAD 와 ancestry 를
      공유하는 것이 accumulator
 
 2. **워크트리 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재가 main 워킹트리가
@@ -74,12 +76,12 @@ disable-model-invocation: true
 
 3. **이름 안 제시 + 사용자 확인 한 번** — accumulator 이름은 위 `## 작업 문서` 표 그대로.
    - **여기가 이 브랜치의 유일한 소유 지점이다** — 이름 유도도 생성도 전부 이 스킬이 한다.
-     wtflow:issue 는 이름을 정하지 않는다(정해도 넘길 채널이 없어 slug 만 갈린다)
+     wtflow:issue 는 이름을 정하지 않는다(정해도 넘길 채널이 없어 slug 만 어긋난다)
    - `#` 때문에 브랜치명은 **항상 따옴표로 감싼다**(adhoc 도 형태를 맞춘다)
    - ⚠️ prefix 에 **`worktree/` 를 쓰지 않는다** — 이 이름이 그대로 mirror base 이고 머지 커밋
      메시지에 남는다
    - 경로엔 `#`·`+` 를 넣지 않는다 (`#` 는 셸 주석 문자라 따옴표가 빠지면 조용히 잘린다)
-   - slug 는 제목/작업 설명의 한국어를 의미 기반 영어 kebab-case 로(최대 5단어).
+   - slug 는 제목/작업 설명을 의미 기반 영어 kebab-case 로 옮긴 것(최대 5단어).
      **adhoc 은 slug 가 유일 식별자**라 기존 accumulator 와 겹치면 되묻는다(`-2` 자동 접미 금지)
 
 4. **브랜치 + 워크트리 생성**
@@ -99,15 +101,18 @@ disable-model-invocation: true
    - a. **이슈 note** — `~/.claude/notes/<group>/<repo>/issue-<N>.md` 가 있으면 Read.
         `/wtflow:issue` 가 이슈를 만들 때 한 번 쓴 스냅샷으로, 페이로드 계약·타입·에러코드가 들어 있다.
         없으면 없는 대로 — 적을 게 없던 이슈다
-   - b. **마일스톤 note** — 계약 1 에서 이미 받아온 이슈 조회 응답의 `milestone.iid` 로 경로를
+   - b. **마일스톤 note** — 계약 1 에서 이미 받아온 이슈 조회 응답의 마일스톤 식별자로 경로를
         조립해 **홈의 원본을 그대로 Read** 한다:
-        `~/.claude/notes/<group>/_milestone/<iid>-*.md`
+        `~/.claude/notes/<group>/_milestone/<식별자>-*.md`
+        ⚠️ **식별자 이름이 호스트마다 다르다** — GitLab `iid` · GitHub `number` · Gitea `id`
+        (`host-adapter.md` 의 `## 마일스톤`). GitHub 응답에서 `iid` 를 찾으면 비어 있고,
+        그러면 마일스톤이 없는 것으로 잘못 판정한다
         배정이 없거나 대응 파일이 없으면 마일스톤은 없는 것이다 — 넘어간다
    - c. **adhoc** — 이슈가 없어 a 도 b 도 없다. 사용자가 경로를 직접 주면 그것만 읽는다
    - 로드한 계약은 plan 표의 "관련 파일/위치"·각 K 설명에 반영하고, 계약과 충돌하는 분해를 내지 않는다
 
    ⚠️ **읽기만 한다 — 어느 note 도 만들거나 고치지 않는다**(규율 문서 `## 상세는 이슈가 아니라 note 에`).
-   이슈 note 가 낡아 보이면 **사용자에게 알리되 스스로 고치지 않는다.** 어긋나면 이슈 본문이 이긴다.
+   이슈 note 가 낡아 보이면 **사용자에게 알리되 스스로 고치지 않는다.** 어긋나면 이슈 본문을 따른다.
 
    ⚠️ **마일스톤 목록을 훑지 않는다** — `_milestone/` 를 글롭해 "아마 이거겠지" 로 고르는 것 금지.
    이 이슈의 계약인지는 **배정**만이 답한다. 배정이 없으면 마일스톤은 없는 것이다.
@@ -122,7 +127,7 @@ disable-model-invocation: true
 
    ⚠️ **여기서 끝이다 — plan 표를 파일로 저장하지 않는다.** 이슈 작업이면 작업 항목의 진실원은
    이미 이슈 본문이고, adhoc 이면 이 출력 + mirror 분기가 곧 기록이다. 파일을 하나 더 두면
-   그 순간부터 둘이 갈린다.
+   그 순간부터 둘이 어긋난다.
 
 ## adhoc 작업 시작
 
@@ -177,7 +182,7 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 
 ## 결정·중단 트리거
 
-- 이슈 미존재 / glab 인증 실패 → 보고 후 중단. **adhoc 으로 조용히 넘어가지 않는다**(번호를 준 건
+- 이슈 미존재 / 호스트 CLI 인증 실패 / 호스트 판별 실패 → 보고 후 중단. **adhoc 으로 조용히 넘어가지 않는다**(번호를 준 건
   그 이슈를 쓰겠다는 뜻). 전환할지는 되묻는다
 - adhoc slug 가 기존 accumulator 와 충돌 → 중단하고 다른 이름 요청(같은 작업의 재개면 그 워크트리로 진입)
 - adhoc 작업 설명이 한 단어 수준이라 범위를 못 세움 → **워크트리 만들기 전에** 되묻는다(만든 뒤엔 이름이 굳는다)
@@ -205,11 +210,14 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 2. **관련 파일 탐색** — 파일명/경로 패턴은 Glob(`**/*Annotation*.kt`), 함수·식별자·에러 메시지는 Grep.
    결과는 "관련 파일/위치" 열에 `file:line` 으로
 3. **Step = 작업 항목** — 한 작업 항목 = 한 K = 한 mirror 분기, 커밋은 그 안에 누적
-   - **작업 항목이 이미 있으면**(이슈 본문) **그대로 Step 으로 매핑**한다
-     (항목 N = Step N = K N). 코드 분석은 새 step 을 만드는 게 아니라 각 항목의 "관련 파일/위치"를
-     채우는 용도
+   - **작업 항목이 이미 있어도 코드 탐색 결과로 다시 뽑는다**(`learning-protocol.md` §9).
+     이슈 항목은 코드를 안 보고 쓴 것이라 그대로 K 가 되면 경계가 코드와 안 맞는다
+     - 다시 뽑은 분해가 이슈 항목과 **같으면** 그대로 간다 — 그게 흔한 경우다
+     - **다르면** 안으로 내서 고르게 하고, 고른 것이 이슈와 다르면 **이슈 본문을 갱신**한다.
+       항목 N = Step N = K N = mirror `-00N` 이라 순서가 어긋나면 체크박스가 엉뚱한 줄을 켠다
    - **없으면 여기서 만든다**(adhoc 의 첫 plan 이 항상 여기다) — 확정한 범위 + 코드 분석 결과를
-     `### step 분할 감각` 으로 쪼갠 것이 곧 K 목록이다. **표를 낸 뒤 "이 분해로 갈까요?" 한 번 확인**한다
+     `### step 분할 감각` 으로 쪼갠 것이 곧 K 목록이다. **표를 낸 뒤 커밋 경계를 고르게 한다**
+     (`learning-protocol.md` §9 — 확인이 아니라 선택이고, `Na` 문항과 같은 호출에 담는다)
    - 한 항목이 단독 commit 으로 감당 안 될 만큼 크면 보조 분해(하위 a/b)하되 **K 는 항목 번호에 고정**
 4. **표 출력** (Step 열 = 작업 항목 번호 = K):
 
@@ -220,7 +228,7 @@ git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전�
 
 ### 사전문답 대상 표시
 
-`learning-protocol.md` 의 `## 켜는 자리 / 끄는 자리` 로 각 K 를 가르고, **착수 전에 멈출 K 의
+`learning-protocol.md` 의 `## 켜는 자리 / 끄는 자리` 로 각 K 를 구분하고, **착수 전에 멈출 K 의
 Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을지 예고한다.
 
 ```
@@ -228,16 +236,16 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
    설계 선택 1건(판정을 어느 층에 둘지)도 두 안으로 함께 띄웁니다.
 ```
 
-- 대상은 두 갈래다 — **동작 판단이 든 K**(§1)와 **고도 기준을 넘는 설계 선택이 있는 K**(§4).
-  후자는 `learning-protocol.md` §4 `### 고도` 의 두 잣대(되돌리기 비용·파급 범위)를 **둘 다**
+- 대상은 두 갈래다 — **동작 판단이 든 K**(§1)와 **물어야 할 설계 선택이 있는 K**(§4).
+  후자는 `learning-protocol.md` §4 `### 묻는 기준` 의 두 잣대(되돌리기 비용·파급 범위)를 **둘 다**
   통과할 때만이고, **K 당 1건 상한**이다. 통과하는 게 없으면 **그 K 엔 `❓` 를 안 붙인다** —
   K 마다 하나씩 짜내면 질문이 구현 세부로 내려가 마찰만 남는다.
   삭제·정리·보일러플레이트에는 안 붙인다
 - **질문은 산문이 아니라 `AskUserQuestion` 으로 낸다** — §1·§4·§5 전부(`learning-protocol.md`
   `## 사전문답은 전부 AskUserQuestion 으로 낸다`). 한 K 의 문항은 **한 번의 호출에 최대 3문항**
-  으로 모은다. 산문으로 늘어놓으면 답 없이 넘어가 장치가 죽는다
+  으로 모은다. 산문으로 늘어놓으면 답 없이 넘어가 트리거가 안 걸린다
 - **`(추천)` 은 §4 에만 붙인다.** §4 보기에는 **판단 기준 한 줄**과 첫 보기 `(추천)` 을 반드시
-  넣는다(§4 `### 형식`) — 트레이드오프만 나열하면 고를 수가 없다. 반대로 **§1 예측·§5 변경 압력
+  넣는다(§4 `### 형식`) — 트레이드오프만 나열하면 고를 수가 없다. 반대로 **§1 예측·§5 변경 시나리오
   보기에는 `(추천)` 을 붙이지 않는다** — 맞히는 자리라 추천이 곧 정답 누설이다
 - **`file:line` 만 던지지 않는다.** 답에 필요한 코드는 질문 본문에 인용하고, 설계 선택은
   `AskUserQuestion` preview 로 좌우 비교를 띄운다(`learning-protocol.md` §1 `### 질문은
@@ -245,7 +253,7 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
 - 계산·API 트리비아는 대상이 아니다 — 정답이 하나라 맞혀도 판단력이 늘지 않는다
 - 사용자가 "급해" / "그냥 해줘" 라고 하면 `❓` 를 걷고 평소대로 민다 — 되묻지 않는다
 - `/wtflow:auto` 로 순회할 때는 `❓` 가 있어도 **멈추지 않는다**(auto 는 무중단이 목적).
-  대신 설계 선택과 변경 압력 예측을 브리핑 뒤로 모아 낸다
+  대신 설계 선택과 변경 시나리오 예측을 브리핑 뒤로 모아 낸다
 - 표시는 plan 출력·대화 전용이다. **작업 문서의 `작업 항목` 체크리스트엔 넣지 않는다**
   (`--done` 이 켜는 줄의 형태가 깨진다)
 
@@ -268,7 +276,9 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
     └ 2b (기능) 자동 갱신 로직     → /wtflow:commit "feat(auth): ..." -K 2
 ```
 
-- **힌트일 뿐 — 강제 계약 아님.** 커밋 경계는 구현하며 달라진다. 실제 분할은 wtflow:auto/구현자 판단
+- **물어서 고른 분할은 뭉개지 않는다**(`learning-protocol.md` §9). 구현 중 더 잘게 쪼개는 건
+  그대로 진행하고, **고른 분할을 한 커밋으로 합칠 때만** 되묻는다
+- 안 고른 K 는 구속이 없다. 구속되는 것은 **경계**지 커밋 메시지·순서의 세부가 아니다
 - 하위 태스크가 새 K 처럼 보여도 **K 번호는 작업 항목에 고정**(2a·2b 모두 `-K 2`, mirror `-002`)
 - 작은 K 는 하위 태스크를 적지 않는다 — noise
 - **`Na` 는 plan 출력·커밋 메시지 전용** — 이슈 본문 체크리스트엔 K(N)만 (체크는 `--done` 이 K 단위로)
@@ -285,14 +295,14 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
 1. **진행 상태 수집**
    - **K 진행 — mirror 분기가 기준**: `git branch --list '<accumulator>-[0-9][0-9][0-9]'`.
      번호=K, tip=최신 커밋. **adhoc 은 이것이 유일한 소스다**
-   - 체크박스 — **이슈 작업일 때만** (`glab issue view <N> --output json` 의 description)
+   - 체크박스 — **이슈 작업일 때만** (이슈 본문 조회 — `host-adapter.md` 의 `## 이슈 명령 대응`)
    - 세션 진행 — 대화 맥락상 완료된 작업 / 새로 생긴 방향. 세션이 끊겼던 adhoc 이면 항목 텍스트가
      없으므로 mirror tip 의 커밋 제목으로 대신 읽는다
 2. **완료 접기** — 완료된 항목·K 는 `✓` 한 줄 요약만
 3. **스코프 드리프트 처리** (plan 표 **전에**) — 실제 작업이 작업 항목을 벗어났으면 되묻는다:
    (a) 이 브랜치에 **새 K로 이어붙이기** / (b) **작업 항목에 추가**(이슈 작업이면 승인 후 이슈 본문
    수정, adhoc 이면 이번 plan 표에 추가) / (c) **별도 작업으로 분리**(`/wtflow:issue` 또는 새 adhoc
-   워크트리). 추측 금지 — 선택에 따라 K 번호·체크박스 동기화가 갈린다
+   워크트리). 추측 금지 — 선택에 따라 K 번호·체크박스 동기화가 달라진다
 4. **델타 plan 표** — 잔여 항목 + 신규 스코프만. 완료 K 번호는 고정, 신규는 **`max(mirror KKK)+1`** 부터
    (mirror 는 이 브랜치에만 있어 타 작업 K 오염 불가). 재사용·재배치 안 함
 5. **출력 순서** — ① 완료 현황(✓) → ② (드리프트 시) 처리 선택 → ③ 델타 plan 표

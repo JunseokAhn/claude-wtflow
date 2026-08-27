@@ -1,13 +1,13 @@
 ---
 name: progress
 description: 워크트리 작업(이슈/adhoc)의 K 진행 현황을 표로 출력(읽기 전용). 이슈 작업은 본문 체크리스트 + mirror 분기, 이슈 없는 작업은 mirror 분기만으로 판정. 사용자 호출 + wtflow:commit/auto가 매 커밋 후 자율 호출.
-allowed-tools: Bash(git *), Bash(glab *)
+allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *)
 disable-model-invocation: false
 ---
 
 # /wtflow:progress — 워크트리 K 진행 현황
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 작업 항목(K)별 진행 상태를 표 하나로 보여준다. **읽기 전용** — 조회만 하고 어떤 변경도 하지 않는다.
 
@@ -41,11 +41,11 @@ disable-model-invocation: false
    ```
    중 HEAD 와 ancestry 를 공유하는 것(`-<KKK>` 로 끝나는 건 mirror 라 제외). **이름이 모드를 정한다**: **`/#` 뒤 정수 = 이슈 모드**(`-N` 이 있으면 우선), **`/+` 뒤 문자열 = 이슈 없는 모드**. accumulator 도 `-N` 도 못 구하면 표 없이 한 줄 안내 후 종료.
    - accumulator 없이 `-N` 만 있으면 mirror 조회를 skip 하고 체크리스트만으로 표를 만든다.
-3. **작업 항목 확보 — 모드별로 갈린다**
+3. **작업 항목 확보 — 모드별로 다르다**
 
    | 모드 | 항목 텍스트 | 없을 때 |
    |---|---|---|
-   | 이슈 (`/#<N>`) | `glab issue view <N> --output json` 의 `description` | 사유 한 줄 안내 후 종료 |
+   | 이슈 (`/#<N>`) | 이슈 본문 조회 — 명령·본문 필드 이름은 `host-adapter.md` 의 `## 이슈 명령 대응` | 사유 한 줄 안내 후 종료 |
    | 이슈 없음 (`/+<slug>`) | **mirror tip 의 커밋 제목**(`%s`) | mirror 0개면 "아직 커밋 없음" 한 줄 후 종료 |
 
    - **이슈 모드**: `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트를 순서대로 추출. 각 항목: 순번(=K)·텍스트·체크 여부. 섹션이 없으면 표 대상 없음, 한 줄 안내 후 종료
@@ -70,7 +70,7 @@ disable-model-invocation: false
 | `- [ ]` + (커밋 잡힘 **또는** 활성 K & 미귀속 작업 있음) | 🟡 진행 중 |
 | `- [ ]` + 그 외 | ⬜ 대기 |
 
-**이슈 없는 모드** — 체크리스트가 없으므로 mirror 와 활성 여부만으로 가른다:
+**이슈 없는 모드** — 체크리스트가 없으므로 mirror 와 활성 여부만으로 판별한다:
 
 | 조건 | 표기 |
 |------|------|
@@ -125,7 +125,7 @@ disable-model-invocation: false
 ## 결정·skip 트리거 (걸리면 표 없이 한 줄 안내 후 종료, 추측 금지)
 
 - 이슈 번호·accumulator 추출 불가 → `-N` 또는 `-a` 로 지정 요청
-- glab 인증/조회 실패 → 실패 사유 한 줄
+- 이슈 CLI 인증/조회 실패 → 실패 사유 한 줄
 - 이슈 없는 모드 + mirror 0개 → "아직 커밋된 K 가 없다 — `/wtflow:commit` 으로 첫 K 를 커밋하면 표가 나온다"
 - `작업 항목` 체크리스트 없음(이슈 모드) → "체크리스트형 아님 — 진행 현황 대상 없음"
 - 섹션/항목 순서 모호 → 추측 매핑 금지, 모호하다고만 보고

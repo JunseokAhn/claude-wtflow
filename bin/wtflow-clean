@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # wtflow-clean — Claude 워크트리 + 이슈 브랜치 정리 (글로벌, 레포 비결합)
 #
-# 사용법: wtflow-clean [옵션] [이슈번호|작업브랜치]
+# 사용법: wtflow-clean [옵션] [이슈번호|작업이름|작업브랜치 ...]
 #
 # 기본 동작: 이슈 N 의 브랜치를 모두 삭제하고 워크트리를 제거.
 #   삭제 대상  = 워크트리 브랜치 <prefix>/#<N>-<slug> (= accumulator = 이슈 마커),
 #                그들의 미러 -NNN (예: fix/#42-foo-001 … 3자리)
 #   워크트리   = .../.claude/worktrees/ 아래의 해당 워크트리
 #   안전장치   = develop/main 에 병합·포함된 브랜치만 삭제 (미병합은 -f/-M 필요).
+#                기본 브랜치(develop/main/master)는 인자로 명시해도 삭제하지 않는다.
 #                워크트리가 물고 있으면 삭제 직전 develop(없으면 main)으로 옮겨 체크아웃을 푼다.
 #
 # 더러운 워크트리: 변경/untracked 가 있으면 그 내용(git status --short)을 보여준다.
@@ -35,6 +36,10 @@
 #   작업 이름(slug)   → 이슈 없는 작업 <prefix>/+<slug> 를 접두사 없이 지목 (예: wtflow-clean dark-mode)
 #                      하나로 좁혀지지 않거나 없는 이름이면 중단한다 — 조용히 통과시키지 않는다
 #   생략             → 현재 체크아웃된 브랜치를 대상으로
+#   여러 개          → 위 형태를 섞어 한 번에 줄 수 있다 (예: wtflow-clean 17 19 dark-mode)
+#                      대상마다 따로 처리하고, 하나가 실패해도 나머지는 계속한다.
+#                      끝에 대상별 성공·실패를 모아 보고하고, 하나라도 실패면 exit 1
+#   기본 브랜치      → develop/main/master 는 명시해도 거부한다
 #
 # 워크트리 브랜치가 곧 이슈 마커다(별도 마커 브랜치 없음) — 그래서 기본 정리 대상이다.
 # 보호의 근거는 "마커냐"가 아니라 "develop/main 에 들어갔냐"로 옮겼다: 안 들어간 건 -f/-M 없이 안 지운다.
@@ -45,6 +50,22 @@ set -uo pipefail
 
 die() { printf 'wtflow-clean: %s\n' "$*" >&2; exit 1; }
 note() { printf '%s\n' "$*" >&2; }
+
+# 기본 브랜치인가 — 어떤 경로로 대상이 됐든 삭제하지 않는다.
+#
+# is_preserved 로는 못 막는다. 그 판정은 "develop/main 에 포함됐나" 인데 develop 은 자기 자신의
+# 조상이라 항상 통과한다. 즉 기본 브랜치는 보존 판정상 "지워도 안전한 것" 으로 분류된다.
+# 실제로 인자 없이 부른 호출이 develop 을 삭제 대상으로 잡은 적이 있고, 막아준 것은 git 의
+# "체크아웃된 브랜치는 못 지운다" 뿐이었다. 체크아웃돼 있지 않았으면 지워졌다.
+#
+# master 는 이 스크립트의 다른 곳(resolve_merge_target)이 쓰지 않지만 여기엔 넣는다 —
+# 베이스를 고르는 자리가 아니라 막는 자리라, 넓게 막는 쪽의 대가가 없다.
+is_default_branch() {
+  case "$1" in
+    develop|main|master) return 0 ;;
+    *)                   return 1 ;;
+  esac
+}
 
 # 브랜치가 어딘가에 보존돼 있는지: 마커(정렬 후) / develop / main 에 포함되면 안전.
 # (force 면 무조건 삭제하므로 호출 안 함)  main_top·marker_branch 전역 사용.
@@ -105,24 +126,55 @@ assume_yes=0
 dry=0
 del_marker=1     # 워크트리 브랜치(= 마커)까지 삭제. -m/-w 전용 모드에서는 적용 안 됨
 target_arg=""
+targets=()       # 위치 인자(이슈번호·작업이름·브랜치명) — 여러 개 가능
+opts=()          # 대상마다 그대로 물려줄 옵션
 
 while [ $# -gt 0 ]; do
   case "$1" in
     -a|--all)           note "wtflow-clean: -a 는 이제 기본 동작입니다 (무시)" ;;
-    -m|--mirror-only)   mode=mirror ;;
-    -w|--worktree-only) mode=worktree ;;
-    -M|--merge)         merge=1 ;;
-    -f|--force)         force=1 ;;
-    -y|--yes)           assume_yes=1 ;;
-    -n|--dry-run)       dry=1 ;;
+    -m|--mirror-only)   mode=mirror;    opts+=("$1") ;;
+    -w|--worktree-only) mode=worktree;  opts+=("$1") ;;
+    -M|--merge)         merge=1;        opts+=("$1") ;;
+    -f|--force)         force=1;        opts+=("$1") ;;
+    -y|--yes)           assume_yes=1;   opts+=("$1") ;;
+    -n|--dry-run)       dry=1;          opts+=("$1") ;;
     -h|--help)          show_help; exit 0 ;;
     --)                 shift; break ;;
     -*)                 die "알 수 없는 옵션: $1 (도움말: wtflow-clean -h)" ;;
-    *)                  [ -z "$target_arg" ] || die "인자가 너무 많습니다: $1"; target_arg="$1" ;;
+    *)                  targets+=("$1") ;;
   esac
   shift
 done
-[ $# -eq 0 ] || { [ -z "$target_arg" ] && target_arg="$1"; }
+while [ $# -gt 0 ]; do targets+=("$1"); shift; done   # `--` 뒤는 전부 대상
+
+# 대상이 여럿이면 대상마다 자기 자신을 한 번씩 부른다.
+#
+# 이 스크립트는 대상 하나를 전역(target_branch·target_wt·issue_num·marker_branch…)에 담고
+# 그 뒤 400여 줄이 그것을 참조한다. 목록을 받겠다고 전역을 배열로 바꾸면 그 참조를 전부
+# 손봐야 하고, 한 대상의 중간 상태가 다음 대상으로 새기 쉽다. 프로세스를 나누면 격리가
+# 공짜로 따라오고 본체는 "대상 하나" 전제를 그대로 유지한다.
+#
+# 하나가 실패해도 나머지는 계속 진행하고, 끝에 대상별로 모아 보고한다.
+if [ ${#targets[@]} -gt 1 ]; then
+  multi_ok=""; multi_fail=""; multi_rc=0
+  for t in "${targets[@]}"; do
+    note ""
+    note "═══ 대상: $t"
+    if "$0" "$t" ${opts[@]+"${opts[@]}"}; then
+      multi_ok="${multi_ok}${multi_ok:+, }$t"
+    else
+      multi_rc=1
+      multi_fail="${multi_fail}${multi_fail:+, }$t"
+    fi
+  done
+  note ""
+  note "═══ 대상별 결과 (${#targets[@]}개)"
+  note "  성공: ${multi_ok:-(없음)}"
+  note "  실패: ${multi_fail:-(없음)}"
+  exit $multi_rc
+fi
+
+[ ${#targets[@]} -eq 0 ] || target_arg="${targets[0]}"
 
 git rev-parse --git-dir >/dev/null 2>&1 || die "git 저장소 안에서 실행하세요."
 
@@ -262,6 +314,11 @@ fi
 if [ "$marker_only" != 1 ]; then
   [ -n "$target_branch" ] && [ "$target_branch" != "HEAD" ] \
     || die "대상 브랜치를 알 수 없습니다 (detached HEAD?). 이슈번호나 작업브랜치명을 인자로 주세요."
+  if is_default_branch "$target_branch"; then
+    die "기본 브랜치는 삭제 대상이 될 수 없습니다: $target_branch
+  인자를 생략하면 '현재 체크아웃된 브랜치' 가 대상입니다. 워크트리 밖(메인 체크아웃)에서
+  인자 없이 불렀다면 그 브랜치가 잡힌 것이니, 지우려는 이슈번호·작업이름·브랜치명을 주세요."
+  fi
   # 세션이 워크트리 안에 있으면 target 은 대개 워크트리 브랜치 <prefix>/#<N>-<slug> 다.
   # 그게 곧 정리 대상이라 막지 않는다 — 안전 판정은 뒤의 is_preserved(develop/main 병합) 몫.
   case "$target_branch" in
@@ -583,6 +640,11 @@ release_checkout() {
 if [ "$del_branch" = 1 ]; then
   while IFS= read -r b; do
     [ -n "$b" ] || continue
+    if is_default_branch "$b"; then
+      rc=1
+      note "⚠ 건너뜀(기본 브랜치): $b — 어떤 옵션으로도 삭제하지 않습니다"
+      continue
+    fi
     [ "$release_checkouts" = 1 ] && { release_checkout "$b" || rc=1; }
     if [ "$branch_force" != 1 ] && ! is_preserved "$b"; then
       rc=1

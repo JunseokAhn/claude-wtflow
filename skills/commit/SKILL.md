@@ -1,19 +1,19 @@
 ---
 name: commit
 description: 워크트리 작업단위 로컬 커밋 + accumulator-K 분기. 인자 -K/--done/--push/--no-test. 한 K 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 K 진행 여부에만; 다중 K 순회는 wtflow:auto.
-allowed-tools: Bash(git *), Bash(glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
+allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/commit-convention.md`(메시지 형식), `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 ## 호출
 
 `/wtflow:commit <작업 설명> [-K <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
 
-- `<작업 설명>` (필수): 한국어 한 줄. commit subject + 본문에 사용
+- `<작업 설명>` (필수): 한 줄 요약. commit subject + 본문에 사용 (언어는 `commit-convention.md` 의 `## Subject` 를 따른다)
 - `-K <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N = K N). 명시 시 그 K 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
 - `-n` / `--new-topic`: 이번 커밋부터 새 주제 — 새 분기(`기존 최고 K + 1`) 강제
 - `-s` / `--same-topic`: 현재(최고 K) 분기에 누적 강제
@@ -26,9 +26,9 @@ disable-model-invocation: false
 - `--no-test`: 테스트 단계 생략
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
 
-> **체크박스가 있느냐를 accumulator 이름이 정한다.** `/#` 뒤 정수 → 이슈 #N 본문(glab)에 체크리스트가
+> **체크박스가 있느냐를 accumulator 이름이 정한다.** `/#` 뒤 정수 → 이슈 #N 본문에 체크리스트가
 > 있다. `/+` 뒤 문자열 → **체크리스트가 없다** — 완료는 mirror 분기 `<accumulator>-<KKK>` 의 존재로만
-> 드러난다. 커밋·분기·테스트 규율은 두 경우가 완전히 같고, 체크박스 동기화(계약 6)만 갈린다.
+> 드러난다. 커밋·분기·테스트 규율은 두 경우가 완전히 같고, 체크박스 동기화(계약 6)만 다르다.
 
 ## 한 번 호출 = 한 K, 그리고 멈춤 (자율 다중 K 금지)
 
@@ -53,7 +53,7 @@ disable-model-invocation: false
    | `package.json`, `scripts.test` 없음 | `npm run lint` + (`tsconfig.json` 있으면) `npx tsc --noEmit` |
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
-3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 Why / 변경 / 테스트 결과. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 K 를 넓게 잡았다는 신호다** — 이 판정은 K 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
@@ -84,16 +84,31 @@ disable-model-invocation: false
 
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 K`, 이슈 없는 작업이면 `mirror -00N 생성/전진` 으로 대신)
 
-   **이전 K 의 설계 선택이 이번 커밋에서 대가를 드러냈으면 청구서를 함께 낸다**
-   (`learning-protocol.md` `## 6. 청구서`). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
-   대가가 아직 안 왔으면 안 왔다고 적는다 — 없는 청구서를 지어내면 다음 예측이 무의미해진다.
+   **이전 K 의 설계 선택이 이번 커밋에서 유지보수 비용을 드러냈으면 얼마였는지 함께 보고한다**
+   (`learning-protocol.md` `## 6. 유지보수 비용`). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
+   비용이 아직 안 왔으면 안 왔다고 적는다 — 없는 비용을 지어내면 다음 예측이 무의미해진다.
 
    ```
-   청구서 — K1 에서 B(판정 분리)를 고르셨고 "호출자가 늘면 A 가 먼저 무너진다" 고 예측하셨습니다.
+   비용 — K1 에서 B(판정 분리)를 고르셨고 "호출자가 늘면 A 를 먼저 고쳐야 한다" 고 예측하셨습니다.
             이번 테스트 K 에서 판정만 단독 테스트 6케이스로 덮었고 스텁은 0줄이었습니다. 예측대로입니다.
    ```
 
 8. **진행 현황 자동 출력** — 요약 직후 `/wtflow:progress --quiet` 1회 호출해 갱신된 K 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
+
+9. **영향 범위 문답 (동작이 바뀌는 커밋만)** — 번호는 뒤지만 **실행은 계약 3 커밋보다 앞이다.** 절차는 `references/learning-protocol.md` §7, 형식은 그 절의 `### 형식`
+
+   | 단계 | 무엇 |
+   |---|---|
+   | 판정 | staged diff 가 **동작을 바꾸나** — 반환형·시그니처·부수효과·조건 분기. 삭제·import 정리·포맷·이름변경·문서만이면 여기서 끝 |
+   | 수집 | 바뀐 함수·export 의 **호출부**를 저장소에서 찾는다. 테스트·스크립트·훅도 호출부다 |
+   | 질문 | `AskUserQuestion` **multiSelect** — 호출부 목록만 보이고 **어느 것이 깨지는지 묻는다.** 영향 여부를 미리 채우지 않는다. `(추천)` 금지 |
+   | 공개 | 답을 받은 **뒤에** 내 답을 낸다. 갈리면 근거로 다투고, 사실 문제면 실행해서 결론낸다 |
+   | 기록 | 갈린 자리와 안 바꾼 것을 커밋 본문 `영향` 란에 적는다 |
+
+   - **호출부 0곳이면 묻지 않는다.** 대신 `영향` 란에 "호출부 0곳" 을 적는다
+   - **16곳을 넘으면 묻지 않는다** — 보기로 낼 수 없다. 표로 내고 확인만 받되 **묻지 못했다는 사실을 요약(계약 7)에 적는다**
+   - **`--no-ask` 로 끌 수 없다.** §1·§4·§5 와 달리 이건 학습 장치가 아니라 회귀를 막는 자리다
+   - 깨지는 호출부가 나와도 **이 커밋은 그대로 낸다.** 그 수정은 **같은 K 의 다음 태스크**다 (§7 `### 깨지는 호출부가 나오면`) — 새 K 로 빼지 않는다. 깨진 호출부는 `영향` 란에 적는다
 
 ## 결정·중단 트리거
 
@@ -104,7 +119,7 @@ disable-model-invocation: false
 - 아키텍처 트레이드오프 발견 → 옵션 비교만 제시, 결정 대기
 - 스코프 확장 필요 → 진행 전 보고
 - 파괴적 동작(force-push, 다른 브랜치 reset, amend/rebase 등 history 재작성, 운영 영향) → 명시적 동의 전 금지. 수정은 항상 새 commit(계약 3)
-- 체크박스 동기화 실패(이슈번호 추출 불가 / glab 실패 / 항목 수 < K / 순서 모호 / 훅이 막음) → **경고만 하고 커밋은 그대로 완료**. 수동 체크 안내, 엉뚱한 항목을 추측해 체크하지 말 것. ⚠️ 이슈 없는 작업은 실패가 아니라 **해당 없음**이라 경고도 내지 않는다
+- 체크박스 동기화 실패(이슈번호 추출 불가 / 이슈 CLI 실패 / 항목 수 < K / 순서 모호 / 훅이 막음) → **경고만 하고 커밋은 그대로 완료**. 수동 체크 안내, 엉뚱한 항목을 추측해 체크하지 말 것. ⚠️ 이슈 없는 작업은 실패가 아니라 **해당 없음**이라 경고도 내지 않는다
 
 ## 짧은 변형
 
@@ -112,6 +127,19 @@ disable-model-invocation: false
 - "새 주제" / "분기 새로 떠" → `-n` · "같은 거에 묶어" → `-s`
 - "K12 로" → `-K 12` · "accumulator 는 X" → `-a X`
 - "이 작업 항목 끝" / "항목 완료" / "체크해줘" → `--done`
+
+## 커밋 본문 자체 검사
+
+본문을 쓴 뒤 **커밋하기 전에** 해석된 커밋 컨벤션의 검사 표로 대조한다
+(`commit-convention.md` 의 `### 분량과 문체`·`### 제목이 diff 와 맞나`, `writing-style.md`,
+`convention-precedence.md`).
+
+- **여기에 검사 항목을 적지 않는다.** 컨벤션이 갖는다 — 사본을 두면 둘이 갈라진다
+- **컨벤션에 문체 항목이 없는 저장소는 이 단계를 건너뛴다.** 없는 규칙을 만들어 검사하지 않는다
+- **줄 수 상한 초과는 K 를 넓게 잡았다는 신호다**(계약 3). 이 판정만은 컨벤션이 아니라
+  K 모델 소관이라 저장소가 컨벤션을 덮어도 남는다
+- 걸린 항목은 고쳐서 커밋한다. 요약에 "문체 검사 N건 수정" 같은 줄을 남기지 않는다 —
+  본문을 다듬은 것은 변경 내용이 아니다
 
 ## mirror 불변식 (커밋을 mirror 밖에 방치 금지)
 
@@ -135,16 +163,20 @@ mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 �
 
    | 로드 | 쓰기 |
    |---|---|
-   | `glab issue view <N> --output json` 의 `description` | `WTFLOW_CHECKBOX_SYNC=1 glab issue update <N> -d "<전체 본문>"` |
+   | 이슈 본문 조회 | 이슈 본문 쓰기 앞에 환경변수 `WTFLOW_CHECKBOX_SYNC=1` |
 
-   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` prefix 를 빼지 않는다.** 이슈 본문을 고치는 호출은 훅
+   **명령과 본문 필드 이름은 `host-adapter.md` 의 `## 이슈 명령 대응` 에서 꺼낸다** — 여기 박지
+   않는다. 본문 필드가 GitHub 은 `body`, GitLab 은 `description` 이라 이름째로 다르다.
+
+   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` 환경변수를 빼지 않는다.** 이슈 본문을 고치는 호출은 훅
    (`hooks/guard-body-edit.sh`)이 막는다 — 재작성에는 템플릿 준수·미리보기·확인 계약이 걸려야
-   하는데 `glab issue update` 직접 호출은 그걸 전부 건너뛰기 때문이다. **여기만 예외**인 이유는
+   하는데 이슈 수정 명령 직접 호출은 그걸 전부 건너뛰기 때문이다. **환경변수는 호스트와 무관하게
+   똑같이 붙인다** — 훅이 `glab issue update` 와 `gh issue edit` 를 다 잡는다. **여기만 예외**인 이유는
    본문을 다시 쓰는 게 아니라 `- [ ]` **한 줄을 켜는 것**이라서다. 훅은 명령 문자열만 보므로,
-   호출자가 이 prefix 로 스스로를 밝히는 것 말고 정당한 호출을 구별할 방법이 없다.
-   - 그러니 **이 prefix 를 붙인 호출은 실제로 체크박스 한 줄만 바꿔야 한다.** 같은 호출에
+   호출자가 이 환경변수로 스스로를 밝히는 것 말고 정당한 호출을 구별할 방법이 없다.
+   - 그러니 **이 환경변수를 붙인 호출은 실제로 체크박스 한 줄만 바꿔야 한다.** 같은 호출에
      본문 손질을 얹으면 예외를 우회로로 쓰는 것이다 — 본문을 고칠 일이면 `/wtflow:issue --rewrite`
-   - 훅이 막았다는 응답을 받으면 prefix 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
+   - 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 3. **K번째 항목** — `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트에서 **위에서 K번째** `- [ ]`/`- [x]` 줄. 항목 수 < K·섹션 모호 → 경고·skip(추측 금지)
 4. **그 줄만 토글** `- [ ]`→`- [x]` (나머지 본문 보존, 이미 `[x]` 면 no-op). 실패 시 경고만, 커밋 흐름 안 막음
 5. **요약에 명시** — "이슈 #N 항목 K 체크", 또는 실패 사유
