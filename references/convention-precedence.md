@@ -1,6 +1,7 @@
 # 컨벤션 우선순위
 
-커밋·이슈·PR 세 컨벤션이 여러 곳에서 지정될 때 무엇이 우선하는지.
+커밋·이슈·PR 세 컨벤션과 셋이 공유하는 **문체**(`writing-style.md`)가 여러 곳에서
+지정될 때 무엇이 우선하는지.
 **`commit`·`auto`·`issue`·`mr`·`briefing` 이 컨벤션 문서를 읽기 전에 읽는다.**
 
 브랜치 이름·K 모델(`worktree-discipline.md`)과 사전문답(`learning-protocol.md`)은 대상이 아니다 —
