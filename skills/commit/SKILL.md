@@ -53,7 +53,7 @@ disable-model-invocation: false
    | `package.json`, `scripts.test` 없음 | `npm run lint` + (`tsconfig.json` 있으면) `npx tsc --noEmit` |
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
-3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 K 를 넓게 잡았다는 신호다** — 이 판정은 K 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
@@ -112,6 +112,18 @@ disable-model-invocation: false
 - "새 주제" / "분기 새로 떠" → `-n` · "같은 거에 묶어" → `-s`
 - "K12 로" → `-K 12` · "accumulator 는 X" → `-a X`
 - "이 작업 항목 끝" / "항목 완료" / "체크해줘" → `--done`
+
+## 커밋 본문 자체 검사
+
+본문을 쓴 뒤 **커밋하기 전에** 해석된 커밋 컨벤션의 검사 표로 대조한다
+(`commit-convention.md` `### 분량과 문체` · `convention-precedence.md`).
+
+- **여기에 검사 항목을 적지 않는다.** 컨벤션이 갖는다 — 사본을 두면 둘이 갈라진다
+- **컨벤션에 문체 항목이 없는 저장소는 이 단계를 건너뛴다.** 없는 규칙을 만들어 검사하지 않는다
+- **줄 수 상한 초과는 K 를 넓게 잡았다는 신호다**(계약 3). 이 판정만은 컨벤션이 아니라
+  K 모델 소관이라 저장소가 컨벤션을 덮어도 남는다
+- 걸린 항목은 고쳐서 커밋한다. 요약에 "문체 검사 N건 수정" 같은 줄을 남기지 않는다 —
+  본문을 다듬은 것은 변경 내용이 아니다
 
 ## mirror 불변식 (커밋을 mirror 밖에 방치 금지)
 
