@@ -116,7 +116,8 @@ disable-model-invocation: false
 ## 커밋 본문 자체 검사
 
 본문을 쓴 뒤 **커밋하기 전에** 해석된 커밋 컨벤션의 검사 표로 대조한다
-(`commit-convention.md` `### 분량과 문체` · `convention-precedence.md`).
+(`commit-convention.md` 의 `### 분량과 문체`·`### 제목이 diff 와 맞나`, `writing-style.md`,
+`convention-precedence.md`).
 
 - **여기에 검사 항목을 적지 않는다.** 컨벤션이 갖는다 — 사본을 두면 둘이 갈라진다
 - **컨벤션에 문체 항목이 없는 저장소는 이 단계를 건너뛴다.** 없는 규칙을 만들어 검사하지 않는다
