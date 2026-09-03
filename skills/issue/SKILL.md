@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다. 계약 8 에서 note 를 쓸 때만 `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(이슈 note 규격)를 읽는다.**
 
 ## 트리거
 
@@ -20,9 +20,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 - 자연어: "이슈 본문 다시 써줘", "이슈 #14 갱신", "이슈 내용 고쳐줘", "이슈에 <내용> 반영해줘" 등
 - 슬래시: `/wtflow:issue --rewrite <N> [-t "<새 제목>"] [-R <group>/<repo>]`
 
-⚠️ **이슈 본문을 바꾸는 경로는 재작성 모드 하나다.** 이슈 수정 명령(`glab issue update -d` ·
-`gh issue edit --body`)을 직접 부르지 않는다 —
-훅이 막는다(`hooks/guard-body-edit.sh`). 유일한 예외는 wtflow:commit 의 체크박스 동기화다.
+⚠️ **이슈 본문을 바꾸는 경로는 재작성 모드 하나다** — 규율은 `body-rewrite.md` 가 갖는다.
 
 ## 마일스톤은 이 스킬의 관심사가 아니다
 
@@ -65,7 +63,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 7. **이슈 생성 결과 수집**: 이슈 번호 + URL
 
-8. **이슈 note 작성 — 딱 한 번, 적을 게 있을 때만** (형식은 아래 `## 이슈 note 형식`)
+8. **이슈 note 작성 — 딱 한 번, 적을 게 있을 때만** (형식은 `note-format.md` 의 `## 이슈 note 형식`)
 
     `~/.claude/notes/<group>/<repo>/issue-<N>.md` 에 그냥 쓴다 — git 과 무관하다(커밋·MR diff 없음).
 
@@ -97,7 +95,8 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 10. **진행 방향 선택 — 실행은 계약 4 본문 작성 앞** — 번호는 뒤지만 실행 순서는 3 과 4 사이다.
     번호를 끼워 넣으면 `계약 4`·`계약 8` 을 가리키는 `wtflow:milestone` 이 어긋난다.
 
-    절차·형식·건너뛰는 조건은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md` §8.
+    절차·형식·건너뛰는 조건은 §8 진행 방향.
+    묻기 직전에 같은 문서의 `## 질문을 내기 전 검사` 를 거친다 — 안들의 작업 항목 초안이 같으면 묻지 않는다.
     **여기 사본을 두지 않는다** — 사전문답은 컨벤션이 아니라 작업 규율이라 저장소가 이슈
     컨벤션을 덮어도 남는다(`convention-precedence.md`).
 
@@ -126,53 +125,16 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 ### 절차
 
-1. **현재 본문을 먼저 읽는다** — 이슈 본문·제목 조회(`host-adapter.md` 의 `## 이슈 명령 대응`).
-   ⚠️ 본문 필드 이름이 GitHub 은 `body`, GitLab 은 `description` 이다.
-   실패하면 중단·보고. ⚠️ **읽지 않고 쓰지 않는다** — 본문 쓰기는 어느 호스트든 전체 치환이라
-   통째로 덮어쓰게 된다
+**조회·파일 경유·`WTFLOW_BODY_REWRITE=1`·미리보기 의무는 `body-rewrite.md` 가 갖는다.**
+여기 사본을 두지 않는다 — 아래는 이 스킬에서만 다른 부분이다.
+
+1. **현재 본문을 먼저 읽는다** (`body-rewrite.md` 의 `## 읽지 않고 쓰지 않는다`)
 2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
-   **임의로 맞추지 않는다.** 어긋난 절은 3의 미리보기에 드러내고 사용자가 정한다
-3. **미리보기 + 확인** — `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
-4. **반영** — 본문은 파일을 거쳐 넘긴다. 줄바꿈·백틱·따옴표가 섞이므로 인자에 직접 이어붙이지 않는다
-   (`wtflow:mr` 계약 10 과 같은 이유):
-   ```
-   WTFLOW_BODY_REWRITE=1 gh   issue edit   <N> --body-file <본문파일>      # GitHub
-   WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "$(cat <본문파일>)"      # GitLab
-   ```
-   ⚠️ **`WTFLOW_BODY_REWRITE=1` 환경변수를 빼지 않는다.** 본문을 고치는 호출은 훅
-   (`hooks/guard-body-edit.sh`)이 막고, 이 환경변수가 "계약을 다 탄 재작성" 임을 밝히는
-   유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다.
-   - 그러니 **이 환경변수를 붙인 호출은 1~3 을 실제로 거친 뒤여야 한다.** 미리보기·확인을
-     건너뛰고 붙이면 예외가 그대로 우회로가 된다
-   - 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
+   **임의로 맞추지 않는다.** 어긋난 섹션은 3의 미리보기에 드러내고 사용자가 정한다
+3. **미리보기 + 확인** — 무엇을 셀지는 `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
+4. **반영** — `body-rewrite.md` 의 `## 본문은 파일로 넘긴다` · `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`.
+   제목도 바꾸면 `-t "<새 제목>"` 을 함께
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
-
-## 이슈 note 형식
-
-`~/.claude/notes/<group>/<repo>/issue-<N>.md`. 계약 8 이 **한 번만** 만든다.
-**착수 전 사고의 스냅샷**이지 유지되는 문서가 아니다 — 분량 제한 없이 규격을 못박는 게 목적:
-
-```markdown
----
-issue: <N>
-repo: <group>/<repo>
-created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는 기준이 된다
----
-
-## 배경          무슨 문제를 왜 푸는가 + 범위·전제 (2-4문장)
-
-## 계약 요약      다른 사람·다른 레포가 맞춰 구현해야 하는 규격. 산문 말고 표로:
-                엔드포인트 | 페이로드(필드·타입·필수·기본) | 에러코드 | 호환성·배포 순서
-                확정 안 된 필드는 행을 지어내지 말고 `(미정)`
-
-## 열린 질문      아직 안 정한 것 + 재검토 트리거 (있을 때만)
-```
-
-- 표에 담기는 건 **규격**이지 구현이 아니다 — 함수 본문·쿼리를 옮겨오지 않는다
-- ⚠️ **K 번호·작업 항목·완료 여부·체크박스 금지** — 진행 상태의 진실원은 이슈 체크박스와 mirror 분기다
-- **`branch:`·`milestone_note:` 는 넣지 않는다** — 브랜치 이름은 `plan` 이, 마일스톤은 이슈의
-  배정이 각각 답한다. 여기 적으면 답이 둘이 된다
-- 마일스톤 계약과 겹치는 내용은 **복사하지 않는다** — 원본이 바뀔 때 사본이 조용히 낡는다
 
 ## 결정·중단 트리거
 
@@ -192,7 +154,7 @@ created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는
 - "fix 로" / "feat 로" → prefix 강제
 - "긴급" / "우선순위 높음" / "쉬움" → 저장소에 그 뜻의 라벨이 있으면 그것을 붙인다
 - "repo는 X" → `-R X`
-- "본문 자세히" → 본문에 맥락 추가 (단, 계약 4 의 서술 절 규칙은 유지 — 상세는 note 로)
+- "본문 자세히" → 본문에 맥락 추가 (단, 계약 4 의 서술 섹션 규칙은 유지 — 상세는 note 로)
 - "note 빼고" / "이슈만" → 계약 8 생략
 - "이슈 본문 다시 써줘" / "이슈 갱신" / "이슈에 반영해줘" → `--rewrite <N>`
 - 재작성에서 "제목도 바꿔" → `-t "<새 제목>"` 함께 (안 주면 제목은 건드리지 않는다)
