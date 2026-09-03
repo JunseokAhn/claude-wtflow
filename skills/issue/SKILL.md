@@ -97,7 +97,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 10. **진행 방향 선택 — 실행은 계약 4 본문 작성 앞** — 번호는 뒤지만 실행 순서는 3 과 4 사이다.
     번호를 끼워 넣으면 `계약 4`·`계약 8` 을 가리키는 `wtflow:milestone` 이 어긋난다.
 
-    절차·형식·건너뛰는 조건은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md` §8.
+    절차·형식·건너뛰는 조건은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md` §8 진행 방향.
     **여기 사본을 두지 않는다** — 사전문답은 컨벤션이 아니라 작업 규율이라 저장소가 이슈
     컨벤션을 덮어도 남는다(`convention-precedence.md`).
 
