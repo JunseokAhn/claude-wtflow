@@ -98,6 +98,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
     번호를 끼워 넣으면 `계약 4`·`계약 8` 을 가리키는 `wtflow:milestone` 이 어긋난다.
 
     절차·형식·건너뛰는 조건은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md` §8 진행 방향.
+    묻기 직전에 같은 문서의 `## 질문을 내기 전 검사` 를 거친다 — 안들의 작업 항목 초안이 같으면 묻지 않는다.
     **여기 사본을 두지 않는다** — 사전문답은 컨벤션이 아니라 작업 규율이라 저장소가 이슈
     컨벤션을 덮어도 남는다(`convention-precedence.md`).
 
