@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:plan — 워크트리 작업 시작
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답 — 어느 K 를 착수 전에 멈출지), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 ## 작업 문서
 
@@ -142,9 +142,9 @@ disable-model-invocation: true
    | 질문 | 언제 | 안 물을 때 |
    |---|---|---|
    | **범위·완료 기준** (포함/제외) | 거의 항상 — adhoc 의 핵심 결손 | — |
-   | prefix / 작업 성격 | 설명으로 성격이 안 갈릴 때만 | 추론 ("추가"→`feat`, "안 됨"→`fix`) |
+   | prefix / 작업 성격 | 설명으로 성격이 안 드러날 때만 | 추론 ("추가"→`feat`, "안 됨"→`fix`) |
    | base 브랜치 | `origin/develop` 이 없거나 다른 흐름을 시사할 때만 | `origin/develop` |
-   | 접근 방식 | 갈래가 둘 이상이고 K 분해가 갈릴 때만 | 안 물음 |
+   | 접근 방식 | 갈래가 둘 이상이고 K 분해가 달라질 때만 | 안 물음 |
 
    ⚠️ **"이슈를 만들까요?" 는 묻지 않는다** — 이슈 없이 시작하겠다고 이미 고른 것이다
    (나중에 필요하면 `## 이슈로 승격`)
@@ -233,7 +233,7 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
 
 ```
 ❓ K2 — 코드를 인용해 붙이고 "무엇이 문제고 무엇으로 바꿀지" 를 먼저 답하신 뒤 진행합니다.
-   설계 선택 1건(판정을 어느 층에 둘지)도 두 안으로 함께 띄웁니다.
+   설계 선택 1건(판정을 어느 계층에 둘지)도 두 안으로 함께 띄웁니다.
 ```
 
 - 대상은 두 갈래다 — **동작 판단이 든 K**(§1 예측)와 **물어야 할 설계 선택이 있는 K**(§4 설계 선택).

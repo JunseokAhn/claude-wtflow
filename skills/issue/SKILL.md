@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
 
 ## 트리거
 
@@ -131,7 +131,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
    실패하면 중단·보고. ⚠️ **읽지 않고 쓰지 않는다** — 본문 쓰기는 어느 호스트든 전체 치환이라
    통째로 덮어쓰게 된다
 2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
-   **임의로 맞추지 않는다.** 어긋난 절은 3의 미리보기에 드러내고 사용자가 정한다
+   **임의로 맞추지 않는다.** 어긋난 섹션은 3의 미리보기에 드러내고 사용자가 정한다
 3. **미리보기 + 확인** — `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
 4. **반영** — 본문은 파일을 거쳐 넘긴다. 줄바꿈·백틱·따옴표가 섞이므로 인자에 직접 이어붙이지 않는다
    (`wtflow:mr` 계약 10 과 같은 이유):
@@ -192,7 +192,7 @@ created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는
 - "fix 로" / "feat 로" → prefix 강제
 - "긴급" / "우선순위 높음" / "쉬움" → 저장소에 그 뜻의 라벨이 있으면 그것을 붙인다
 - "repo는 X" → `-R X`
-- "본문 자세히" → 본문에 맥락 추가 (단, 계약 4 의 서술 절 규칙은 유지 — 상세는 note 로)
+- "본문 자세히" → 본문에 맥락 추가 (단, 계약 4 의 서술 섹션 규칙은 유지 — 상세는 note 로)
 - "note 빼고" / "이슈만" → 계약 8 생략
 - "이슈 본문 다시 써줘" / "이슈 갱신" / "이슈에 반영해줘" → `--rewrite <N>`
 - 재작성에서 "제목도 바꿔" → `-t "<새 제목>"` 함께 (안 주면 제목은 건드리지 않는다)

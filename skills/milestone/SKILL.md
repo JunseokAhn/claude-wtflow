@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
 
 # /wtflow:milestone — 마일스톤 계약 문서
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 이슈는 "무엇/왜"의 짧은 메모여야 하는데(wtflow:issue 계약 4), 여러 이슈가 엮인 작업은 착수 전에
 페이로드·타입·에러코드·호출 순서까지 정해두게 된다. **그걸 적을 곳이 없어서 이슈가 비대해진다.**
@@ -39,14 +39,14 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
 - **읽는 건 `/wtflow:plan` 계약 6 이다** — 이슈의 마일스톤 배정에서 식별자를 얻어 위 경로를 조립해
   이 파일을 직접 Read 한다. 워크트리에 사본도 심링크도 만들지 않으므로 여기를 고치면 모든 이슈가
   즉시 현행을 본다
-- `~/.claude` 는 글로벌 gitignore 대상이라 git·MR 에 안 잡힌다
+- `~/.claude` 는 글로벌 gitignore 대상이라 git·MR 에 안 올라간다
 
 ## 계약 (보장되어야 하는 것)
 
 1. **그룹 판별** — `git remote get-url origin` 에서 group path. 실패 시 `-g` 요청
 
-2. **마일스톤 목록 조회** — 먼저 `host-adapter.md` 의 `## 마일스톤` 으로 **이 호스트에 계층이
-   있는지**부터 판별한다. 계층 유무로 조회 대상이 달라진다:
+2. **마일스톤 목록 조회** — 먼저 `host-adapter.md` 의 `## 마일스톤` 으로 **이 호스트에 조직 레벨이
+   있는지**부터 판별한다. 조직 레벨 유무로 조회 대상이 달라진다:
 
    | 호스트 | 조회 |
    |---|---|
@@ -66,8 +66,8 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
    | GitHub | `gh api --method POST repos/<owner>/<repo>/milestones -f title="<제목>" -f description="<한 줄>"` |
    | Gitea | `tea milestones create --title "<제목>" --description "<한 줄>"` |
 
-   ⚠️ **계층이 없는 호스트에서는 저장소마다 같은 제목으로 만든다.** 조직 레벨 마일스톤을 만들
-   방법을 찾지 말 것 — 없는 계층이다(`host-adapter.md`). 여러 저장소를 묶는 건 아래 note 가 맡는다
+   ⚠️ **조직 레벨이 없는 호스트에서는 저장소마다 같은 제목으로 만든다.** 조직 레벨 마일스톤을 만들
+   방법을 찾지 말 것 — 없는 조직 레벨이다(`host-adapter.md`). 여러 저장소를 묶는 건 아래 note 가 맡는다
 
 4. **문서 경로 확정** — `~/.claude/notes/<group>/_milestone/<식별자>-<slug>.md`
    (`<식별자>`: GitLab `iid` / GitHub `number` / Gitea `id`. `<slug>`: 제목을 의미 기반 영어
@@ -81,13 +81,13 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
    | GitHub | `gh issue list --milestone "<제목>" --json number,title,url` — **저장소 하나 안에서만** |
    | Gitea | `tea issues ls --milestones "<제목>"` — **저장소 하나 안에서만** |
 
-   ⚠️ **계층이 없는 호스트에서는 이 조회가 저장소 하나만 덮는다.** 여러 저장소에 걸친 현황은
+   ⚠️ **조직 레벨이 없는 호스트에서는 이 조회가 저장소 하나만 덮는다.** 여러 저장소에 걸친 현황은
    호스트가 답해주지 못하므로 **note 의 이슈 표가 유일한 대조본**이다 — 그래서 그 표를 비워두지 않는다
 
 6. **공통 계약 작성 — 여기가 본체다. 날조 금지**
    - 출처는 **대화에서 실제로 정한 것 + 코드·스펙 파일**뿐. 근거 없는 칸은 `(미정)`
    - 갱신할 때마다 **계약 현황 표 ①** 출력. 되묻기 직전에는 반드시
-   - 따져서 고른 것은 `결정` 절에 한 줄로. 논의 재현이 아니라 결론과 트레이드오프만
+   - 따져서 고른 것은 `결정` 섹션에 한 줄로. 논의 재현이 아니라 결론과 트레이드오프만
    - 분량 제한 없음 — 이슈에 못 적던 상세가 전부 여기 들어간다
 
 7. **(--no-issue 아니면) 이슈 분할 제안** — 분할 표 ② 를 낸 뒤 `AskUserQuestion` 승인.
@@ -104,7 +104,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
         ```
         /wtflow:issue <설명> -R <group>/<repo>
         ```
-        **이슈 본문은 짧게.** ⚠️ **이슈에는 절 이름·문서 경로를 넣지 않는다 —
+        **이슈 본문은 짧게.** ⚠️ **이슈에는 섹션 이름·문서 경로를 넣지 않는다 —
         `참고 자료` 섹션에도.** 깨진 포인터다 (wtflow:issue 계약 4). 계약 전문도 넘기지 않는다
    - b. 배정 — 호스트별로 다르다:
 
@@ -127,7 +127,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
 ## 중간 표 출력
 
 계획 단계는 상태가 머릿속에만 쌓인다. **계약이 바뀔 때마다 표를 다시 낸다** — 끝에 한 번이 아니라.
-셋 다 **출력 전용**이다. note 에 "현황" 절로 저장하면 낡은 사본이 되고 이원화가 시작된다.
+셋 다 **출력 전용**이다. note 에 "현황" 섹션로 저장하면 낡은 사본이 되고 이원화가 시작된다.
 
 **재출력 규칙은 세 표에 모두 걸린다.** ① 만이 아니다.
 
@@ -178,7 +178,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
 | 이슈 제목·open/closed | 호스트 | △ 대조용, 어긋나면 호스트가 이김 |
 | 페이로드·타입·에러코드 | **이 문서** | ✅ 본체 |
 | 이슈 간 의존 순서 | **이 문서** | ✅ 어느 호스트에도 없는 정보 |
-| 여러 저장소가 한 마일스톤에 묶인다는 사실 | **이 문서** (계층 없는 호스트) | ✅ `repos:` |
+| 여러 저장소가 한 마일스톤에 묶인다는 사실 | **이 문서** (조직 레벨 없는 호스트) | ✅ `repos:` |
 
 체크박스·완료 칼럼·진행률을 넣는 순간 `wtflow:commit --done` 이 참조하는 이슈 체크박스와
 어긋나 엉뚱한 항목이 체크된다.
@@ -194,7 +194,7 @@ host: github | gitlab | gitea
 milestone_id: <글로벌 id>      # GitLab 전용, 이슈 배정용 (iid 아님). 다른 호스트는 생략
 ref: <경로에 쓴 식별자>        # GitLab iid / GitHub number / Gitea id
 group: <group path>
-repos: [<repo>, …]            # 계층이 없는 호스트에서 같은 제목을 나눠 가진 저장소들
+repos: [<repo>, …]            # 조직 레벨이 없는 호스트에서 같은 제목을 나눠 가진 저장소들
 web_url: <마일스톤 URL>
 ---
 
@@ -223,7 +223,7 @@ web_url: <마일스톤 URL>
 ## 결정·중단 트리거
 
 - 호스트 CLI 인증 실패 / 그룹 추론 실패 / 호스트 판별 실패 → 보고 후 중단
-- 계층이 없는 호스트인데 **여러 저장소에 걸친 마일스톤**을 요청받음 → 저장소마다 같은 제목으로
+- 조직 레벨이 없는 호스트인데 **여러 저장소에 걸친 마일스톤**을 요청받음 → 저장소마다 같은 제목으로
   만들고 `repos:` 로 묶겠다고 알린 뒤 진행. 조직 레벨 마일스톤을 만들 방법을 찾지 않는다
 - `include_parent_milestones=true` 없이 조회해 빈 목록을 얻고 "마일스톤 없음" 단정 → **금지**. 재조회
 - 계약 핵심(페이로드·에러코드)이 대화에 근거 없음 → `(미정)` 후 1회 되묻기. 지어내지 말 것

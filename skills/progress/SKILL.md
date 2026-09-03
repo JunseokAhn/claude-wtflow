@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:progress — 워크트리 K 진행 현황
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 작업 항목(K)별 진행 상태를 표 하나로 보여준다. **읽기 전용** — 조회만 하고 어떤 변경도 하지 않는다.
 
@@ -51,12 +51,12 @@ disable-model-invocation: false
    - **이슈 모드**: `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트를 순서대로 추출. 각 항목: 순번(=K)·텍스트·체크 여부. 섹션이 없으면 표 대상 없음, 한 줄 안내 후 종료
    - **이슈 없는 모드**: 존재하는 mirror 분기가 곧 항목 목록이다. K = `-<KKK>` 번호, 텍스트 = 그 tip 의 커밋 제목. **없는 K 는 표에 넣지 않는다** — 계획된 항목 수를 알 방법이 없으므로 ⬜ 대기 행을 지어내지 않는다
    - ⚠️ 어느 모드든 **mirror 만으로 이슈 항목을 지어내지 않는다.** 이슈 모드에서 본문을 못 읽으면 종료지, 커밋 제목으로 대체하지 않는다(그건 이슈 없는 모드의 규칙이다)
-5. **mirror 분기 K 귀속** — `git branch --list '<accumulator>-[0-9][0-9][0-9]'`. 각 분기의 번호=K, tip=그 K 의 최신 커밋(`%h %s`). mirror 가 있는 K = 잡힌 K.
+5. **mirror 분기 K 귀속** — `git branch --list '<accumulator>-[0-9][0-9][0-9]'`. 각 분기의 번호=K, tip=그 K 의 최신 커밋(`%h %s`). mirror 가 있는 K = 파악된 K.
 6. **미분류 커밋 판정** — base 산정(`git merge-base HEAD origin/develop`, 없으면 develop→main) 후 `<base>..HEAD` 커밋 중 **어떤 mirror tip 의 조상도 아닌** 것(`merge-base --is-ancestor` 로 각 mirror 판정, 전부 실패면 미분류). 불변식 유지 시 0개.
 7. **미귀속 작업 + 활성 K 산정** — `git status --porcelain` + 6번 결과.
    - **미귀속 작업 있음** = dirty **또는** 미분류 커밋 ≥1
-   - **활성 K** = ① `-K` 명시값 → ② 잡힌 K 중 **미완료 최고 번호**(진행하던 K 이어감) → ③ 첫 ⬜ 대기 K(새로 시작, 이슈 모드에만 있다). 전부 없으면 활성 K 없음
-8. **상태 판정 + 표 출력** — 아래 규칙. **현재 진행 K** = 활성 K(없으면 잡힌 K 중 tip 이 가장 최근인 것 — 번호 최대 ≠ 최근).
+   - **활성 K** = ① `-K` 명시값 → ② 파악된 K 중 **미완료 최고 번호**(진행하던 K 이어감) → ③ 첫 ⬜ 대기 K(새로 시작, 이슈 모드에만 있다). 전부 없으면 활성 K 없음
+8. **상태 판정 + 표 출력** — 아래 규칙. **현재 진행 K** = 활성 K(없으면 파악된 K 중 tip 이 가장 최근인 것 — 번호 최대 ≠ 최근).
 
 ## 상태 판정 규칙 (K i, 1-base)
 
@@ -67,7 +67,7 @@ disable-model-invocation: false
 | 조건 | 표기 |
 |------|------|
 | 체크리스트 `- [x]` | ✅ 완료 |
-| `- [ ]` + (커밋 잡힘 **또는** 활성 K & 미귀속 작업 있음) | 🟡 진행 중 |
+| `- [ ]` + (커밋 파악됨 **또는** 활성 K & 미귀속 작업 있음) | 🟡 진행 중 |
 | `- [ ]` + 그 외 | ⬜ 대기 |
 
 **이슈 없는 모드** — 체크리스트가 없으므로 mirror 와 활성 여부만으로 판별한다:
