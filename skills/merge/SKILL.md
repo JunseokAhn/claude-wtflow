@@ -9,7 +9,7 @@ description: >-
 
 # /wtflow:merge — 기본 브랜치 최신본을 작업 브랜치로
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 계층)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)를 읽는다.**
 
 작업이 길어지면 기본 브랜치가 앞서 나가 충돌이 쌓인다. 그걸 **MR 을 열기 전에** 작업 브랜치 쪽에서
 해소해 둔다. `/wtflow:mr` 과 방향이 반대다:
