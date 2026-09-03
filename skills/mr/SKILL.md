@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:mr — 작업 브랜치로 MR 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고, `pr-convention.md`(MR 제목·본문 형식)를 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고, `pr-convention.md`(MR 제목·본문 형식)를 읽는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
 
 작업이 끝난 브랜치를 origin 에 올리고 MR 을 연다. `/wtflow:merge` 와 **방향이 반대다**:
 
@@ -114,8 +114,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 이미 열린 MR 의 **본문(필요하면 제목)을 다시 쓴다.** 계약 4 가 손을 떼던 자리를 이 모드가 받는다
 — 갱신할지 말지는 여전히 사용자 결정이고, 결정한 뒤의 **쓰기**가 스킬 안으로 들어온다.
 
-⚠️ **MR 본문을 바꾸는 경로는 이것 하나다.** `glab mr update -d` 를 직접 부르지 않는다 —
-훅(`hooks/guard-body-edit.sh`)이 막는다.
+⚠️ **MR 본문을 바꾸는 경로는 이것 하나다** — 규율은 `body-rewrite.md` 가 갖는다.
 
 `/wtflow:mr --rewrite [이슈번호] [-t <제목>] [--iid <MR iid>]`
 
@@ -139,13 +138,9 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 | 10 본문은 파일 경유 | 그대로 |
 | 11 브리핑 없으면 안 만듦 | **그대로 — 손으로 지어낸 요약으로 기존 본문을 덮어쓰지 않는다** |
 
-⚠️ **6 의 `WTFLOW_BODY_REWRITE=1` 환경변수를 빼지 않는다.** MR 본문을 고치는 호출은 훅
-(`hooks/guard-body-edit.sh`)이 막고, 이 환경변수가 "계약을 다 탄 재작성" 임을 밝히는 유일한
-수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다.
-
-- 그러니 **이 환경변수를 붙인 호출은 브리핑 재수집·상한 재검사·확인을 실제로 거친 뒤여야 한다.**
-  건너뛰고 붙이면 예외가 그대로 우회로가 된다
-- 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
+⚠️ **6 의 `WTFLOW_BODY_REWRITE=1` 환경변수를 빼지 않는다** — 이유와 금지 사항은
+`body-rewrite.md` 의 `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`. 이 스킬에서 "실제로 거친 뒤" 란
+**브리핑 재수집·상한 재검사·확인**을 마친 뒤다.
 
 ### 본문은 옛 본문을 손보는 게 아니라 다시 받는다
 
@@ -163,8 +158,8 @@ Skill(wtflow:briefing) → /wtflow:briefing <base>..HEAD --mr --no-fence
 
 ### 확인 질문
 
-**질문 축은 "본문 이대로 반영할지" 다.** `AskUserQuestion` 으로 묻는다(산문 나열 금지,
-보기 첫째에 `(추천)`). 미리보기에 **셀 수 있는 변화**를 함께 낸다:
+**질문 축은 "본문 이대로 반영할지" 다.** 확인 방식과 다시 쓰는 조건은 `body-rewrite.md` 의
+`## 미리보기에는 셀 수 있는 변화를 낸다`. MR 에서 세는 것은 이 넷이다:
 
 | 항목 | 형태 |
 |---|---|
@@ -173,5 +168,4 @@ Skill(wtflow:briefing) → /wtflow:briefing <base>..HEAD --mr --no-fence
 | 커밋 나열 섹션 | `4줄 / 커밋 5개` — 어긋나면 그대로 표시 |
 | 제목 | `변경 없음` 또는 `이전 → 이후` |
 
-- 헤더가 템플릿과 어긋났거나 본문이 40줄을 넘으면 **묻지 말고 다시 쓴다** — 물어서 통과시킬
-  대상이 아니다
+- 상한 40줄은 `pr-convention.md` 의 `## 셀 수 있는 상한` 이 정한다

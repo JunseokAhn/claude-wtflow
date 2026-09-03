@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용), `learning-impact.md`(§7 영향 범위)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용), `learning-impact.md`(§7 영향 범위)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
 
 ## 호출
 
@@ -168,15 +168,11 @@ mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 �
    **명령과 본문 필드 이름은 `host-adapter.md` 의 `## 이슈 명령 대응` 에서 꺼낸다** — 여기 박지
    않는다. 본문 필드가 GitHub 은 `body`, GitLab 은 `description` 이라 이름째로 다르다.
 
-   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` 환경변수를 빼지 않는다.** 이슈 본문을 고치는 호출은 훅
-   (`hooks/guard-body-edit.sh`)이 막는다 — 재작성에는 템플릿 준수·미리보기·확인 계약이 걸려야
-   하는데 이슈 수정 명령 직접 호출은 그걸 전부 건너뛰기 때문이다. **환경변수는 호스트와 무관하게
-   똑같이 붙인다** — 훅이 `glab issue update` 와 `gh issue edit` 를 다 잡는다. **여기만 예외**인 이유는
-   본문을 다시 쓰는 게 아니라 `- [ ]` **한 줄을 켜는 것**이라서다. 훅은 명령 문자열만 보므로,
-   호출자가 이 환경변수로 스스로를 밝히는 것 말고 정당한 호출을 구별할 방법이 없다.
+   ⚠️ **`WTFLOW_CHECKBOX_SYNC=1` 환경변수를 빼지 않는다** — 훅이 왜 막는지와 우회 금지는
+   `body-rewrite.md` 가 갖는다. **여기만 이름이 다른 이유**는 본문을 다시 쓰는 게 아니라
+   `- [ ]` 한 줄을 켜는 것이라서다.
    - 그러니 **이 환경변수를 붙인 호출은 실제로 체크박스 한 줄만 바꿔야 한다.** 같은 호출에
      본문 손질을 얹으면 예외를 우회로로 쓰는 것이다 — 본문을 고칠 일이면 `/wtflow:issue --rewrite`
-   - 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
 3. **K번째 항목** — `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트에서 **위에서 K번째** `- [ ]`/`- [x]` 줄. 항목 수 < K·섹션 모호 → 경고·skip(추측 금지)
 4. **그 줄만 토글** `- [ ]`→`- [x]` (나머지 본문 보존, 이미 `[x]` 면 no-op). 실패 시 경고만, 커밋 흐름 안 막음
 5. **요약에 명시** — "이슈 #N 항목 K 체크", 또는 실패 사유

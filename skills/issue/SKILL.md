@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다.**
 
 ## 트리거
 
@@ -20,9 +20,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 - 자연어: "이슈 본문 다시 써줘", "이슈 #14 갱신", "이슈 내용 고쳐줘", "이슈에 <내용> 반영해줘" 등
 - 슬래시: `/wtflow:issue --rewrite <N> [-t "<새 제목>"] [-R <group>/<repo>]`
 
-⚠️ **이슈 본문을 바꾸는 경로는 재작성 모드 하나다.** 이슈 수정 명령(`glab issue update -d` ·
-`gh issue edit --body`)을 직접 부르지 않는다 —
-훅이 막는다(`hooks/guard-body-edit.sh`). 유일한 예외는 wtflow:commit 의 체크박스 동기화다.
+⚠️ **이슈 본문을 바꾸는 경로는 재작성 모드 하나다** — 규율은 `body-rewrite.md` 가 갖는다.
 
 ## 마일스톤은 이 스킬의 관심사가 아니다
 
@@ -127,25 +125,15 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 ### 절차
 
-1. **현재 본문을 먼저 읽는다** — 이슈 본문·제목 조회(`host-adapter.md` 의 `## 이슈 명령 대응`).
-   ⚠️ 본문 필드 이름이 GitHub 은 `body`, GitLab 은 `description` 이다.
-   실패하면 중단·보고. ⚠️ **읽지 않고 쓰지 않는다** — 본문 쓰기는 어느 호스트든 전체 치환이라
-   통째로 덮어쓰게 된다
+**조회·파일 경유·`WTFLOW_BODY_REWRITE=1`·미리보기 의무는 `body-rewrite.md` 가 갖는다.**
+여기 사본을 두지 않는다 — 아래는 이 스킬에서만 다른 부분이다.
+
+1. **현재 본문을 먼저 읽는다** (`body-rewrite.md` 의 `## 읽지 않고 쓰지 않는다`)
 2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
    **임의로 맞추지 않는다.** 어긋난 섹션은 3의 미리보기에 드러내고 사용자가 정한다
-3. **미리보기 + 확인** — `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
-4. **반영** — 본문은 파일을 거쳐 넘긴다. 줄바꿈·백틱·따옴표가 섞이므로 인자에 직접 이어붙이지 않는다
-   (`wtflow:mr` 계약 10 과 같은 이유):
-   ```
-   WTFLOW_BODY_REWRITE=1 gh   issue edit   <N> --body-file <본문파일>      # GitHub
-   WTFLOW_BODY_REWRITE=1 glab issue update <N> -d "$(cat <본문파일>)"      # GitLab
-   ```
-   ⚠️ **`WTFLOW_BODY_REWRITE=1` 환경변수를 빼지 않는다.** 본문을 고치는 호출은 훅
-   (`hooks/guard-body-edit.sh`)이 막고, 이 환경변수가 "계약을 다 탄 재작성" 임을 밝히는
-   유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다.
-   - 그러니 **이 환경변수를 붙인 호출은 1~3 을 실제로 거친 뒤여야 한다.** 미리보기·확인을
-     건너뛰고 붙이면 예외가 그대로 우회로가 된다
-   - 훅이 막았다는 응답을 받으면 환경변수 누락을 먼저 의심한다. 훅을 끄거나 우회하지 않는다
+3. **미리보기 + 확인** — 무엇을 셀지는 `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
+4. **반영** — `body-rewrite.md` 의 `## 본문은 파일로 넘긴다` · `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`.
+   제목도 바꾸면 `-t "<새 제목>"` 을 함께
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
 
 ## 이슈 note 형식
