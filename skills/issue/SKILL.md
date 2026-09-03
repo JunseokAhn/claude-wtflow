@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다. 계약 8 에서 note 를 쓸 때만 `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(이슈 note 규격)를 읽는다.**
 
 ## 트리거
 
@@ -63,7 +63,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 7. **이슈 생성 결과 수집**: 이슈 번호 + URL
 
-8. **이슈 note 작성 — 딱 한 번, 적을 게 있을 때만** (형식은 아래 `## 이슈 note 형식`)
+8. **이슈 note 작성 — 딱 한 번, 적을 게 있을 때만** (형식은 `note-format.md` 의 `## 이슈 note 형식`)
 
     `~/.claude/notes/<group>/<repo>/issue-<N>.md` 에 그냥 쓴다 — git 과 무관하다(커밋·MR diff 없음).
 
@@ -135,33 +135,6 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 4. **반영** — `body-rewrite.md` 의 `## 본문은 파일로 넘긴다` · `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`.
    제목도 바꾸면 `-t "<새 제목>"` 을 함께
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
-
-## 이슈 note 형식
-
-`~/.claude/notes/<group>/<repo>/issue-<N>.md`. 계약 8 이 **한 번만** 만든다.
-**착수 전 사고의 스냅샷**이지 유지되는 문서가 아니다 — 분량 제한 없이 규격을 못박는 게 목적:
-
-```markdown
----
-issue: <N>
-repo: <group>/<repo>
-created: 2026-08-18             # 상대날짜 금지 — 낡음을 판단하는 기준이 된다
----
-
-## 배경          무슨 문제를 왜 푸는가 + 범위·전제 (2-4문장)
-
-## 계약 요약      다른 사람·다른 레포가 맞춰 구현해야 하는 규격. 산문 말고 표로:
-                엔드포인트 | 페이로드(필드·타입·필수·기본) | 에러코드 | 호환성·배포 순서
-                확정 안 된 필드는 행을 지어내지 말고 `(미정)`
-
-## 열린 질문      아직 안 정한 것 + 재검토 트리거 (있을 때만)
-```
-
-- 표에 담기는 건 **규격**이지 구현이 아니다 — 함수 본문·쿼리를 옮겨오지 않는다
-- ⚠️ **K 번호·작업 항목·완료 여부·체크박스 금지** — 진행 상태의 진실원은 이슈 체크박스와 mirror 분기다
-- **`branch:`·`milestone_note:` 는 넣지 않는다** — 브랜치 이름은 `plan` 이, 마일스톤은 이슈의
-  배정이 각각 답한다. 여기 적으면 답이 둘이 된다
-- 마일스톤 계약과 겹치는 내용은 **복사하지 않는다** — 원본이 바뀔 때 사본이 조용히 낡는다
 
 ## 결정·중단 트리거
 
