@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다.**
 
 ## 트리거
 
@@ -97,7 +97,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 10. **진행 방향 선택 — 실행은 계약 4 본문 작성 앞** — 번호는 뒤지만 실행 순서는 3 과 4 사이다.
     번호를 끼워 넣으면 `계약 4`·`계약 8` 을 가리키는 `wtflow:milestone` 이 어긋난다.
 
-    절차·형식·건너뛰는 조건은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md` §8 진행 방향.
+    절차·형식·건너뛰는 조건은 §8 진행 방향.
     묻기 직전에 같은 문서의 `## 질문을 내기 전 검사` 를 거친다 — 안들의 작업 항목 초안이 같으면 묻지 않는다.
     **여기 사본을 두지 않는다** — 사전문답은 컨벤션이 아니라 작업 규율이라 저장소가 이슈
     컨벤션을 덮어도 남는다(`convention-precedence.md`).

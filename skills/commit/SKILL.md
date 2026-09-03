@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(사전문답), `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용), `learning-impact.md`(§7 영향 범위)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 ## 호출
 
@@ -85,7 +85,7 @@ disable-model-invocation: false
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 K`, 이슈 없는 작업이면 `mirror -00N 생성/전진` 으로 대신)
 
    **이전 K 의 설계 선택이 이번 커밋에서 유지보수 비용을 드러냈으면 얼마였는지 함께 보고한다**
-   (`learning-protocol.md` §6 유지보수 비용). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
+   (§6 유지보수 비용). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
    비용이 아직 안 왔으면 안 왔다고 적는다 — 없는 비용을 지어내면 다음 예측이 무의미해진다.
 
    ```
@@ -95,7 +95,7 @@ disable-model-invocation: false
 
 8. **진행 현황 자동 출력** — 요약 직후 `/wtflow:progress --quiet` 1회 호출해 갱신된 K 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
 
-9. **영향 범위 문답 (동작이 바뀌는 커밋만)** — 번호는 뒤지만 **실행은 계약 4 mirror 전진 직후, 계약 6 체크박스 동기화보다 앞이다.** 커밋이 있어야 사용자가 `git show` 로 코드를 놓고 답할 수 있고, 답을 받기 전에 요약이 나가면 문답이 산문에 묻힌다. 절차는 `references/learning-protocol.md` §7 영향 범위, 형식은 그 섹션의 `### 형식`
+9. **영향 범위 문답 (동작이 바뀌는 커밋만)** — 번호는 뒤지만 **실행은 계약 4 mirror 전진 직후, 계약 6 체크박스 동기화보다 앞이다.** 커밋이 있어야 사용자가 `git show` 로 코드를 놓고 답할 수 있고, 답을 받기 전에 요약이 나가면 문답이 산문에 묻힌다. 절차는 §7 영향 범위, 형식은 그 섹션의 `### 형식`
 
    | 단계 | 무엇 |
    |---|---|
