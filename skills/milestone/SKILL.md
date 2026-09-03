@@ -39,7 +39,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
 - **읽는 건 `/wtflow:plan` 계약 6 이다** — 이슈의 마일스톤 배정에서 식별자를 얻어 위 경로를 조립해
   이 파일을 직접 Read 한다. 워크트리에 사본도 심링크도 만들지 않으므로 여기를 고치면 모든 이슈가
   즉시 현행을 본다
-- `~/.claude` 는 글로벌 gitignore 대상이라 git·MR 에 안 잡힌다
+- `~/.claude` 는 글로벌 gitignore 대상이라 git·MR 에 안 올라간다
 
 ## 계약 (보장되어야 하는 것)
 
