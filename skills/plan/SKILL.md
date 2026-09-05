@@ -20,7 +20,7 @@ disable-model-invocation: true
 | 식별자 | 이슈번호 `N` | `slug` |
 | accumulator (=워크트리 브랜치) | `<prefix>/#<N>-<slug>` | `<prefix>/+<slug>` |
 | 워크트리 경로 | `.claude/worktrees/<N>-<slug>` | `.claude/worktrees/<slug>` |
-| **작업 항목 (진실원)** | 이슈 본문 체크리스트 | plan 출력 + mirror 분기 `<accumulator>-<KKK>` |
+| **작업 항목 (진실원)** | 이슈 본문 체크리스트 | plan 출력 + mirror 분기 `<accumulator>-<NNN>` |
 
 - **accumulator 이름이 유일한 입력이다.** `/#` 뒤 정수면 이슈 작업, `/+` 뒤 문자열이면 adhoc.
   이 해석은 wtflow:commit·progress·auto 도 똑같이 쓴다
@@ -55,7 +55,7 @@ disable-model-invocation: true
      ```
      git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
      ```
-     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<KKK>` 유무로 구분한다) → HEAD 와 ancestry 를
+     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<NNN>` 유무로 구분한다) → HEAD 와 ancestry 를
      공유하는 것이 accumulator
 
 2. **워크트리 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재가 main 워킹트리가
@@ -68,7 +68,7 @@ disable-model-invocation: true
    | 워크트리 안 + 같은 작업 + 진행 이력 없음 | 3·4·5 skip → 6~8 (최초 플랜) |
    | 워크트리 안 + 같은 작업 + 진행 이력 있음 | 3·4·5 skip → `plan-replan.md` |
 
-   - "진행 이력 있음" = 작업 항목 일부 완료 **OR** mirror 분기(`<accumulator>-<KKK>`)·브랜치 고유 커밋 존재
+   - "진행 이력 있음" = 작업 항목 일부 완료 **OR** mirror 분기(`<accumulator>-<NNN>`)·브랜치 고유 커밋 존재
    - ⚠️ **다른 작업 요청이어도 현재 워크트리 브랜치를 체크아웃/이동하지 않는다.** 격리된 워크트리를
      추가로 팔 뿐이라 글로벌 "워크트리 이탈 금지" 와 상충하지 않는다
 

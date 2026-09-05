@@ -126,5 +126,5 @@ Step 오름차순으로 반복:
 - 이 스킬은 **사용자만 명시 호출**(frontmatter `disable-model-invocation: true`) — 자율 다중 커밋은 의도적으로 사람이 시작해야 한다.
 - 단일 작업 항목 하나만 커밋할 거면 이 스킬 대신 `/wtflow:commit` 을 직접 부르는 게 맞다. wtflow:auto 는 **여러 Step 을 연속**으로 돌릴 때의 도구.
 - 커밋·분기·테스트·push 의 모든 세부는 `/wtflow:commit` 의 contract 를 따른다 — 이 스킬은 그 위의 순회·정지 정책만 더한다.
-- 워크트리 브랜치는 origin 에 push 안 함. Step 분기(`<accumulator>-<KKK>`)도 기본 로컬, `--push` 시에만 노출. 워크트리 브랜치를 올리는 것은 `/wtflow:mr` 만의 예외다 — 이 스킬은 `--push` 여도 올리지 않는다.
+- 워크트리 브랜치는 origin 에 push 안 함. Step 분기(`<accumulator>-<NNN>`)도 기본 로컬, `--push` 시에만 노출. 워크트리 브랜치를 올리는 것은 `/wtflow:mr` 만의 예외다 — 이 스킬은 `--push` 여도 올리지 않는다.
 - plan 은 자주 틀린다 — 진행 중 자연어로 Step 재조정 가능(그 시점부터 Step 번호만 일관 유지).

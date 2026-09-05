@@ -14,20 +14,20 @@ disable-model-invocation: false
 `/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
 
 - `<작업 설명>` (필수): 한 줄 요약. commit subject + 본문에 사용 (언어는 `commit-convention.md` 의 `## Subject` 를 따른다)
-- `--step <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
+- `--step <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<NNN>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
 - `-n` / `--new-topic`: 이번 커밋부터 새 주제 — 새 분기(`기존 최고 Step + 1`) 강제
 - `-s` / `--same-topic`: 현재(최고 Step) 분기에 누적 강제
 - `-a <accumulator>`: 워크트리 브랜치 (예 `refactor/#30-metric-history-pg-migration`, 이슈 없는 작업이면 `refactor/+metric-history-pg-migration`). 미지정 시 자동 탐지:
   ```
   git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
   ```
-  중 현재 HEAD 와 ancestry 를 공유하는 것(`-<KKK>` 로 끝나는 건 mirror 라 제외)
+  중 현재 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 으로 끝나는 건 mirror 라 제외)
 - `--done`: 이번 커밋으로 **현재 Step(작업 항목)가 완료**됨을 명시 → 이슈 본문 체크박스 체크(`## 작업 항목 체크박스 동기화`). 주제 전환 없이 끝나는 마지막 Step, 또는 단일 커밋으로 끝나는 Step 에 사용. **이슈 작업 전용** — 이슈 없는 작업엔 켤 체크박스가 없어 무시된다
 - `--no-test`: 테스트 단계 생략
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
 
 > **체크박스가 있느냐를 accumulator 이름이 정한다.** `/#` 뒤 정수 → 이슈 #N 본문에 체크리스트가
-> 있다. `/+` 뒤 문자열 → **체크리스트가 없다** — 완료는 mirror 분기 `<accumulator>-<KKK>` 의 존재로만
+> 있다. `/+` 뒤 문자열 → **체크리스트가 없다** — 완료는 mirror 분기 `<accumulator>-<NNN>` 의 존재로만
 > 드러난다. 커밋·분기·테스트 규율은 두 경우가 완전히 같고, 체크박스 동기화(계약 6)만 다르다.
 
 ## 한 번 호출 = 한 Step, 그리고 멈춤 (자율 다중 Step 금지)
@@ -57,13 +57,13 @@ disable-model-invocation: false
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
-4. **분기 브랜치 = 작업단위(Step=주제) 1개, 커밋은 누적** — `<mirror base>-<KKK>`(3자리 zero-padding). 체크아웃 없음, **로컬만**. 커밋마다 새 분기 만들지 않는다.
+4. **분기 브랜치 = 작업단위(Step=주제) 1개, 커밋은 누적** — `<mirror base>-<NNN>`(3자리 zero-padding). 체크아웃 없음, **로컬만**. 커밋마다 새 분기 만들지 않는다.
 
-   > **mirror base = accumulator 이름 그대로.** 뒤에 `-<KKK>` 만 붙인다 — prefix·마커를 따로 유도하지 않는다. accumulator 본체는 워크트리에 체크아웃돼 있어 커밋마다 자동 전진하므로 별도로 `git branch -f` 할 일이 없다.
+   > **mirror base = accumulator 이름 그대로.** 뒤에 `-<NNN>` 만 붙인다 — prefix·마커를 따로 유도하지 않는다. accumulator 본체는 워크트리에 체크아웃돼 있어 커밋마다 자동 전진하므로 별도로 `git branch -f` 할 일이 없다.
 
    - **주제 판단**(`--step`/`-n`/`-s` 없을 때): `<작업 설명>` 이 직전 커밋과 같은 주제면 **현재 분기 전진**, 다른 주제면 **새 분기**
    - **전진(같은 주제 / 기존 Step)**: mirror 를 HEAD 로 **FF-전진**. 커밋이 분기 끝에 누적되므로 fast-forward(force-push 아님). 기존 tip 은 HEAD 의 조상이어야 함
-   - **신규(새 주제 / 새 Step)**: `git branch "<mirror base>-<KKK>" HEAD`, Step = (기존 최고 Step)+1. 분기 0개면 Step=1
+   - **신규(새 주제 / 새 Step)**: `git branch "<mirror base>-<NNN>" HEAD`, Step = (기존 최고 Step)+1. 분기 0개면 Step=1
    - 판단 결과(**전진 vs 신규 + 어느 Step**)를 계약 7 요약에 명시 — 사용자가 틀린 판단을 `-n`/`-s` 로 잡을 수 있게
 
    **FF-전진(브랜치 X → 워크트리 tip) — 모든 로컬 브랜치 전진에 공통**
@@ -71,7 +71,7 @@ disable-model-invocation: false
    2. `fatal: ... checked out at '<PATH>'` 로 **막히면** = 누군가 `<PATH>` 에서 X 를 보고 있는 중 → 그 워킹트리에서 `git -C <PATH> merge --ff-only <worktree-branch>`(ref+워킹트리 함께 전진 → 화면 즉시 갱신). non-FF 거나 `<PATH>` 가 더티면 알리고 skip
    - ⚠️ merge 는 **에러가 가리킨 그 `<PATH>` 에서만.** 임의 워킹트리(예: 메인)에서 돌리면 거기 체크아웃된 **다른 브랜치(예: develop)** 를 엉뚱하게 tip 으로 끌어올려 오염시킨다. `branch -f` 의 실패가 곧 '체크아웃 여부 + 정확한 위치' 를 알려주므로 사전 조회 불필요
 
-   **한 곳에서 보기(viewing)** — 작업물을 한 브랜치에서만 보려면 그 브랜치를 체크아웃해 두면 된다. FF-전진 ②가 체크아웃된 브랜치를 매 커밋 자동으로 살려두므로 별도 viewing 로직이 필요 없다. 다만 mirror `-KKK` 는 Step 이 바뀌면 안 움직이니, **Step 전환을 넘어 항상 최신**을 보고 싶으면 accumulator 본체도 매 커밋 같은 FF-전진으로 올린다(로컬만).
+   **한 곳에서 보기(viewing)** — 작업물을 한 브랜치에서만 보려면 그 브랜치를 체크아웃해 두면 된다. FF-전진 ②가 체크아웃된 브랜치를 매 커밋 자동으로 살려두므로 별도 viewing 로직이 필요 없다. 다만 mirror `-NNN` 은 Step 이 바뀌면 안 움직이니, **Step 전환을 넘어 항상 최신**을 보고 싶으면 accumulator 본체도 매 커밋 같은 FF-전진으로 올린다(로컬만).
 
 5. **origin push** — `--push` 명시 시만. 분기 브랜치만, MR 미생성
 

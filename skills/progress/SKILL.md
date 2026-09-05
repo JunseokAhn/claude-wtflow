@@ -25,7 +25,7 @@ disable-model-invocation: false
 추측 금지. 상태는 이 소스에서만 파생한다.
 
 1. **`작업 항목` 체크리스트 (이슈 작업 전용)** — wtflow:commit 이 Step 완료 시 체크하는 그 리스트. **위에서 N번째 = Step N**, `- [x]`=완료. 위치는 **이슈 본문**. **이슈 없는 작업(`/+<slug>`)엔 이 소스가 없다** — 체크박스를 둘 곳이 없으므로 2번만으로 표를 만든다
-2. **mirror 분기 `<accumulator>-<KKK>`** — Step 귀속의 **유일 소스**: 번호(뒤 3자리)=Step, tip=그 Step 최신 커밋. (커밋 메시지에 `Step:` 트레일러 없음). **이슈 없는 작업에선 진행 상태의 진실원이기도 하다**
+2. **mirror 분기 `<accumulator>-<NNN>`** — Step 귀속의 **유일 소스**: 번호(뒤 3자리)=Step, tip=그 Step 최신 커밋. (커밋 메시지에 `Step:` 트레일러 없음). **이슈 없는 작업에선 진행 상태의 진실원이기도 하다**
 3. **워킹트리 상태** — dirty 여부·파일 수 (아래 활동 오버레이)
 
 > **어떤 mirror tip 의 조상도 아닌 dangling 커밋**은 Step 단정 불가 → 표에 넣지 말고 **"미분류 커밋"** 줄로 노출(불변식이 지켜지면 안 생긴다).
@@ -39,7 +39,7 @@ disable-model-invocation: false
    ```
    git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
    ```
-   중 HEAD 와 ancestry 를 공유하는 것(`-<KKK>` 로 끝나는 건 mirror 라 제외). **이름이 모드를 정한다**: **`/#` 뒤 정수 = 이슈 모드**(`-N` 이 있으면 우선), **`/+` 뒤 문자열 = 이슈 없는 모드**. accumulator 도 `-N` 도 못 구하면 표 없이 한 줄 안내 후 종료.
+   중 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 으로 끝나는 건 mirror 라 제외). **이름이 모드를 정한다**: **`/#` 뒤 정수 = 이슈 모드**(`-N` 이 있으면 우선), **`/+` 뒤 문자열 = 이슈 없는 모드**. accumulator 도 `-N` 도 못 구하면 표 없이 한 줄 안내 후 종료.
    - accumulator 없이 `-N` 만 있으면 mirror 조회를 skip 하고 체크리스트만으로 표를 만든다.
 3. **작업 항목 확보 — 모드별로 다르다**
 
@@ -49,7 +49,7 @@ disable-model-invocation: false
    | 이슈 없음 (`/+<slug>`) | **mirror tip 의 커밋 제목**(`%s`) | mirror 0개면 "아직 커밋 없음" 한 줄 후 종료 |
 
    - **이슈 모드**: `작업 항목`(또는 `작업 계획`) 섹션 **안의** 체크리스트를 순서대로 추출. 각 항목: 순번(=Step)·텍스트·체크 여부. 섹션이 없으면 표 대상 없음, 한 줄 안내 후 종료
-   - **이슈 없는 모드**: 존재하는 mirror 분기가 곧 항목 목록이다. Step = `-<KKK>` 번호, 텍스트 = 그 tip 의 커밋 제목. **없는 Step 은 표에 넣지 않는다** — 계획된 항목 수를 알 방법이 없으므로 ⬜ 대기 행을 지어내지 않는다
+   - **이슈 없는 모드**: 존재하는 mirror 분기가 곧 항목 목록이다. Step = `-<NNN>` 번호, 텍스트 = 그 tip 의 커밋 제목. **없는 Step 은 표에 넣지 않는다** — 계획된 항목 수를 알 방법이 없으므로 ⬜ 대기 행을 지어내지 않는다
    - ⚠️ 어느 모드든 **mirror 만으로 이슈 항목을 지어내지 않는다.** 이슈 모드에서 본문을 못 읽으면 종료지, 커밋 제목으로 대체하지 않는다(그건 이슈 없는 모드의 규칙이다)
 5. **mirror 분기 Step 귀속** — `git branch --list '<accumulator>-[0-9][0-9][0-9]'`. 각 분기의 번호=Step, tip=그 Step 의 최신 커밋(`%h %s`). mirror 가 있는 Step = 파악된 Step.
 6. **미분류 커밋 판정** — base 산정(`git merge-base HEAD origin/develop`, 없으면 develop→main) 후 `<base>..HEAD` 커밋 중 **어떤 mirror tip 의 조상도 아닌** 것(`merge-base --is-ancestor` 로 각 mirror 판정, 전부 실패면 미분류). 불변식 유지 시 0개.

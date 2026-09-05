@@ -72,7 +72,7 @@ wtflow 스킬이 공유하는 규율. 브랜치 이름, Step 모델, note 종류
 ### 이슈 없는 작업의 진행 상태 = mirror 분기
 
 이슈가 없으면(`<prefix>/+<slug>`) 체크박스를 둘 곳이 없다. **Step 귀속과 진행 상태를
-mirror 분기(`<accumulator>-<KKK>`)로만 판정한다** — 뒤 3자리가 Step 이고, 분기가 있으면 그 Step 은
+mirror 분기(`<accumulator>-<NNN>`)로만 판정한다** — 뒤 3자리가 Step 이고, 분기가 있으면 그 Step 은
 시작된 것, tip 이 그 Step 의 최신 커밋이다. 따라서 `wtflow:commit --done` 은 **이슈 작업 전용**이다.
 
 항목 텍스트가 어디 사는지와 세션이 끊겼을 때의 복구는 `plan-adhoc.md` 의
@@ -86,7 +86,7 @@ mirror 분기(`<accumulator>-<KKK>`)로만 판정한다** — 뒤 3자리가 Ste
 | 종류 | 이름 (이슈 작업) | 이름 (이슈 없는 adhoc) | 누가 만드나 |
 |------|------------------|------------------------|-------------|
 | **워크트리 브랜치** (= accumulator = 작업 마커) | `<prefix>/#<N>-<slug>` | `<prefix>/+<slug>` | 자동 (plan) |
-| **mirror 분기** (Step별) | `<prefix>/#<N>-<slug>-<KKK>` | `<prefix>/+<slug>-<KKK>` | 자동 (commit) |
+| **mirror 분기** (Step별) | `<prefix>/#<N>-<slug>-<NNN>` | `<prefix>/+<slug>-<NNN>` | 자동 (commit) |
 
 `#<N>` 자리에 `+` 하나가 들어간 것뿐이고 나머지 규칙은 전부 같다. `~`·`^` 는 git refname
 금지문자라 마커로 못 쓴다.
@@ -97,9 +97,9 @@ mirror 분기(`<accumulator>-<KKK>`)로만 판정한다** — 뒤 3자리가 Ste
 - **워크트리 브랜치가 곧 이슈 마커다.** 별도 마커 브랜치를 따로 두지 않는다 — plan 이 만들고,
   워크트리에 체크아웃돼 있으니 커밋마다 자동 전진한다. 사용자가 미리 같은 이름으로 만들어 뒀으면
   새로 만들지 말고 **그대로 붙여 이어받는다**
-- **mirror base = 워크트리 브랜치 이름 그대로.** 뒤에 `-<KKK>` 만 붙인다. 워크트리 밖에서 추론해야
-  하면 기존 mirror(`git branch --list '*/#<N>-<slug>-[0-9][0-9][0-9]'`)에서 `-<KKK>` 를 떼면 된다
-- `<KKK>` 는 3자리 zero-padding(`-001`) — `wtflow-clean`·`progress` 가 이 형태로 매칭한다.
+- **mirror base = 워크트리 브랜치 이름 그대로.** 뒤에 `-<NNN>` 만 붙인다. 워크트리 밖에서 추론해야
+  하면 기존 mirror(`git branch --list '*/#<N>-<slug>-[0-9][0-9][0-9]'`)에서 `-<NNN>` 을 떼면 된다
+- `<NNN>` 은 3자리 zero-padding(`-001`) — `wtflow-clean`·`progress` 가 이 형태로 매칭한다.
   따라서 **accumulator 탐지 = `*/[#+]*` 중 `-[0-9][0-9][0-9]` 로 끝나지 않는 것**
 - 워크트리 **경로**는 `.claude/worktrees/<N>-<slug>`(adhoc 은 `<slug>`) — `#`·`+` 를 넣지 않는다.
   브랜치명과 달리 경로는 셸에서 `#` 가 주석 시작이라, 따옴표가 빠지는 순간 조용히 잘린다
