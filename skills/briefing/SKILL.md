@@ -6,7 +6,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), B
 
 # /wtflow:briefing — 작업 브리핑 생성
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. `--mr` 이면 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고 `pr-convention.md`(MR 제목·본문 형식)도 읽는다.**
 
 ## 호출
 
@@ -24,7 +24,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), B
 ## 계약 (보장되어야 하는 것)
 
 1. **사실 수집 (날조 금지가 최우선)** — 다음 출처에서만 내용을 채운다:
-   - `git log <범위> --pretty` : 커밋 = 작업항목(K). 커밋 해시·subject 그대로 사용
+   - `git log <범위> --pretty` : 커밋 = 작업항목(Step). 커밋 해시·subject 그대로 사용
    - `git diff --stat <범위>` / `--name-only` : 영향 범위·파일·증감 통계
    - **대화 맥락** : 결정 사항, 고려했지만 안 쓴 대안과 그 이유, 검증 결과
    - 코드/문서(Read·Grep) : 잔존 참조 확인, 의존 전제
@@ -70,7 +70,7 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), B
 - **<무엇을 했나>** — <왜 (목적/효과)>  `<hash>`
 - **<무엇을 했나>** — <왜>  `<hash>`
 ...
-   (--detail: 위 각 항목을 `**K1 — <subject>** \`<hash>\`` + 하위 `[x]` 체크리스트로)
+   (--detail: 위 각 항목을 `**Step 1 — <subject>** \`<hash>\`` + 하위 `[x]` 체크리스트로)
 
 ## 4. 영향 범위
 <모듈/파일 그룹, 신규/삭제, API 변경, 총 N파일 ±증감>

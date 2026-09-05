@@ -5,7 +5,7 @@
 
 커밋 메시지를 짓는 `commit`·`auto` 가 시작 전에 읽는다.
 
-브랜치 이름·K 모델·note 종류은 이 문서에 없다. `worktree-discipline.md` 를 본다.
+브랜치 이름·Step 모델·note 종류은 이 문서에 없다. `worktree-discipline.md` 를 본다.
 
 ## Subject
 
