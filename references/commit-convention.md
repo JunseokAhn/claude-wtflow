@@ -27,12 +27,19 @@
 
 ## 요약은 "코드 변경" 이 아니라 "기능/동작 변경"
 
+코드의 어디를 어떻게 고쳤는지는 diff 가 이미 준다.
+제목에는 **사용자·시스템 관점에서 무엇이 달라졌는지** 적는다.
+
 - ✅ `fix(auth): 토큰 만료 시 재로그인 없이 자동 갱신`
 - ✅ `fix(cart): refresh the total as soon as quantity changes` — 언어는 저장소를 따른다
 - ❌ `fix(auth): useSession 훅에서 token null 처리 추가`
-  → 코드가 뭘 했는지 말고, **사용자/시스템 관점에서 뭐가 달라졌는지** 적기
-- 예외: **동작 변화가 전혀 없는** 순수 내부 정리(이름변경·파일이동·포맷·dead code 제거)만 코드 변경 자체를 제목으로 (`refactor(store): persist 대상에서 임시 캐시 제거`)
-- 단, `refactor` 라도 인증 방식·아키텍처·보안·데이터 흐름 등 **시스템 동작이 바뀌면 동작/결과 관점**으로 작성 (✅ `refactor(auth): API 요청 인증을 쿠키 자동 전송 방식으로 전환` / ❌ `refactor(auth): authApiClient 에서 Authorization 헤더 제거`)
+
+**예외는 동작이 하나도 안 바뀌는 커밋뿐** — 이름변경·파일이동·포맷·dead code 제거.
+이때만 코드 변경 자체를 제목으로 쓴다 (`refactor(store): persist 대상에서 임시 캐시 제거`).
+
+**`refactor` 라는 type 은 면제가 아니다.** 인증 방식·아키텍처·보안·데이터 흐름이 바뀌면
+동작·결과 관점으로 적는다 — ✅ `refactor(auth): API 요청 인증을 쿠키 자동 전송 방식으로 전환`
+/ ❌ `refactor(auth): authApiClient 에서 Authorization 헤더 제거`
 
 ### 제목이 diff 와 맞나 (쓰고 나서 센다)
 
