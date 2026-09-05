@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용), `learning-impact.md`(§7 영향 범위)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용·§10 수용 기준), `learning-impact.md`(§7 영향 범위)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
 
 ## 호출
 
@@ -53,7 +53,7 @@ disable-model-invocation: false
    | `package.json`, `scripts.test` 없음 | `npm run lint` + (`tsconfig.json` 있으면) `npx tsc --noEmit` |
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
-3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 K 를 넓게 잡았다는 신호다** — 이 판정은 K 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **이 K 에서 수용 기준을 골랐으면 `검증` 란은 조건별 한 줄이다**(§10 수용 기준 `### 기록과 미달 처리`) — 저장소 컨벤션에 `검증` 란이 없으면 계약 7 요약에만 적는다. **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 K 를 넓게 잡았다는 신호다** — 이 판정은 K 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`K:` 트레일러 안 넣음** — K 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
@@ -79,10 +79,17 @@ disable-model-invocation: false
    - **새 K 로 전환(신규 분기 생성)** → 직전까지 진행하던 **이전 K** 를 완료로 보고 체크. 첫 K(분기 0개 → K=1)면 이전 K 없음 → 체크 안 함. 기존 K 전진(같은 주제·`-K` 재방문·FF)은 완료 신호가 아니라 체크 안 함
    - **`--done` 지정** → 이번 커밋의 **현재 K** 를 체크
 
+   ⚠️ **미달한 수용 기준이 하나라도 있으면 `--done` 이 와도 체크하지 않는다**(§10 수용 기준
+   `### 기록과 미달 처리`). 커밋은 그대로 하고, 어느 조건이 미달인지 계약 7 요약에 적는다 —
+   부분 진행도 기록이고 체크박스를 안 켜면 다음 호출이 그 K 를 이어받는다.
+
    **accumulator 가 `/+<slug>` 면 이 계약 전체를 건너뛴다** — 체크할 문서가 없다. `--done` 이 와도
    조용히 무시하고(경고 아님 — 정상 경로다) 계약 4 의 mirror 분기가 완료 표시를 대신한다.
 
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 K`, 이슈 없는 작업이면 `mirror -00N 생성/전진` 으로 대신)
+
+   **수용 기준을 고른 K 는 조건별 결과를 함께 적는다** — 미달이 있으면 `--done` 을 안 켠 사실과
+   무엇이 남았는지까지(§10 수용 기준 `### 기록과 미달 처리`).
 
    **이전 K 의 설계 선택이 이번 커밋에서 유지보수 비용을 드러냈으면 얼마였는지 함께 보고한다**
    (§6 유지보수 비용). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
@@ -99,6 +106,7 @@ disable-model-invocation: false
    | 대상 | 상한 |
    |---|---|
    | 위 항목 각각 | 1줄 — **해당 없는 항목은 줄을 만들지 않는다** |
+   | 수용 기준 조건별 결과 | 조건당 1줄 — 미달일 때만 그 조건의 재현 절차 3줄을 덧붙인다 |
    | §6 유지보수 비용 보고 | 3줄 |
 
    변경 파일 stat 은 이 셈에서 뺀다 — 줄 수가 변경 크기에서 나온다.

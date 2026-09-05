@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:plan — 워크트리 작업 시작
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오 — 어느 K 를 착수 전에 멈출지), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-impact.md`(§7 영향 범위)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오·§10 수용 기준 — 어느 K 를 착수 전에 멈출지), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-impact.md`(§7 영향 범위)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
 
 ## 작업 문서
 
@@ -195,12 +195,18 @@ Step 행 수는 이 셈에서 뺀다 — 개수가 작업 크기에서 나온다
 Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을지 예고한다.
 
 ```
-❓ K2 — 코드를 인용해 붙이고 "무엇이 문제고 무엇으로 바꿀지" 를 먼저 답하신 뒤 진행합니다.
+❓ K2 — 코드를 인용해 붙이고 "무엇이 문제고 무엇으로 바꿀지" 를 먼저 답하십시오. 그 답이 곧 완료 조건입니다.
    설계 선택 1건(판정을 어느 계층에 둘지)도 두 안으로 함께 띄웁니다.
+❓ K3 — 도메인 판단 없이 동작만 바뀝니다. "무엇이 참이면 K3 이 끝난 것인지"를 고르십니다(3개까지).
 ```
 
-- 대상은 두 갈래 — **동작 판단이 든 K**(§1 예측), **물어야 할 설계 선택이 있는 K**(§4 설계 선택).
-  후자는 §4 설계 선택 `### 묻는 기준` 을 통과할 때만이고 **K 당 1건 상한**이다
+- 대상은 세 갈래 — **동작 판단이 든 K**(§1 예측), **동작이 바뀌는 K**(§10 수용 기준),
+  **물어야 할 설계 선택이 있는 K**(§4 설계 선택). 셋째는 §4 설계 선택 `### 묻는 기준` 을
+  통과할 때만이고 **K 당 1건 상한**이다
+- **§10 수용 기준의 대상이 제일 넓다** — 동작이 바뀌면 도메인 판단이 없어도 붙는다.
+  §1 예측이 안 걸리는 K 에 `❓` 가 붙는 경우는 대개 이것이다
+- **둘이 같이 문항으로 나가지는 않는다** — §1 예측이 걸린 K 는 그 답이 곧 완료 조건이다
+  (§10 수용 기준 `### §1 예측과 겹칠 때`). 예고 줄도 그에 맞춰 쓴다
 - **통과하는 게 없으면 `❓` 를 안 붙인다** — 짜내면 질문이 구현 세부로 내려가 마찰만 남는다.
   삭제·정리·보일러플레이트에는 안 붙인다
 - **붙이기 전에 `learning-protocol.md` 의 `## 질문을 내기 전 검사` 를 거친다.** 붙인 K 라도 시작
