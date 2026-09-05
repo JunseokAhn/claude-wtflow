@@ -38,7 +38,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 1. **accumulator 를 origin 에 push 한다 — 규율의 예외다.** 워크트리 브랜치는 로컬 전용이고
    origin 에 노출되는 건 mirror 뿐이라는 규칙(`plan` 계약·`auto` 비고)의 **유일한 예외**가 이 스킬이다.
    MR 은 소스 브랜치가 origin 에 있어야 성립하고, 그 브랜치는 작업 전체를 담은 accumulator 여야 한다
-   - **mirror(`-<KKK>`)를 소스로 쓰지 않는다** — K 단위 조각이라 통짜 MR 이 안 된다
+   - **mirror(`-<KKK>`)를 소스로 쓰지 않는다** — Step 단위 조각이라 통짜 MR 이 안 된다
    - push 는 이 명령이 부를 때만. 다른 스킬은 여전히 accumulator 를 올리지 않는다
    - 되돌리기: MR 을 닫고 `git push origin --delete '<accumulator>'`
 2. **제목은 `pr-convention.md` 의 `## 제목` 을 따른다** — 커밋 컨벤션의 `## Subject` 그대로이고,

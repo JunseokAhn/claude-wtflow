@@ -9,7 +9,7 @@ description: >-
 
 # /wtflow:merge — 기본 브랜치 최신본을 작업 브랜치로
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다.**
 
 작업이 길어지면 기본 브랜치가 앞서 나가 충돌이 쌓인다. 그걸 **MR 을 열기 전에** 작업 브랜치 쪽에서
 해소해 둔다. `/wtflow:mr` 과 방향이 반대다:
@@ -41,7 +41,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 
 1. **대상은 현재 체크아웃된 브랜치다.** 다른 브랜치를 찾아 나서지 않고, 체크아웃도 옮기지 않는다.
    현재 브랜치가 accumulator(`<prefix>/#<N>-<slug>` 또는 `<prefix>/+<slug>`)가 아니면 보고하고 멈춘다
-   — mirror(`-<KKK>`) 위에서 이 작업을 하면 K 경계가 뭉개진다
+   — mirror(`-<KKK>`) 위에서 이 작업을 하면 Step 경계가 뭉개진다
 2. **원격을 먼저 받아오고, 로컬 기본 브랜치를 머지한다.**
    ```
    git fetch origin <기본브랜치>                 # origin/<기본브랜치> 만 갱신된다
@@ -49,7 +49,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    ```
    - **기본 브랜치를 체크아웃하지 않는다** — 현재 워크트리 안에서 끝난다
    - **메시지를 손대지 않는다.** git 기본값 `Merge branch '<기본브랜치>' into <현재 브랜치>` 가
-     그대로 이력이 된다. 현재 브랜치는 accumulator 이므로 이름에 K 가 섞이지 않는다
+     그대로 이력이 된다. 현재 브랜치는 accumulator 이므로 이름에 Step 이 섞이지 않는다
 
    **로컬과 원격이 어긋나 있으면 머지하기 전에 맞춘다** — `git fetch` 는 `origin/<기본브랜치>` 만
    갱신하지 로컬 `<기본브랜치>` 는 건드리지 않는다. 그래서 둘의 관계를 먼저 본다
@@ -72,7 +72,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
    컴파일 언어 → `compileJava`/`compileTestJava` 등, TS → `npx tsc --noEmit`, Python → 구문 파싱.
    깨지면 커밋하지 않고 보고한다
 5. **push 하지 않는다.** origin 반영·MR 은 `/wtflow:mr` 몫이다
-6. **mirror 를 건드리지 않는다.** 이 머지 커밋은 accumulator 에만 쌓인다 — K 에 속한 작업이 아니므로
+6. **mirror 를 건드리지 않는다.** 이 머지 커밋은 accumulator 에만 쌓인다 — Step 에 속한 작업이 아니므로
    mirror 를 새로 만들지 않는다. 다만 accumulator tip 이 앞서므로, 다음 `/wtflow:commit` 이
    최상단 mirror 를 FF 로 끌어올린다
 
