@@ -1,6 +1,6 @@
 ---
 name: commit
-description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 -K/--done/--push/--no-test. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
+description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
 allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
@@ -11,10 +11,10 @@ disable-model-invocation: false
 
 ## 호출
 
-`/wtflow:commit <작업 설명> [-K <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
+`/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
 
 - `<작업 설명>` (필수): 한 줄 요약. commit subject + 본문에 사용 (언어는 `commit-convention.md` 의 `## Subject` 를 따른다)
-- `-K <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
+- `--step <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<KKK>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
 - `-n` / `--new-topic`: 이번 커밋부터 새 주제 — 새 분기(`기존 최고 Step + 1`) 강제
 - `-s` / `--same-topic`: 현재(최고 Step) 분기에 누적 강제
 - `-a <accumulator>`: 워크트리 브랜치 (예 `refactor/#30-metric-history-pg-migration`, 이슈 없는 작업이면 `refactor/+metric-history-pg-migration`). 미지정 시 자동 탐지:
@@ -35,7 +35,7 @@ disable-model-invocation: false
 이 스킬은 **한 작업 항목(Step)의 커밋 하나**를 처리하고 **멈춘다**. 커밋·요약·진행표(계약 8) 출력 후 **다음 Step 을 자율로 이어서 구현·커밋하지 않는다** — 다음 Step 진행은 사용자의 다음 신호를 기다린다.
 
 - **커밋 자체는 묻지 않는다(기본).** 현재 Step 의 구현 + 검증이 끝나면 "커밋할까요?" 승인을 구하지 말고 **곧장 이 스킬을 자율 호출해 커밋**한다. 메시지는 커밋 컨벤션대로 모델이 짓고 결과만 보고. 사용자 신호를 기다리는 유일한 지점은 **다음 Step 으로 넘어갈지**다(커밋 전 승인 ✗ / 다음 Step 진행 승인 ○).
-- 자연어 "k3부터 진행", "쭉 가", "남은 거 다 해줘" 가 **여러 Step 을 연속 처리하라는 뜻처럼 읽혀도**, 명시적 `/wtflow:auto` 호출이 없으면 **지명된(없으면 현재) 한 Step 만** 처리하고 멈춰 다음 진행 여부를 묻는다. 예: "k3부터 진행" → **Step 3 하나만**(Step 4 이후 자동 진행 ✗).
+- 자연어 "step3부터 진행", "쭉 가", "남은 거 다 해줘" 가 **여러 Step 을 연속 처리하라는 뜻처럼 읽혀도**, 명시적 `/wtflow:auto` 호출이 없으면 **지명된(없으면 현재) 한 Step 만** 처리하고 멈춰 다음 진행 여부를 묻는다. 예: "step3부터 진행" → **Step 3 하나만**(Step 4 이후 자동 진행 ✗).
 - 여러 Step 을 사람 개입 없이 순회하는 건 **오직 사용자가 `/wtflow:auto` 를 직접 호출**했을 때만. wtflow:commit 을 Step 마다 반복 호출하며 **손으로 wtflow:auto 를 흉내내지 말 것**(가장 흔한 오작동 — 이 가드가 그걸 막는다).
 - 한 Step 안의 여러 태스크는 **같은 Step 에 커밋 누적** OK. **다른 작업 항목(새 Step)으로 넘어가는 순간** 멈추고 묻는다.
 - 멈춰 묻거나 방식을 고르게 할 땐 산문 나열 말고 **`AskUserQuestion`**(보기 첫째에 추천안 `(추천)`). 자유 입력은 자동 "Other" 로 보장되니 "직접 입력" 보기는 넣지 않는다.
@@ -61,7 +61,7 @@ disable-model-invocation: false
 
    > **mirror base = accumulator 이름 그대로.** 뒤에 `-<KKK>` 만 붙인다 — prefix·마커를 따로 유도하지 않는다. accumulator 본체는 워크트리에 체크아웃돼 있어 커밋마다 자동 전진하므로 별도로 `git branch -f` 할 일이 없다.
 
-   - **주제 판단**(`-K`/`-n`/`-s` 없을 때): `<작업 설명>` 이 직전 커밋과 같은 주제면 **현재 분기 전진**, 다른 주제면 **새 분기**
+   - **주제 판단**(`--step`/`-n`/`-s` 없을 때): `<작업 설명>` 이 직전 커밋과 같은 주제면 **현재 분기 전진**, 다른 주제면 **새 분기**
    - **전진(같은 주제 / 기존 Step)**: mirror 를 HEAD 로 **FF-전진**. 커밋이 분기 끝에 누적되므로 fast-forward(force-push 아님). 기존 tip 은 HEAD 의 조상이어야 함
    - **신규(새 주제 / 새 Step)**: `git branch "<mirror base>-<KKK>" HEAD`, Step = (기존 최고 Step)+1. 분기 0개면 Step=1
    - 판단 결과(**전진 vs 신규 + 어느 Step**)를 계약 7 요약에 명시 — 사용자가 틀린 판단을 `-n`/`-s` 로 잡을 수 있게
@@ -76,7 +76,7 @@ disable-model-invocation: false
 5. **origin push** — `--push` 명시 시만. 분기 브랜치만, MR 미생성
 
 6. **작업 항목 체크박스 동기화 (이슈 작업 전용)** — accumulator 가 `/#<N>` 일 때만. 아래 두 경우에 체크(절차는 `## 작업 항목 체크박스 동기화`). **로컬/push 무관하게 완료 시점에 즉시 반영**(진행 가시성 용도라 "로컬만" 원칙의 예외):
-   - **새 Step 으로 전환(신규 분기 생성)** → 직전까지 진행하던 **이전 Step** 를 완료로 보고 체크. 첫 Step(분기 0개 → Step=1)면 이전 Step 없음 → 체크 안 함. 기존 Step 전진(같은 주제·`-K` 재방문·FF)은 완료 신호가 아니라 체크 안 함
+   - **새 Step 으로 전환(신규 분기 생성)** → 직전까지 진행하던 **이전 Step** 를 완료로 보고 체크. 첫 Step(분기 0개 → Step=1)면 이전 Step 없음 → 체크 안 함. 기존 Step 전진(같은 주제·`--step` 재방문·FF)은 완료 신호가 아니라 체크 안 함
    - **`--done` 지정** → 이번 커밋의 **현재 Step** 를 체크
 
    ⚠️ **미달한 수용 기준이 하나라도 있으면 `--done` 이 와도 체크하지 않는다**(§10 수용 기준
@@ -137,7 +137,7 @@ disable-model-invocation: false
 
 - "테스트 빼고" → `--no-test` · "푸쉬도" → `--push`
 - "새 주제" / "분기 새로 떠" → `-n` · "같은 거에 묶어" → `-s`
-- "K12 로" → `-K 12` · "accumulator 는 X" → `-a X`
+- "Step12 로" → `--step 12` · "accumulator 는 X" → `-a X`
 - "이 작업 항목 끝" / "항목 완료" / "체크해줘" → `--done`
 
 ## 커밋 본문 자체 검사

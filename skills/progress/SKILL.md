@@ -55,7 +55,7 @@ disable-model-invocation: false
 6. **미분류 커밋 판정** — base 산정(`git merge-base HEAD origin/develop`, 없으면 develop→main) 후 `<base>..HEAD` 커밋 중 **어떤 mirror tip 의 조상도 아닌** 것(`merge-base --is-ancestor` 로 각 mirror 판정, 전부 실패면 미분류). 불변식 유지 시 0개.
 7. **미귀속 작업 + 활성 Step 산정** — `git status --porcelain` + 6번 결과.
    - **미귀속 작업 있음** = dirty **또는** 미분류 커밋 ≥1
-   - **활성 Step** = ① `-K` 명시값 → ② 파악된 Step 중 **미완료 최고 번호**(진행하던 Step 이어감) → ③ 첫 ⬜ 대기 Step(새로 시작, 이슈 모드에만 있다). 전부 없으면 활성 Step 없음
+   - **활성 Step** = ① `--step` 명시값 → ② 파악된 Step 중 **미완료 최고 번호**(진행하던 Step 이어감) → ③ 첫 ⬜ 대기 Step(새로 시작, 이슈 모드에만 있다). 전부 없으면 활성 Step 없음
 8. **상태 판정 + 표 출력** — 아래 규칙. **현재 진행 Step** = 활성 Step(없으면 파악된 Step 중 tip 이 가장 최근인 것 — 번호 최대 ≠ 최근).
 
 ## 상태 판정 규칙 (Step i, 1-base)

@@ -173,8 +173,8 @@ disable-model-invocation: true
 
 | Step | 설명 | 권장 호출 |
 |------|------|-----------|
-| 1 | <한 줄 요약> | `/wtflow:commit "<커밋 메시지>" -K 1` |
-| 2 ❓ | ... | `/wtflow:commit "..." -K 2` |
+| 1 | <한 줄 요약> | `/wtflow:commit "<커밋 메시지>" --step 1` |
+| 2 ❓ | ... | `/wtflow:commit "..." --step 2` |
 
 **파일 목록은 열로 두지 않는다** — 손댈 자리는 그 Step 을 시작할 때 내는 것이라, 표에 실으면
 아직 안 쓸 정보가 행마다 붙는다.
@@ -234,15 +234,15 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
 `Na`(1a·1b…)로 쪼개 적는다. 같은 Step 에 커밋을 누적하라는 뜻 — 새 Step 이 아니다.
 
 ```
-| 2 | 토큰 자동 갱신 도입 | /wtflow:commit "..." -K 2 |
-    └ 2a (리팩터) 만료 체크 분리   → /wtflow:commit "refactor(auth): ..." -K 2
-    └ 2b (기능) 자동 갱신 로직     → /wtflow:commit "feat(auth): ..." -K 2
+| 2 | 토큰 자동 갱신 도입 | /wtflow:commit "..." --step 2 |
+    └ 2a (리팩터) 만료 체크 분리   → /wtflow:commit "refactor(auth): ..." --step 2
+    └ 2b (기능) 자동 갱신 로직     → /wtflow:commit "feat(auth): ..." --step 2
 ```
 
 - **물어서 고른 분할은 뭉개지 않는다**(§9 커밋 경계). 구현 중 더 잘게 쪼개는 건
   그대로 진행하고, **고른 분할을 한 커밋으로 합칠 때만** 되묻는다
 - 안 고른 Step 은 구속이 없다. 구속되는 것은 **경계**지 커밋 메시지·순서의 세부가 아니다
-- 하위 태스크가 새 Step 처럼 보여도 **Step 번호는 작업 항목에 고정**(2a·2b 모두 `-K 2`, mirror `-002`)
+- 하위 태스크가 새 Step 처럼 보여도 **Step 번호는 작업 항목에 고정**(2a·2b 모두 `--step 2`, mirror `-002`)
 - 작은 Step 은 하위 태스크를 적지 않는다 — noise
 - **`Na` 는 plan 출력·커밋 메시지 전용** — 이슈 본문 체크리스트엔 Step(N)만 (체크는 `--done` 이 Step 단위로)
 
