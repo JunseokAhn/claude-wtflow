@@ -6,7 +6,7 @@
 MR(GitLab)·PR(GitHub) 의 제목과 본문 형식. **`/wtflow:mr` 과 `/wtflow:briefing --mr` 이 읽는다.**
 
 커밋 메시지 형식은 `commit-convention.md`, 이슈 형식은 `issue-convention.md`,
-브랜치 이름·K 모델은 `worktree-discipline.md` 를 본다.
+브랜치 이름·Step 모델은 `worktree-discipline.md` 를 본다.
 
 아래에서 **MR** 은 GitLab 의 merge request 와 GitHub 의 pull request 를 함께 가리킨다.
 

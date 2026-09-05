@@ -6,7 +6,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(git *), Bash(ls *), B
 
 # /wtflow:milestone — 마일스톤 계약 문서
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·K 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응), `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(마일스톤 note 규격·상태 금지)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응), `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(마일스톤 note 규격·상태 금지)를 읽는다.**
 
 이슈는 "무엇/왜"의 짧은 메모여야 하는데(wtflow:issue 계약 4), 여러 이슈가 엮인 작업은 착수 전에
 페이로드·타입·에러코드·호출 순서까지 정해두게 된다. **그걸 적을 곳이 없어서 이슈가 비대해진다.**

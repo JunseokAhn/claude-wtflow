@@ -3,7 +3,7 @@
 이슈를 읽고 쓰는 스킬이 공유하는 규칙. **어느 호스트인지 판별하는 자리를 여기 하나로 둔다.**
 **`issue`·`plan`·`progress`·`commit`·`milestone`·`briefing` 이 시작 전에 읽는다.**
 
-브랜치 이름·K 모델·note 종류은 `worktree-discipline.md`, 커밋 메시지 형식은
+브랜치 이름·Step 모델·note 종류은 `worktree-discipline.md`, 커밋 메시지 형식은
 `commit-convention.md` 를 본다.
 
 ## 판별은 remote 주소 하나로 — 묻지 않는다
