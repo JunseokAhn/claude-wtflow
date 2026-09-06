@@ -11,7 +11,7 @@ disable-model-invocation: true
 역추적·mirror 매칭·보존 판정은 전부 스크립트 안에 있다. 필요한 한 가지 사실만 여기 적어 둔다:
 
 > accumulator(=워크트리 브랜치)는 이슈 작업이면 `<prefix>/#<N>-<slug>`, 이슈 없는 작업이면
-> `<prefix>/+<slug>` 이고, mirror 는 그 뒤에 `-<KKK>`(3자리)가 붙은 것이다.
+> `<prefix>/+<slug>` 이고, mirror 는 그 뒤에 `-<NNN>`(3자리)이 붙은 것이다.
 
 작업이 끝난 워크트리와 거기 딸린 accumulator·mirror 를 지운다. 실제 삭제는 `wtflow-clean`
 스크립트가 하고, 이 스킬은 **받은 인자를 그대로 넘겨 한 번 실행하고 그 출력을 원문으로
