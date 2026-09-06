@@ -53,7 +53,7 @@
 | §4 설계 선택 · §5 변경 시나리오 · §6 유지보수 비용 | `learning-implementation.md` | `plan` · `commit` · `auto` | **설계 판단** — 어떻게 짤 것인가 |
 | §7 영향 범위 | `learning-impact.md` | `commit` · `auto` | **영향 판단** — 어느 호출부에 영향을 미치나 |
 | §8 진행 방향 · §9 커밋 경계 | `learning-direction.md` | `issue`(§8) · `plan`(§9) | **선택 단계** — 언제 무엇을 고르나 |
-| §10 수용 기준 | `learning-implementation.md` | `plan` · `commit` · `auto` | **완료 판단** — 무엇이 참이면 끝난 것인가 |
+| §10 수용 기준 | `learning-implementation.md` | `plan` · `commit` · `auto` | **완료 판단** — 반드시 동작해야 하는 것은 무엇인가 |
 
 - **참조는 `§<번호> <이름>` 그대로 적는다 — 파일명을 덧붙이지 않는다.** 어느 문서인지는 이 표가
   답한다. 참조마다 경로를 적으면 절이 옮겨갈 때 고칠 자리가 문서 수만큼 늘어난다
