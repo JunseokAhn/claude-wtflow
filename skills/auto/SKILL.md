@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # /wtflow:auto — 워크트리 작업 항목 자율 순회
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 중에도 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용·§10 수용 기준), `learning-impact.md`(§7 영향 범위)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 중에도 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-impact.md`(§7 영향 범위)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 `/wtflow:plan` 이 만든 plan 의 작업 항목(Step)들을 **사람이 Step마다 끼어들지 않아도** 끝까지 돌린다.
 각 Step = 구현 → 가벼운 검증 → `/wtflow:commit` 로컬 커밋. **commit 메커니즘은 직접 짜지 않고 `/wtflow:commit` 에 위임**한다(분기·테스트·누적 contract 단일화).
@@ -25,7 +25,7 @@ disable-model-invocation: true
 - `--from <Step>`: Step 부터 재개(이전 Step 은 이미 커밋됐다고 간주) — 테스트 실패로 멈춘 뒤 고치고 이어갈 때
 - `--only <Step,...>`: 지정한 Step 들만
 - `--no-test`: 각 `/wtflow:commit` 에 `--no-test` 전달(빠른 반복 — 검증 책임은 사용자)
-- `--no-ask`: 순회 중 사전문답을 끈다. `❓` 가 붙은 Step 앞에서도 멈추지 않고, 내가 정하고 넘어간 설계 선택·수용 기준만 순회 뒤에 모아 낸다(기본은 멈추고 묻는다)
+- `--no-ask`: 순회 중 사전문답을 끈다. `❓` 가 붙은 Step 앞에서도 멈추지 않고, 내가 정하고 넘어간 설계 선택만 순회 뒤에 모아 낸다(기본은 멈추고 묻는다)
 - `--push`: 각 Step 커밋을 origin 에도 push(기본 OFF — 이 스킬의 기본은 **로컬만**). 명시 안 하면 절대 push 안 함
 - `--dry-run`: 구현·커밋 없이 plan→Step 매핑과 각 Step 의 변경 대상만 출력하고 멈춤(계획 확인용)
 
@@ -75,7 +75,7 @@ Step 오름차순으로 반복:
 6. **항목 종료** — 작업 항목의 모든 태스크가 커밋되고 `--done` 을 넘겼으면 Step 종료. 다음 Step 으로(재허락 안 물음).
 
 **사전문답은 순회 중에도 낸다(기본).** plan 이 `❓` 를 붙인 Step 은 **그 Step 을 시작하기 전에** 멈추고
-묻는다(§1 예측 · §10 수용 기준 · §4 설계 선택 · §5 변경 시나리오).
+묻는다(§1 예측 · §4 설계 선택 · §5 변경 시나리오).
 무중단이 이 스킬의 목적이지만, 판단이 든 자리까지 건너뛰면 순회가 끝났을 때
 작업자가 쥔 게 없다. `❓` 가 없는 Step 은 묻지 않고 그대로 지나간다. `❓` 가 있어도 시작 직전
 `## 질문을 내기 전 검사` ①② 에 걸리면 묻지 않고, 건너뛴 사실과 걸린 검사를 한 줄로 적는다.
@@ -90,9 +90,9 @@ Step 오름차순으로 반복:
 **`--no-ask` 면 순회 중에는 묻지 않는다.** `❓` Step 이라도 멈추지 않고, 임의로 정하고 넘어간 설계 선택을
 근거와 함께 적어 뒀다가 마지막 브리핑 뒤에 모아 낸다 — 안 멈춘 것이지 안 묻는 게 아니다.
 
-**수용 기준은 `--no-ask` 여도 기록이 남는다.** 동작이 바뀌는 Step 은 내가 조건을 정해 커밋 본문
-`검증` 란에 적고, **내가 정했다는 사실**과 함께 마지막에 모아 낸다(§10 수용 기준 `### 안 묻는 자리`).
-미달 조건이 있으면 그 Step 은 `--done` 을 안 넘긴다 — 순회는 계속하되 완료로 닫지 않는다.
+**완료 조건은 이 스킬이 묻지 않는다.** 계획 단계에서 이슈 전체로 이미 정해져 이슈 본문에 있고,
+**마지막 작업 항목을 닫는 커밋에서 `/wtflow:commit` 이 확인한다**(그 스킬 계약 6). 미달이 있으면
+그 항목은 `--done` 이 안 먹으므로, 순회는 계속하되 완료로 닫히지 않는다.
 
 전부 끝나면 **`/wtflow:briefing` 을 호출해 전체 작업 브리핑을 출력**한다(범위 = accumulator base..HEAD). 브리핑이 Step별 커밋·변경 파일·검증·기술선택을 구조화해 정리하므로 별도 수기 요약은 생략. 브리핑 뒤에 **push 여부(기본 안 됨)**, 커밋된 Step 목록(이슈 작업이면 체크된 항목도), 사용자가 할 다음 단계(통합 테스트·MR), 동기화 못 한 항목 수동 체크 안내를 덧붙인다. (wtflow:briefing 이 범위 추정 실패 등으로 못 돌면 막지 말고 인라인 요약으로 폴백)
 
