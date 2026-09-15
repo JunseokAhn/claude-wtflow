@@ -7,7 +7,7 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용·§10 수용 기준), `learning-impact.md`(§7 영향 범위)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용·§10 수용 기준), `learning-mastery.md`(§7 숙달 문항·§11 제품 동작 확인)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
 
 ## 호출
 
@@ -116,13 +116,14 @@ disable-model-invocation: false
 
 8. **진행 현황 자동 출력** — 요약 직후 `/wtflow:progress --quiet` 1회 호출해 갱신된 Step 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
 
-9. **영향 범위 문답 (동작이 바뀌는 커밋만)** — 번호는 뒤지만 **실행은 계약 4 mirror 전진 직후, 계약 6 체크박스 동기화보다 앞이다.** 커밋이 있어야 사용자가 `git show` 로 코드를 놓고 답할 수 있고, 답을 받기 전에 요약이 나가면 문답이 산문에 묻힌다. 절차는 §7 영향 범위, 형식은 그 섹션의 `### 형식`
+9. **커밋 직후 문답 (소재나 동작 변화가 있을 때만)** — 번호는 뒤지만 **실행은 계약 4 mirror 전진 직후, 계약 6 체크박스 동기화보다 앞이다.** 커밋이 있어야 사용자가 `git show` 로 코드를 놓고 답할 수 있고, 답을 받기 전에 요약이 나가면 문답이 산문에 묻힌다. 절차는 §7 숙달 문항·§11 제품 동작 확인
 
-   **판정·수집·질문·공개·기록의 절차와 상한(호출부 0곳·16곳), `--no-ask` 로 못 끄는 이유, 깨진
-   호출부를 같은 Step 의 다음 태스크로 다루는 규칙은 전부 §7 영향 범위가 갖는다. 여기 사본을 두지 않는다.**
+   **소재를 거르는 기준, 형식, 두 절을 한 호출에 담는 규칙, 코드 버그를 문항으로 내지 않는 이유는
+   전부 `learning-mastery.md` 가 갖는다. 여기 사본을 두지 않는다.**
 
    - 이 스킬에서만 다른 것 : 질문 본문에 **방금 낸 commit hash** 를 적어 `git show <hash>` 로 열어 보게 한다
-   - 묻지 못한 경우(0곳·16곳 초과)는 그 사실을 **요약(계약 7)에 한 줄로** 적는다
+   - **소재도 동작 변화도 없으면 멈추지 않는다** — 그 사실을 요약(계약 7)에 한 줄로 적는다
+   - 버그를 찾아 고쳤으면 **같은 Step 의 다음 커밋**으로 잇는다 — 문항으로 내지 않는다
 
 ## 결정·중단 트리거
 
