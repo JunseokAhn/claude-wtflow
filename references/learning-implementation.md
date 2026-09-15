@@ -4,7 +4,7 @@
 **`plan`(어느 Step 을 멈출지 표시)·`commit`·`auto` 가 시작 전에 읽는다.**
 
 켜는 자리·질문 형식·질문 전 검사는 `learning-protocol.md`, 커밋 직후 영향 범위는
-`learning-impact.md`, 방향·커밋 경계는 `learning-direction.md` 를 본다.
+`learning-mastery.md`, 방향·커밋 경계는 `learning-direction.md` 를 본다.
 
 ## 1. 예측 — 동작 판단 Step 은 구현 전에 멈춘다
 
@@ -252,7 +252,7 @@ Step 을 쪼갤 때부터 이 경계를 만든다 — **동작 변경을 한 커
 ```
 
 - **`multiSelect: true`**, 보기 5~7개. 자유 입력은 자동 Other 로 보장된다
-- **`(추천)` 을 붙이지 않는다** — multiSelect 라 첫 보기 규칙이 성립하지 않는다(§7 영향 범위와 같다)
+- **`(추천)` 을 붙이지 않는다** — multiSelect 라 첫 보기 규칙이 성립하지 않는다(§11 제품 동작 확인과 같다)
 - **고르는 상한은 5개다.** 넘으면 **이슈를 넓게 잡았다는 신호**다 — 조건이 갈래를 이루면
   이슈를 쪼개는 편이 낫다(`wtflow:milestone`)
 
