@@ -54,19 +54,15 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
    reset·rebase·amend 하지도 않는다. 이 스킬이 쓰는 ref 는 `<accumulator>-squash` 하나뿐이다.
    - 워크트리 브랜치에서 떠나지 않는다(`worktree-discipline.md` 의 행동 정책)
 
-2. **접기 전에 백업 ref 를 박는다** — `refs/wtflow-backup/<accumulator>/<타임스탬프>` 로
-   접기 직전의 accumulator tip 을 가리키게 한다.
-   ```
-   git update-ref "refs/wtflow-backup/<accumulator>/$(date -u +%Y%m%dT%H%M%SZ)" "<accumulator>"
-   ```
-   - **ref 하나가 그 아래 이력 전체를 살린다** — tip 만 가리켜도 조상 커밋이 전부 도달 가능해져
-     GC 가 걷어가지 못한다. 커밋을 하나씩 박아 둘 필요가 없다
-   - **타임스탬프가 붙어 덮어쓰이지 않는다** — 여러 번 접어도 접을 때마다 하나씩 쌓인다.
-     `<accumulator>-squash` 를 덮어쓰는 것(계약 5)과 반대인데, 이쪽은 되돌릴 근거라 남겨야 한다
-   - 이름 규칙과 `refs/heads` 밖에 두는 이유는 `worktree-discipline.md` 의
-     `## 브랜치 이름 규칙 (세 종류, 역할이 다르다)` 가 갖는다. **여기 사본을 두지 않는다**
-   - 되찾기: `git log <백업 ref>` · `git branch <새 이름> <백업 ref>`
-   - ⚠️ **백업 ref 를 못 박으면 접지 않는다.** 되돌릴 근거 없이 만든 브랜치는 안전장치가 아니다
+2. **되돌릴 근거는 accumulator 자신이다 — 백업 ref 를 따로 두지 않는다.** 계약 1 이 원본을
+   안 건드리므로 접기 전 커밋은 accumulator tip 에서, Step 별로는 mirror `-<NNN>` 에서 그대로
+   도달 가능하다. 접어도 잃는 것이 없다.
+   - **백업 ref 를 만들지 않는다** — 이미 도달 가능한 것을 한 번 더 가리키는 ref 는 쌓이기만
+     하고, 안전장치가 둘로 흩어지면 어느 쪽이 실제로 지키는지가 흐려진다
+   - 되찾기: `git log <accumulator>` · `git branch <새 이름> <accumulator>`
+   - ⚠️ **그래서 `wtflow-clean` 이 accumulator 를 지울 때 `-squash` 도 같이 지워야 한다.**
+     접힌 브랜치만 남으면 그 순간 원본이 도달 불가능해진다 — 이 스킬이 원본 보존으로 성립하는
+     전제가 거기서 깨진다
 
 3. **체크아웃 없이 접는다 — `git commit-tree` 를 쓴다.** 워킹트리도 인덱스도 안 건드린다.
    ```
@@ -102,7 +98,7 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
      접힌 커밋 수를 한 줄로 남긴다(`커밋 N개를 접었다`)
    - 푸터의 `Co-Authored-By` 는 구간 안에 있던 것을 **중복 없이 모아** 남긴다
    - ⚠️ **접었다는 사실 말고는 본문을 늘리지 않는다** — 원본 커밋 본문을 이어 붙이면
-     커밋 컨벤션의 분량 상한을 넘는다. 원본은 백업 ref 에 그대로 있다
+     커밋 컨벤션의 분량 상한을 넘는다. 원본 본문은 accumulator 에 그대로 있다
 
 7. **트리 해시를 대조하고, 어긋나면 브랜치를 안 만든다.** 접은 마지막 커밋의 트리는
    원본 tip 의 트리와 **같아야** 한다 — 같지 않으면 내용이 바뀐 것이라 스쿼시가 아니다.
@@ -121,7 +117,7 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
    ```
    feat/#37-commit-squash-skill  15커밋  →  feat/#37-commit-squash-skill-squash  4커밋
 
-     -001  252cd91 feat(worktree): 스쿼시 브랜치·백업 ref 이름 규칙 신설 …   (1커밋)
+     -001  252cd91 feat(worktree): 스쿼시 브랜치 이름 규칙 신설 …            (1커밋)
      -002  a1b2c3d feat(squash): 커밋 스쿼시 스킬 신설                      (7커밋 접힘)
      …
    ```
@@ -130,7 +126,7 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
 
 9. **요약 출력** — 스쿼시 브랜치명 / 원본 대비 커밋 수(`15 → 4`) / 구간별 접힌 수 /
    덮어쓴 경우 이전 tip / 원본 accumulator tip(안 바뀌었음을 보이려고 SHA 를 적는다) /
-   **박아 둔 백업 ref 이름** / **트리 해시 대조 결과**
+   **트리 해시 대조 결과**
 
 ## 결정·중단 트리거
 
@@ -141,7 +137,6 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
 - `manual` 인데 받은 SHA 가 base..tip 밖이거나 순서가 ancestry 와 어긋남 → 어느 SHA 가
   문제인지 짚고 중단
 - 워크트리 밖에서 `-a` 없이 호출 → accumulator 를 못 정하므로 중단
-- **백업 ref 를 못 박음**(권한·ref 이름 충돌) → 접지 않고 중단 (계약 2)
 - **트리 해시 불일치** → 브랜치를 만들지 않고 두 해시와 마지막 구간을 보고하고 중단 (계약 7)
 - 파괴적 동작(원본 reset·rebase·amend, force-push) → **이 스킬은 하지 않는다.** 요청받아도
   거절하고 이유를 말한다 — 원본 보존이 이 스킬이 성립하는 전제다
@@ -160,5 +155,5 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
 - 접은 뒤에도 `wtflow:progress` 의 Step 표는 **원본 mirror** 로 읽는다. 스쿼시 브랜치는
   진행 상태의 근거가 아니다 — 리뷰용 산출물이다
 - `wtflow-clean` 은 스쿼시 브랜치를 accumulator 로 세지 않는다(`-squash` 로 끝나는 이름을 제외)
-- **백업 ref 는 쌓인다** — 접을 때마다 하나씩 늘고, 아무것도 자동으로 지우지 않는다.
-  정리는 `wtflow-clean` 몫이다
+- **`wtflow-clean` 은 accumulator 와 함께 `-squash` 도 지운다** — 접힌 브랜치만 남으면
+  원본이 도달 불가능해진다(계약 2)

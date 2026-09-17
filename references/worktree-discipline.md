@@ -92,13 +92,11 @@ mirror 분기(`<accumulator>-<NNN>`)로만 판정한다** — 뒤 3자리가 Ste
 `#<N>` 자리에 `+` 하나가 들어간 것뿐이고 나머지 규칙은 전부 같다. `~`·`^` 는 git refname
 금지문자라 마커로 못 쓴다.
 
-**백업 ref 는 브랜치가 아니다** — `refs/wtflow-backup/<accumulator>/<타임스탬프>` 로
-`refs/heads` 밖에 둔다. 스쿼시가 접기 전 tip 을 여기 박아 두고, 접은 뒤에도 원본 커밋을
-전부 되찾을 수 있게 한다.
+**접기 전 커밋을 위한 별도 ref 는 두지 않는다.** 스쿼시는 accumulator 를 안 건드리므로
+접기 전 커밋은 accumulator tip 에서, Step 별로는 mirror `-<NNN>` 에서 그대로 도달 가능하다.
 
-- **`refs/heads` 밖인 것이 요점이다** — 브랜치로 두면 아래 accumulator 탐지에 다시 걸린다.
-  `git branch --list` 와 `for-each-ref refs/heads` 는 둘 다 이 ref 를 보지 못한다
-- 그래서 `wtflow-clean` 은 **이 네임스페이스를 따로 훑어야** 정리 대상에 넣을 수 있다
+- **대신 `-squash` 는 accumulator 와 수명을 같이 한다** — accumulator 를 지우면서 `-squash` 만
+  남기면 그 순간 원본이 도달 불가능해진다. `wtflow-clean` 이 둘을 함께 지운다
 
 - `<prefix>` 는 커밋 컨벤션과 같은 값(`fix`/`feat`/`refactor`/`docs`/`test`/`chore`) — 이슈 종류
   라벨에서 유도한다. **워크트리 브랜치에 `worktree/` 를 쓰지 않는다** — 브랜치 목록에서 이슈 종류가
@@ -114,7 +112,7 @@ mirror 분기(`<accumulator>-<NNN>`)로만 판정한다** — 뒤 3자리가 Ste
   이름만 보고 어느 accumulator 것인지 읽히고, 이슈번호 역추적(`/#<N>-`)에 그대로 걸린다
 - ⚠️ **accumulator 당 스쿼시 브랜치는 하나다.** 탐지가 `-squash` 로 **끝나는지**를 보므로
   `-squash-2` 같은 둘째 이름을 만들면 그 브랜치가 accumulator 로 세어진다. 다시 접을 때는
-  같은 이름을 덮어쓴다 — 접기 전 커밋은 백업 ref 에 남아 있다
+  같은 이름을 덮어쓴다 — 접기 전 커밋은 accumulator 에 남아 있다
 - ⚠️ **slug 를 `squash` 로 끝내지 않는다.** 같은 이유로 `feat/#50-commit-squash` 는 accumulator 인데도
   탐지에서 빠진다. 제목에서 뽑은 slug 가 그 꼴이면 plan 이 한 단어를 더해 피한다
   (`commit-squash-skill`)
