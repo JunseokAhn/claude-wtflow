@@ -19,9 +19,9 @@ disable-model-invocation: false
 - `-s` / `--same-topic`: 현재(최고 Step) 분기에 누적 강제
 - `-a <accumulator>`: 워크트리 브랜치 (예 `refactor/#30-metric-history-pg-migration`, 이슈 없는 작업이면 `refactor/+metric-history-pg-migration`). 미지정 시 자동 탐지:
   ```
-  git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
+  git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-([0-9]{3}|squash)$'
   ```
-  중 현재 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 으로 끝나는 건 mirror 라 제외)
+  중 현재 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 은 mirror, `-squash` 는 스쿼시 브랜치라 제외)
 - `--done`: 이번 커밋으로 **현재 Step(작업 항목)가 완료**됨을 명시 → 이슈 본문 체크박스 체크(`## 작업 항목 체크박스 동기화`). 주제 전환 없이 끝나는 마지막 Step, 또는 단일 커밋으로 끝나는 Step 에 사용. **이슈 작업 전용** — 이슈 없는 작업엔 켤 체크박스가 없어 무시된다
 - `--no-test`: 테스트 단계 생략
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
