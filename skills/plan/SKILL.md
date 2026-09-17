@@ -53,10 +53,10 @@ disable-model-invocation: true
      그게 이슈 본문 자리를 대신한다. 워크트리 안이면 mirror 분기로 기존 Step 진행을 읽는다
    - 인자 없음 + 워크트리 안 → accumulator 에서 추론. **accumulator 탐지**:
      ```
-     git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
+     git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-([0-9]{3}|squash)$'
      ```
-     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<NNN>` 유무로 구분한다) → HEAD 와 ancestry 를
-     공유하는 것이 accumulator
+     (accumulator·mirror·스쿼시 브랜치는 같은 prefix 를 쓰므로 `-<NNN>`·`-squash` 유무로 구분한다)
+     → HEAD 와 ancestry 를 공유하는 것이 accumulator
 
 2. **워크트리 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재가 main 워킹트리가
    아닌 워크트리인지 보고, **현재 워크트리의 식별자와 요청을 비교**한다.
@@ -82,6 +82,8 @@ disable-model-invocation: true
      메시지에 남는다
    - 경로엔 `#`·`+` 를 넣지 않는다 (`#` 는 셸 주석 문자라 따옴표가 빠지면 조용히 잘린다)
    - slug 는 제목/작업 설명을 의미 기반 영어 kebab-case 로 옮긴 것(최대 5단어).
+     **`squash` 로 끝내지 않는다** — 스쿼시 브랜치와 구분이 안 돼 accumulator 탐지에서 빠진다
+     (`worktree-discipline.md` 의 `## 브랜치 이름 규칙 (세 종류, 역할이 다르다)`).
      **adhoc 은 slug 가 유일 식별자**라 기존 accumulator 와 겹치면 되묻는다(`-2` 자동 접미 금지)
 
 4. **브랜치 + 워크트리 생성**

@@ -215,10 +215,12 @@ resolve_merge_target() {
 # 이슈 번호 N → 작업 브랜치 역추적 (브랜치/위치 무관)
 resolve_by_number() {
   local num="$1" cands wt_br
-  # 후보: 워크트리 브랜치 <prefix>/#<N>-<slug> (= accumulator). 미러 -NNN 은 제외.
+  # 후보: 워크트리 브랜치 <prefix>/#<N>-<slug> (= accumulator).
+  # 미러 -NNN 과 스쿼시 브랜치 -squash 는 제외 — 둘 다 accumulator 이름에 접미만 붙인 것이라
+  # 접미로 안 거르면 후보가 여럿이 되어 대표 선정이 엉뚱한 브랜치를 집는다.
   cands=$(git for-each-ref --format='%(refname:short)' refs/heads \
     | grep -E "/#${num}-" \
-    | grep -vE -- '-[0-9][0-9][0-9]$' || true)
+    | grep -vE -- '-([0-9][0-9][0-9]|squash)$' || true)
   local n; n=$(printf '%s\n' "$cands" | grep -c . || true)
   if [ "$n" -eq 1 ]; then
     printf '%s\n' "$cands"; return 0
@@ -323,6 +325,7 @@ if [ "$marker_only" != 1 ]; then
   # 그게 곧 정리 대상이라 막지 않는다 — 안전 판정은 뒤의 is_preserved(develop/main 병합) 몫.
   case "$target_branch" in
     *-[0-9][0-9][0-9]) ;;                           # 미러를 직접 지정한 경우
+    *-squash) ;;                                    # 스쿼시 브랜치를 직접 지정한 경우
     *'#'*) [ "$mode" = both ] \
              && note "워크트리 브랜치입니다 — 미러와 함께 삭제 대상: $target_branch" ;;
   esac
@@ -387,10 +390,11 @@ if [ -n "$issue_num" ]; then
   # 새 컨벤션에선 미러(-NNN)에도 '#' 가 붙는다. 미러는 이미 issue_branches 에 있으므로
   # 여기서 빼지 않으면 삭제 목록에 같은 브랜치가 두 번 들어간다(두 번째 branch -D 는 실패).
   marker_branch=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
-    | grep -E "/#${issue_num}-" | grep -vE -- '-[0-9][0-9][0-9]$' | head -n1 || true)
-  # 이슈 N 의 워크트리 브랜치(= 마커) — 미러 제외 (현재 체크아웃 브랜치는 삭제 불가 → 제외)
+    | grep -E "/#${issue_num}-" | grep -vE -- '-([0-9][0-9][0-9]|squash)$' | head -n1 || true)
+  # 이슈 N 의 워크트리 브랜치(= 마커) — 미러·스쿼시 브랜치 제외
+  # (현재 체크아웃 브랜치는 삭제 불가 → 제외)
   marker_branches=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
-    | grep -E "/#${issue_num}-" | grep -vE -- '-[0-9][0-9][0-9]$' || true)
+    | grep -E "/#${issue_num}-" | grep -vE -- '-([0-9][0-9][0-9]|squash)$' || true)
   if [ "$release_checkouts" != 1 ] && [ -n "$current_branch" ] && [ "$current_branch" != HEAD ]; then
     marker_branches=$(printf '%s\n' "$marker_branches" | grep -vxF "$current_branch" || true)
   fi

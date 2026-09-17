@@ -81,15 +81,24 @@ mirror 분기(`<accumulator>-<NNN>`)로만 판정한다** — 뒤 3자리가 Ste
 **Why:** 계획 파일은 세션이 끊기면 계획이 사라지는 것을 막으려 생겼다. `plan` 이 같은 세션을
 워크트리로 옮기면서 그 전제가 사라져, 세션이 대신 가질 수 없는 공유 계약만 파일로 남긴다.
 
-## 브랜치 이름 규칙 (두 종류, 역할이 다르다)
+## 브랜치 이름 규칙 (세 종류, 역할이 다르다)
 
 | 종류 | 이름 (이슈 작업) | 이름 (이슈 없는 adhoc) | 누가 만드나 |
 |------|------------------|------------------------|-------------|
 | **워크트리 브랜치** (= accumulator = 작업 마커) | `<prefix>/#<N>-<slug>` | `<prefix>/+<slug>` | 자동 (plan) |
 | **mirror 분기** (Step별) | `<prefix>/#<N>-<slug>-<NNN>` | `<prefix>/+<slug>-<NNN>` | 자동 (commit) |
+| **스쿼시 브랜치** (accumulator 당 하나) | `<prefix>/#<N>-<slug>-squash` | `<prefix>/+<slug>-squash` | 자동 (squash) |
 
 `#<N>` 자리에 `+` 하나가 들어간 것뿐이고 나머지 규칙은 전부 같다. `~`·`^` 는 git refname
 금지문자라 마커로 못 쓴다.
+
+**백업 ref 는 브랜치가 아니다** — `refs/wtflow-backup/<accumulator>/<타임스탬프>` 로
+`refs/heads` 밖에 둔다. 스쿼시가 접기 전 tip 을 여기 박아 두고, 접은 뒤에도 원본 커밋을
+전부 되찾을 수 있게 한다.
+
+- **`refs/heads` 밖인 것이 요점이다** — 브랜치로 두면 아래 accumulator 탐지에 다시 걸린다.
+  `git branch --list` 와 `for-each-ref refs/heads` 는 둘 다 이 ref 를 보지 못한다
+- 그래서 `wtflow-clean` 은 **이 네임스페이스를 따로 훑어야** 정리 대상에 넣을 수 있다
 
 - `<prefix>` 는 커밋 컨벤션과 같은 값(`fix`/`feat`/`refactor`/`docs`/`test`/`chore`) — 이슈 종류
   라벨에서 유도한다. **워크트리 브랜치에 `worktree/` 를 쓰지 않는다** — 브랜치 목록에서 이슈 종류가
@@ -100,7 +109,15 @@ mirror 분기(`<accumulator>-<NNN>`)로만 판정한다** — 뒤 3자리가 Ste
 - **mirror base = 워크트리 브랜치 이름 그대로.** 뒤에 `-<NNN>` 만 붙인다. 워크트리 밖에서 추론해야
   하면 기존 mirror(`git branch --list '*/#<N>-<slug>-[0-9][0-9][0-9]'`)에서 `-<NNN>` 을 떼면 된다
 - `<NNN>` 은 3자리 zero-padding(`-001`) — `wtflow-clean`·`progress` 가 이 형태로 매칭한다.
-  따라서 **accumulator 탐지 = `*/[#+]*` 중 `-[0-9][0-9][0-9]` 로 끝나지 않는 것**
+  따라서 **accumulator 탐지 = `*/[#+]*` 중 `-[0-9][0-9][0-9]` 로도 `-squash` 로도 끝나지 않는 것**
+- **스쿼시 브랜치 base = 워크트리 브랜치 이름 그대로.** mirror 와 같은 자리에 `-squash` 를 붙인다 —
+  이름만 보고 어느 accumulator 것인지 읽히고, 이슈번호 역추적(`/#<N>-`)에 그대로 걸린다
+- ⚠️ **accumulator 당 스쿼시 브랜치는 하나다.** 탐지가 `-squash` 로 **끝나는지**를 보므로
+  `-squash-2` 같은 둘째 이름을 만들면 그 브랜치가 accumulator 로 세어진다. 다시 접을 때는
+  같은 이름을 덮어쓴다 — 접기 전 커밋은 백업 ref 에 남아 있다
+- ⚠️ **slug 를 `squash` 로 끝내지 않는다.** 같은 이유로 `feat/#50-commit-squash` 는 accumulator 인데도
+  탐지에서 빠진다. 제목에서 뽑은 slug 가 그 꼴이면 plan 이 한 단어를 더해 피한다
+  (`commit-squash-skill`)
 - 워크트리 **경로**는 `.claude/worktrees/<N>-<slug>`(adhoc 은 `<slug>`) — `#`·`+` 를 넣지 않는다.
   브랜치명과 달리 경로는 셸에서 `#` 가 주석 시작이라, 따옴표가 빠지는 순간 조용히 잘린다
 
