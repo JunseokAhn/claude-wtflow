@@ -5,7 +5,10 @@
 #
 # 기본 동작: 이슈 N 의 브랜치를 모두 삭제하고 워크트리를 제거.
 #   삭제 대상  = 워크트리 브랜치 <prefix>/#<N>-<slug> (= accumulator = 이슈 마커),
-#                그들의 미러 -NNN (예: fix/#42-foo-001 … 3자리)
+#                그들의 미러 -NNN (예: fix/#42-foo-001 … 3자리),
+#                스쿼시 브랜치 -squash (예: fix/#42-foo-squash)
+#                스쿼시 브랜치를 남기지 않는 이유: accumulator 만 지우면 접기 전 원본 커밋이
+#                도달 불가능해진다(접힌 커밋은 트리만 같을 뿐 별개 오브젝트).
 #   워크트리   = .../.claude/worktrees/ 아래의 해당 워크트리
 #   안전장치   = develop/main 에 병합·포함된 브랜치만 삭제 (미병합은 -f/-M 필요).
 #                기본 브랜치(develop/main/master)는 인자로 명시해도 삭제하지 않는다.
@@ -336,17 +339,20 @@ issue_num=""
 case "$target_arg" in ''|*[!0-9]*) ;; *) issue_num="$target_arg" ;; esac
 [ -n "$issue_num" ] || issue_num=$(printf '%s\n' "$target_branch" | sed -nE 's@^.*/#([0-9]+)-.*@\1@p')
 
-# 이슈 N 의 미러(-NNN) 목록. 워크트리 브랜치 자체는 marker_branches 로 따로 모아
-# 뒤에서 합친다 — 여기에도 넣으면 삭제 목록에 같은 이름이 두 번 들어간다.
+# 이슈 N 의 미러(-NNN)와 스쿼시 브랜치(-squash) 목록. 워크트리 브랜치 자체는 marker_branches 로
+# 따로 모아 뒤에서 합친다 — 여기에도 넣으면 삭제 목록에 같은 이름이 두 번 들어간다.
+#
+# 스쿼시 브랜치를 여기 넣는 이유: 접힌 커밋은 원본과 트리만 같을 뿐 별개 오브젝트다.
+# accumulator 를 지우면서 -squash 만 남기면 접기 전 원본 커밋이 도달 불가능해진다.
 if [ -n "$issue_num" ]; then
   issue_branches=$(git -C "$main_top" for-each-ref --format='%(refname:short)' refs/heads \
     | grep -E "/#${issue_num}-" \
-    | grep -E -- '-[0-9][0-9][0-9]$' || true)
+    | grep -E -- '-([0-9][0-9][0-9]|squash)$' || true)
 else
-  # 이슈번호를 못 구한 비관행 브랜치: 그 브랜치와 그 미러만 대상으로 한다
+  # 이슈번호를 못 구한 비관행 브랜치: 그 브랜치와 그 미러·스쿼시 브랜치만 대상으로 한다
   issue_branches=$( { printf '%s\n' "$target_branch"; \
     git -C "$main_top" for-each-ref --format='%(refname:short)' "refs/heads/${target_branch}-*" 2>/dev/null \
-      | grep -E -- '-[0-9][0-9][0-9]$'; } || true)
+      | grep -E -- '-([0-9][0-9][0-9]|squash)$'; } || true)
 fi
 # 워크트리 브랜치를 실제로 지우는 모드인가. -m(미러만)·-w(워크트리만)는 그 브랜치를 남기므로
 # 보존 근거·정렬·체크아웃 해제 판단이 전부 달라진다.
