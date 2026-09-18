@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # /wtflow:plan — 워크트리 작업 시작
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-impact.md`(§7 영향 범위)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 읽기·§11 제품 동작 확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
 
 ## 작업 문서
 
@@ -53,10 +53,10 @@ disable-model-invocation: true
      그게 이슈 본문 자리를 대신한다. 워크트리 안이면 mirror 분기로 기존 Step 진행을 읽는다
    - 인자 없음 + 워크트리 안 → accumulator 에서 추론. **accumulator 탐지**:
      ```
-     git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
+     git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-([0-9]{3}|squash)$'
      ```
-     (accumulator 와 mirror 는 같은 prefix 를 쓰므로 `-<NNN>` 유무로 구분한다) → HEAD 와 ancestry 를
-     공유하는 것이 accumulator
+     (accumulator·mirror·스쿼시 브랜치는 같은 prefix 를 쓰므로 `-<NNN>`·`-squash` 유무로 구분한다)
+     → HEAD 와 ancestry 를 공유하는 것이 accumulator
 
 2. **워크트리 판별** — `git rev-parse --show-toplevel` + `git worktree list` 로 현재가 main 워킹트리가
    아닌 워크트리인지 보고, **현재 워크트리의 식별자와 요청을 비교**한다.
@@ -82,6 +82,8 @@ disable-model-invocation: true
      메시지에 남는다
    - 경로엔 `#`·`+` 를 넣지 않는다 (`#` 는 셸 주석 문자라 따옴표가 빠지면 조용히 잘린다)
    - slug 는 제목/작업 설명을 의미 기반 영어 kebab-case 로 옮긴 것(최대 5단어).
+     **`squash` 로 끝내지 않는다** — 스쿼시 브랜치와 구분이 안 돼 accumulator 탐지에서 빠진다
+     (`worktree-discipline.md` 의 `## 브랜치 이름 규칙 (세 종류, 역할이 다르다)`).
      **adhoc 은 slug 가 유일 식별자**라 기존 accumulator 와 겹치면 되묻는다(`-2` 자동 접미 금지)
 
 4. **브랜치 + 워크트리 생성**
@@ -224,7 +226,7 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
   삭제·정리·보일러플레이트에는 안 붙인다
 - **붙이기 전에 `learning-protocol.md` 의 `## 질문을 내기 전 검사` 를 거친다.** 붙인 Step 이라도 시작
   직전에 ①② 에 걸리면 묻지 않고, **건너뛴 사실과 걸린 검사를 한 줄로 적는다**.
-  ③ 은 반대다 — 묻되 인용을 채워서 낸다
+  ③④ 는 반대다 — 묻되 인용을 채워서 낸다
 - **질문 형식은 `learning-protocol.md` 의 `## 사전문답은 전부 AskUserQuestion 으로 낸다` 가 정한다**
   — `(추천)` 을 붙이는 절과 안 붙이는 절, 3문항 상한, 판단 자료를 두는 자리까지 전부. 여기 사본을 두지 않는다
 - 사용자가 "급해" / "그냥 해줘" 라고 하면 `❓` 를 걷고 평소대로 민다 — 되묻지 않는다

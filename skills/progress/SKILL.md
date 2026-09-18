@@ -37,9 +37,9 @@ disable-model-invocation: false
 1. **워크트리 확인** — `git rev-parse --show-toplevel` + `git worktree list`. main 워킹트리면 경고만 하고 진행(워크트리 전용은 아니다 — 이슈는 `-N` 만으로도, 이슈 없는 작업은 `-a` 만 알면 동작).
 2. **accumulator 확정 + 모드 판정** — `-a` 우선. 없으면
    ```
-   git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-[0-9]{3}$'
+   git branch --list '*/[#+]*' --format='%(refname:short)' | grep -vE -- '-([0-9]{3}|squash)$'
    ```
-   중 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 으로 끝나는 건 mirror 라 제외). **이름이 모드를 정한다**: **`/#` 뒤 정수 = 이슈 모드**(`-N` 이 있으면 우선), **`/+` 뒤 문자열 = 이슈 없는 모드**. accumulator 도 `-N` 도 못 구하면 표 없이 한 줄 안내 후 종료.
+   중 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 은 mirror, `-squash` 는 스쿼시 브랜치라 제외). **이름이 모드를 정한다**: **`/#` 뒤 정수 = 이슈 모드**(`-N` 이 있으면 우선), **`/+` 뒤 문자열 = 이슈 없는 모드**. accumulator 도 `-N` 도 못 구하면 표 없이 한 줄 안내 후 종료.
    - accumulator 없이 `-N` 만 있으면 mirror 조회를 skip 하고 체크리스트만으로 표를 만든다.
 3. **작업 항목 확보 — 모드별로 다르다**
 
