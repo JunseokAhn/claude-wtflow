@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # /wtflow:auto — 워크트리 작업 항목 자율 순회
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 중에도 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-mastery.md`(§7 숙달 문항·§11 제품 동작 확인)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 중에도 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-mastery.md`(§7 코드 읽기·§11 제품 동작 확인)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 `/wtflow:plan` 이 만든 plan 의 작업 항목(Step)들을 **사람이 Step마다 끼어들지 않아도** 끝까지 돌린다.
 각 Step = 구현 → 가벼운 검증 → `/wtflow:commit` 로컬 커밋. **commit 메커니즘은 직접 짜지 않고 `/wtflow:commit` 에 위임**한다(분기·테스트·누적 contract 단일화).
@@ -87,7 +87,7 @@ Step 오름차순으로 반복:
 - 답을 받으면 그 자리에서 채점하고 곧바로 구현으로 넘어간다. **"다음 Step 으로 갈까요?" 는 묻지 않는다**
   — 순회를 끝까지 도는 것은 이 스킬을 부른 시점에 이미 정해졌다
 
-**커밋 직후에도 문답이 선다** — 숙달 문항과 제품 동작 확인이고, 시점·형식은 `/wtflow:commit` 계약 9 가
+**커밋 직후에도 문답이 선다** — 코드 읽기와 제품 동작 확인이고, 시점·형식은 `/wtflow:commit` 계약 9 가
 지시한다. **소재도 동작 변화도 없으면 그 커밋은 멈춤 없이 지나간다.**
 
 **`--no-ask` 면 순회 중에는 묻지 않는다.** `❓` Step 앞에서도 커밋 직후에도 멈추지 않는다 — 못 끄는
