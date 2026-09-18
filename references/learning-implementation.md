@@ -4,7 +4,7 @@
 **`plan`(어느 Step 을 멈출지 표시)·`commit`·`auto` 가 시작 전에 읽는다.**
 
 켜는 자리·질문 형식·질문 전 검사는 `learning-protocol.md`, 커밋 직후 영향 범위는
-`learning-mastery.md`, 방향·커밋 경계는 `learning-direction.md` 를 본다.
+`learning-postcommit.md`, 방향·커밋 경계는 `learning-direction.md` 를 본다.
 
 ## 1. 예측 — 동작 판단 Step 은 구현 전에 멈춘다
 
