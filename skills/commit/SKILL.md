@@ -1,6 +1,6 @@
 ---
 name: commit
-description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
+description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
 allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
@@ -11,7 +11,7 @@ disable-model-invocation: false
 
 ## 호출
 
-`/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--push]`
+`/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--no-quiz] [--push]`
 
 - `<작업 설명>` (필수): 한 줄 제목. commit subject + 본문에 사용 (언어는 `commit-convention.md` 의 `## Subject` 를 따른다)
 - `--step <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<NNN>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
@@ -24,6 +24,7 @@ disable-model-invocation: false
   중 현재 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 은 mirror, `-squash` 는 스쿼시 브랜치라 제외)
 - `--done`: 이번 커밋으로 **현재 Step(작업 항목)가 완료**됨을 명시 → 이슈 본문 체크박스 체크(`## 작업 항목 체크박스 동기화`). 주제 전환 없이 끝나는 마지막 Step, 또는 단일 커밋으로 끝나는 Step 에 사용. **이슈 작업 전용** — 이슈 없는 작업엔 켤 체크박스가 없어 무시된다
 - `--no-test`: 테스트 단계 생략
+- `--no-quiz`: 커밋 직후 코드 읽기 질문만 생략 — 동작 확인 질문은 그대로 낸다(계약 9)
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
 
 > **체크박스가 있느냐를 accumulator 이름이 정한다.** `/#` 뒤 정수 → 이슈 #N 본문에 체크리스트가
@@ -125,6 +126,7 @@ disable-model-invocation: false
    - **인용이 preview 를 넘으면 인용 턴을 먼저 낸다**(§1 예측 `### 어디에 두나`) — 인용과
      commit hash 를 그 턴의 마지막 응답으로 두고 턴을 끝낸다. 사용자 입력이 오면 그 턴에서 질문을
      띄우고, **계약 6·7·8 은 답을 받은 뒤에** 잇는다. 요약이 인용 뒤에 붙으면 인용 턴이 성립하지 않는다
+   - **`--no-quiz` 면 코드 읽기를 소재 없음으로 본다** — 동작 확인만 남는다
    - **소재도 동작 변화도 없으면 멈추지 않는다** — 그 사실을 요약(계약 7)에 한 줄로 적는다
    - 버그를 찾아 고쳤으면 **같은 Step 의 다음 커밋**으로 잇는다 — 문항으로 내지 않는다
 
@@ -142,6 +144,7 @@ disable-model-invocation: false
 ## 짧은 변형
 
 - "테스트 빼고" → `--no-test` · "푸쉬도" → `--push`
+- "코드 퀴즈 빼고" / "코드 질문은 됐어" → `--no-quiz`
 - "새 주제" / "분기 새로 떠" → `-n` · "같은 거에 묶어" → `-s`
 - "Step12 로" → `--step 12` · "accumulator 는 X" → `-a X`
 - "이 작업 항목 끝" / "항목 완료" / "체크해줘" → `--done`

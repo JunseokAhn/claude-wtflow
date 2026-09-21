@@ -1,6 +1,6 @@
 ---
 name: auto
-description: plan의 Step 항목들을 순회 구현→검증→로컬 커밋. 인자 --from/--only/--push/--dry-run/--no-ask. "알아서 끝까지/작업 항목 다 돌려" 요청에. 사용자 명시 호출만, push 안 함.
+description: plan의 Step 항목들을 순회 구현→검증→로컬 커밋. 인자 --from/--only/--push/--dry-run/--no-ask/--no-quiz. "알아서 끝까지/작업 항목 다 돌려" 요청에. 사용자 명시 호출만, push 안 함.
 disable-model-invocation: true
 ---
 
@@ -19,13 +19,14 @@ disable-model-invocation: true
 
 ## 호출
 
-`/wtflow:auto [작업 항목 범위] [--from <Step>] [--only <Step[,Step,...]>] [--no-test] [--no-ask] [--push] [--dry-run]`
+`/wtflow:auto [작업 항목 범위] [--from <Step>] [--only <Step[,Step,...]>] [--no-test] [--no-ask] [--no-quiz] [--push] [--dry-run]`
 
 - 인자 없음(기본): 현재 세션 plan 의 **모든 작업 항목**을 Step 오름차순으로 자율 순회
 - `--from <Step>`: Step 부터 재개(이전 Step 은 이미 커밋됐다고 간주) — 테스트 실패로 멈춘 뒤 고치고 이어갈 때
 - `--only <Step,...>`: 지정한 Step 들만
 - `--no-test`: 각 `/wtflow:commit` 에 `--no-test` 전달(빠른 반복 — 검증 책임은 사용자)
 - `--no-ask`: 순회 중 문답을 전부 끈다. `❓` Step 앞에서도, 커밋 직후에도 멈추지 않고, 내가 정하고 넘어간 설계 선택만 순회 뒤에 모아 낸다(기본은 멈추고 묻는다)
+- `--no-quiz`: 커밋 직후 코드 읽기 질문만 끈다 — 각 `/wtflow:commit` 에 `--no-quiz` 전달. `❓` Step 앞 문답과 동작 확인 질문은 그대로 낸다. `--no-ask` 와 함께 오면 `--no-ask` 가 이긴다
 - `--push`: 각 Step 커밋을 origin 에도 push(기본 OFF — 이 스킬의 기본은 **로컬만**). 명시 안 하면 절대 push 안 함
 - `--dry-run`: 구현·커밋 없이 plan→Step 매핑과 각 Step 의 변경 대상만 출력하고 멈춤(계획 확인용)
 
@@ -70,7 +71,7 @@ Step 오름차순으로 반복:
    - Kotlin/Java 등 컴파일 언어 → 가능하면 빠른 컴파일(`./gradlew compileKotlin` 등)
    - 마땅한 빠른 검사가 없으면 생략하고 4 로(전체 회귀는 wtflow:commit 이 함)
    ⚠️ 전체 테스트를 여기서 다시 돌리지 않는다 — wtflow:commit 의 테스트 게이트와 중복.
-4. **커밋 위임** — `/wtflow:commit "<type(scope): 요약>" --step {N}` 호출(`--no-test`/`--push` 는 인자 그대로 전달). **이 커밋이 Step 의 마지막 태스크면 `--done` 추가**(Step 단일 커밋이면 항상 `--done`) → 이슈 작업이면 항목 N 체크박스가 켜진다.
+4. **커밋 위임** — `/wtflow:commit "<type(scope): 요약>" --step {N}` 호출(`--no-test`/`--no-quiz`/`--push` 는 인자 그대로 전달). **이 커밋이 Step 의 마지막 태스크면 `--done` 추가**(Step 단일 커밋이면 항상 `--done`) → 이슈 작업이면 항목 N 체크박스가 켜진다.
 5. **결과 확인** — wtflow:commit 요약을 읽는다. 테스트 실패·non-FF·"주제 불확실" 등 이상 신호면 **멈춤 트리거**로 처리. 정상이면 commit hash·분기명·체크된 작업 항목을 진행 로그에 적고 다음 태스크/다음 Step 으로.
 6. **항목 종료** — 작업 항목의 모든 태스크가 커밋되고 `--done` 을 넘겼으면 Step 종료. 다음 Step 으로(재허락 안 물음).
 
@@ -126,6 +127,7 @@ Step 오름차순으로 반복:
 - "3번만" / "Step3, Step4만" → `--only 3` / `--only 3,4`
 - "테스트 빼고 빨리" → `--no-test`
 - "묻지 말고 쭉" / "문답 빼고" / "멈추지 말고" → `--no-ask`
+- "코드 퀴즈 빼고" / "코드 질문은 됐어" → `--no-quiz`
 - "푸쉬까지" / "origin 에도" → `--push`
 - "계획만 보여줘" / "뭐 건드릴지만" → `--dry-run`
 
