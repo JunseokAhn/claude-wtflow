@@ -1,6 +1,6 @@
 ---
 name: auto
-description: plan의 Step 항목들을 순회 구현→검증→로컬 커밋. 인자 --from/--only/--push/--dry-run/--no-ask/--no-quiz. "알아서 끝까지/작업 항목 다 돌려" 요청에. 사용자 명시 호출만, push 안 함.
+description: plan의 Step 항목들을 순회 구현→검증→로컬 커밋. 인자 --from/--step/--only/--push/--dry-run/--no-ask/--no-quiz. "알아서 끝까지/작업 항목 다 돌려" 요청에. 사용자 명시 호출만, push 안 함.
 disable-model-invocation: true
 ---
 
@@ -19,10 +19,13 @@ disable-model-invocation: true
 
 ## 호출
 
-`/wtflow:auto [작업 항목 범위] [--from <Step>] [--only <Step[,Step,...]>] [--no-test] [--no-ask] [--no-quiz] [--push] [--dry-run]`
+`/wtflow:auto [작업 항목 범위] [--from <Step>] [--step <Step>] [--only <Step[,Step,...]>] [--no-test] [--no-ask] [--no-quiz] [--push] [--dry-run]`
 
 - 인자 없음(기본): 현재 세션 plan 의 **모든 작업 항목**을 Step 오름차순으로 자율 순회
 - `--from <Step>`: Step 부터 재개(이전 Step 은 이미 커밋됐다고 간주) — 테스트 실패로 멈춘 뒤 고치고 이어갈 때
+- `--step <Step>`: 남은 작업을 **그 Step 까지** 순회하고 멈춘다. `--from` 과 함께 쓰면 구간이다(`--from 2 --step 3` = 2~3)
+  - ⚠️ `/wtflow:commit` 의 `--step` 과 뜻이 다르다 — 그쪽은 **그 Step 하나만**, 여기는 **그 Step 까지**
+  - `--only` 와 함께 오면 되묻는다 — 둘 다 순회 범위를 정해 어느 쪽이 이기는지 정할 근거가 없다
 - `--only <Step,...>`: 지정한 Step 들만
 - `--no-test`: 각 `/wtflow:commit` 에 `--no-test` 전달(빠른 반복 — 검증 책임은 사용자)
 - `--no-ask`: 순회 중 문답을 전부 끈다. `❓` Step 앞에서도, 커밋 직후에도 멈추지 않고, 내가 정하고 넘어간 설계 선택만 순회 뒤에 모아 낸다(기본은 멈추고 묻는다)
@@ -124,6 +127,7 @@ Step 오름차순으로 반복:
 
 - "알아서 끝까지" / "작업 항목 다 돌려" → 인자 없이 전체
 - "Step2부터 다시" / "고쳤으니 이어가" → `--from 2`
+- "2번까지만" / "두 번째 작업까지 하고 멈춰" → `--step 2`
 - "3번만" / "Step3, Step4만" → `--only 3` / `--only 3,4`
 - "테스트 빼고 빨리" → `--no-test`
 - "묻지 말고 쭉" / "문답 빼고" / "멈추지 말고" → `--no-ask`

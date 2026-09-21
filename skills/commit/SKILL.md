@@ -14,7 +14,7 @@ disable-model-invocation: false
 `/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--no-quiz] [--push]`
 
 - `<작업 설명>` (필수): 한 줄 제목. commit subject + 본문에 사용 (언어는 `commit-convention.md` 의 `## Subject` 를 따른다)
-- `--step <번호>`: 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<NNN>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
+- `--step <번호>`: **그 Step 하나만** 커밋한다(`/wtflow:auto` 의 `--step` 은 「그 Step 까지」라 뜻이 다르다). 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<NNN>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
 - `-n` / `--new-topic`: 이번 커밋부터 새 주제 — 새 분기(`기존 최고 Step + 1`) 강제
 - `-s` / `--same-topic`: 현재(최고 Step) 분기에 누적 강제
 - `-a <accumulator>`: 워크트리 브랜치 (예 `refactor/#30-metric-history-pg-migration`, 이슈 없는 작업이면 `refactor/+metric-history-pg-migration`). 미지정 시 자동 탐지:
