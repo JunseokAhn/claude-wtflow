@@ -1,7 +1,7 @@
 ---
 name: commit
 description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
-allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
+allowed-tools: Bash(git *), Bash(WTFLOW_COMMIT=1 git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
 
@@ -55,6 +55,10 @@ disable-model-invocation: false
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
 3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **마지막 작업 항목을 닫는 커밋이면 `검증` 란에 완료 조건별 결과를 한 줄씩 적는다**(§10 수용 기준 `### 기록과 미달 처리`) — 저장소 컨벤션에 `검증` 란이 없으면 계약 7 요약에만 적는다. **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 Step 을 넓게 잡았다는 신호다** — 이 판정은 Step 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`Step:` 트레일러 안 넣음** — Step 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+   - **커밋 명령 앞에 환경변수 `WTFLOW_COMMIT=1` 을 붙인다** — `WTFLOW_COMMIT=1 git commit -F <메시지파일>`.
+     이 스킬을 거친 커밋임을 밝히는 유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다
+     - ⚠️ **이 환경변수를 붙인 커밋은 계약 4 의 mirror 전진·생성을 실제로 이어서 해야 한다.** 스킬 밖에서
+       붙이면 예외가 그대로 우회로가 된다
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
