@@ -112,4 +112,19 @@ err=$(git -C "$target" branch -f "$top" "$head" 2>&1) && {
   note "스킬을 거치지 않은 커밋이라 mirror ${top} 를 이 커밋으로 전진시켰습니다. 주제가 바뀐 커밋이었다면 이 mirror 가 아니라 새 Step 이어야 합니다 — 그때는 /wtflow:commit --step <N> 으로 다시 잡으세요."
 }
 
-note "mirror ${top} 를 이 커밋으로 전진시키지 못했습니다: ${err}. 그 브랜치를 다른 워킹트리가 체크아웃 중이면 거기서 git merge --ff-only ${branch} 를 돌려야 하고, 별개 갈래(non-FF)면 drift 이므로 손대기 전에 사용자에게 알리세요."
+# 다른 워킹트리가 그 mirror 를 체크아웃 중이면 ref 만 옮길 수 없다. 에러가 그 경로를 알려주므로
+# 거기서 FF 머지로 ref 와 워킹트리를 함께 올린다 — 훅은 세션 격리를 안 받아 이 경로를 쓸 수 있다.
+# (`git -C <PATH> merge --ff-only` 는 규율이 정한 우회로인데, 워크트리에 격리된 세션에서는
+#  harness 가 거부해 모델이 실행하지 못한다 — 그래서 여기서 대신 한다)
+held=$(printf '%s' "$err" | sed -nE "s/.*checked out at '([^']+)'.*/\1/p" | head -n 1)
+if [ -n "$held" ] && [ -d "$held" ]; then
+  if [ -n "$(git -C "$held" status --porcelain 2>/dev/null)" ]; then
+    note "mirror ${top} 를 ${held} 가 체크아웃 중이고 그 워킹트리가 더티라 전진시키지 못했습니다. 그 변경을 정리한 뒤 거기서 git merge --ff-only ${branch} 를 돌려야 합니다 — 사용자에게 그대로 알리세요."
+  fi
+  merr=$(git -C "$held" merge --ff-only "$branch" 2>&1) && {
+    note "mirror ${top} 를 ${held} 가 체크아웃 중이라 그 워킹트리에서 FF 머지로 전진시켰습니다. 그 화면도 이 커밋으로 갱신됐습니다."
+  }
+  note "mirror ${top} 를 ${held} 에서 FF 머지로도 전진시키지 못했습니다: ${merr}. 별개 갈래(non-FF)면 drift 이므로 손대기 전에 사용자에게 알리세요."
+fi
+
+note "mirror ${top} 를 이 커밋으로 전진시키지 못했습니다: ${err}. 별개 갈래(non-FF)면 drift 이므로 손대기 전에 사용자에게 알리세요."
