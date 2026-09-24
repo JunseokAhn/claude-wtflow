@@ -1,7 +1,7 @@
 ---
 name: squash
 description: 워크트리 작업의 커밋 이력을 고른 단위로 접어 별도 스쿼시 브랜치로 낸다. "커밋 정리해줘", "이력 접어줘", "스쿼시해줘", "커밋 너무 많아" 요청에. 원본 accumulator 와 mirror 는 손대지 않는다. 사용자만 호출.
-allowed-tools: Bash(git *), AskUserQuestion
+allowed-tools: Bash(git *), Bash(wtflow-move-branch *), AskUserQuestion
 disable-model-invocation: true
 ---
 
@@ -91,6 +91,13 @@ accumulator 와 mirror 의 커밋 SHA 는 하나도 안 바뀐다. 그래서 `wt
    - 이름 규칙과 `-squash-2` 를 만들면 안 되는 이유는 `worktree-discipline.md` 의
      `## 브랜치 이름 규칙 (세 종류, 역할이 다르다)` 가 갖는다. **여기 사본을 두지 않는다**
    - 덮어쓰기 전에 기존 스쿼시 브랜치가 어디를 가리켰는지 계약 9 요약에 적는다
+   - **덮어쓰기는 `wtflow-move-branch "<accumulator>-squash" <접은 마지막 커밋>` 으로 한다.**
+     `git branch -f` 는 그 브랜치를 다른 워킹트리가 체크아웃 중이면 거부하는데(리뷰하려고 열어 두는
+     자리다), 접은 커밋은 옛 tip 의 자손이 아니라 mirror 처럼 FF 머지로 올릴 수도 없다.
+     그 스크립트가 물린 워킹트리에서 `checkout -B` 로 갈아끼운다 — 리뷰용 산출물이라
+     갈아끼워도 잃는 것이 없다(계약 2)
+     - **저장 안 된 변경이 있으면 옮기지 않고 무엇이 남았는지 보고한다** — 그때는 사용자가
+       정리한 뒤 다시 부른다. 접은 커밋은 이미 만들어져 있으니 다시 접을 필요는 없다
 
 6. **접힌 커밋의 메시지는 그 구간의 커밋들에서 만든다** — 지어내지 않는다.
    - 구간에 **의미 있는 커밋이 하나**면 그 메시지를 그대로 쓴다
