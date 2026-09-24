@@ -1,7 +1,7 @@
 ---
 name: commit
 description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
-allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
+allowed-tools: Bash(git *), Bash(WTFLOW_COMMIT=1 git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
 
@@ -55,6 +55,10 @@ disable-model-invocation: false
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
 3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **마지막 작업 항목을 닫는 커밋이면 `검증` 란에 완료 조건별 결과를 한 줄씩 적는다**(§10 수용 기준 `### 기록과 미달 처리`) — 저장소 컨벤션에 `검증` 란이 없으면 계약 7 요약에만 적는다. **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 Step 을 넓게 잡았다는 신호다** — 이 판정은 Step 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`Step:` 트레일러 안 넣음** — Step 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+   - **커밋 명령 앞에 환경변수 `WTFLOW_COMMIT=1` 을 붙인다** — `WTFLOW_COMMIT=1 git commit -F <메시지파일>`.
+     이 스킬을 거친 커밋임을 밝히는 유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다
+     - ⚠️ **이 환경변수를 붙인 커밋은 계약 4 의 mirror 전진·생성을 실제로 이어서 해야 한다.** 스킬 밖에서
+       붙이면 예외가 그대로 우회로가 된다
    - **`git commit --amend` / rebase / reset 등 history 재작성 절대 금지.** 직전 작업단위에 대한 수정·교정·리뷰 반영이라도 **새 commit 으로 쌓는다**(방금 만든 로컬·미푸시 커밋이라도 amend 하지 않음 — 이력이 곧 작업 기록).
    - 같은 주제의 후속 수정이면 mirror 를 그 새 commit 으로 **FF-전진**(계약 4). amend 가 아니라 누적이므로 force-move 불필요.
 
@@ -70,6 +74,7 @@ disable-model-invocation: false
    **FF-전진(브랜치 X → 워크트리 tip) — 모든 로컬 브랜치 전진에 공통**
    1. `git branch -f X <tip>` → **성공이면 끝**(X 가 어디에도 체크아웃 안 됨 → ref 만 이동)
    2. `fatal: ... checked out at '<PATH>'` 로 **막히면** = 누군가 `<PATH>` 에서 X 를 보고 있는 중 → 그 워킹트리에서 `git -C <PATH> merge --ff-only <worktree-branch>`(ref+워킹트리 함께 전진 → 화면 즉시 갱신). non-FF 거나 `<PATH>` 가 더티면 알리고 skip
+      - ⚠️ **워크트리에 격리된 세션은 이 명령을 실행하지 못한다** — harness 가 공유 체크아웃을 향한 `git -C` 를 거부한다. 스킬 밖 커밋이면 훅이 같은 일을 대신 하고, 이 스킬이 낸 커밋이면 **사용자에게 Claude Code 밖 터미널에서 돌릴 명령을 주고 멈춘다**(훅은 센티넬이 붙은 커밋을 건너뛴다) — `cd <PATH> && git merge --ff-only <worktree-branch>`. **`!` 로 실행해도 같은 가드에 걸리므로 그 경로를 제안하지 않는다**
    - ⚠️ merge 는 **에러가 가리킨 그 `<PATH>` 에서만.** 임의 워킹트리(예: 메인)에서 돌리면 거기 체크아웃된 **다른 브랜치(예: develop)** 를 엉뚱하게 tip 으로 끌어올려 오염시킨다. `branch -f` 의 실패가 곧 '체크아웃 여부 + 정확한 위치' 를 알려주므로 사전 조회 불필요
 
    **한 곳에서 보기(viewing)** — 작업물을 한 브랜치에서만 보려면 그 브랜치를 체크아웃해 두면 된다. FF-전진 ②가 체크아웃된 브랜치를 매 커밋 자동으로 살려두므로 별도 viewing 로직이 필요 없다. 다만 mirror `-NNN` 은 Step 이 바뀌면 안 움직이니, **Step 전환을 넘어 항상 최신**을 보고 싶으면 accumulator 본체도 매 커밋 같은 FF-전진으로 올린다(로컬만).
@@ -167,6 +172,10 @@ disable-model-invocation: false
 mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 워크트리 브랜치 통째로 PR 1개라 분기 격리·충돌이 없고, 모든 커밋이 한 줄로 선형 누적되므로 전진은 늘 fast-forward(계약 4) — 새 커밋 생성·history 재작성·충돌이 구조적으로 없다(rebase/amend 의 안전한 대체).
 
 **불변식 — 최상단 mirror = worktree tip.** 커밋이 쌓이면(Step 커밋이든 **후속 정정·비-Step chore 든**) 반드시 어떤 mirror 가 tip 을 가리켜야 한다. 새 Step면 새 mirror, 아니면 **최상단 mirror 를 HEAD 로 FF**. **wtflow:commit 을 안 거친 수동 `git commit` 이라도 직접 FF**한다("비-Step 라서 생략" 없음 — 가장 흔한 누락).
+
+**스킬 밖 커밋은 훅(`hooks/guard-direct-commit.sh`)이 뒤에서 최상단 mirror 를 전진시킨다** — 커밋을 막지는 않는다. 다만 훅은 **주제가 바뀌었는지 모른 채 최상단에 붙이므로**, 새 작업 항목이면 이 스킬을 `--step <N>` 으로 부른다. **사람이 터미널에서 한 커밋은 훅이 못 잡는다**(Claude 의 도구 호출에만 걸린다) — 위 FF 의무가 그대로 남는 이유다.
+
+**mirror 가 HEAD 보다 앞서거나 갈라져 있으면 그 훅이 먼저 흡수한다**(FF 아니면 머지). 이 스킬의 커밋은 센티넬 때문에 훅을 건너뛰므로, 그 상태를 만나면 **여기서 직접 같은 순서로 처리한다** — 앞서 있으면 `merge --ff-only <mirror>`, 갈라졌으면 `merge --no-ff <mirror>` 뒤 계약 4 의 FF-전진. 충돌이 나면 `merge --abort` 로 되돌리고 중단·보고한다. **rebase·reset·amend 로 맞추지 않는다**(계약 3).
 
 **"최상단" 은 번호가 아니라 최근성(ancestry)으로.** Step 은 작업 항목 번호라 커밋 순서와 다를 수 있다(Step 6 을 Step 4 보다 먼저 커밋 → `-006` 이 `-004` 보다 옛 커밋). 최상단 = **HEAD 의 직계 조상 중 가장 최근 tip 을 가진 mirror**. `git for-each-ref`·`merge-base --is-ancestor` 로 판정 — ⚠️ `git branch --list` 의 `+`(다른 워크트리 체크아웃) 마커가 섞여 이름 `sort|tail` 은 틀린다. **손 sort 말고 ancestry 로.**
 

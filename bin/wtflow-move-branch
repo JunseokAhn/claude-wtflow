@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# wtflow-move-branch — 브랜치를 주어진 커밋으로 옮긴다. 다른 워킹트리가 물고 있어도.
+#
+# 사용법: wtflow-move-branch <브랜치> <커밋>
+#
+# `git branch -f` 는 그 브랜치가 어느 워킹트리에 체크아웃돼 있으면 거부한다. 스쿼시 브랜치는
+# 접을 때마다 새 커밋으로 만들어져 옛 tip 의 자손이 아니므로, mirror 처럼 FF 머지로 올릴 수도
+# 없다(wtflow:squash 계약 5 의 덮어쓰기). 그래서 물린 워킹트리에서 `checkout -B` 로 갈아끼운다.
+#
+# 리뷰용 산출물에만 쓴다 — 원본 커밋은 accumulator 와 mirror 에 그대로 남는다(계약 2).
+# 물린 워킹트리에 저장 안 된 변경이 있으면 **건드리지 않고** 무엇이 남았는지 알리고 끝낸다.
+#
+# 워크트리에 격리된 세션은 남의 워킹트리를 향한 `git -C` 를 실행하지 못한다. 이 스크립트를
+# 거치면 그 제약을 받지 않는다 — 훅이 mirror 에 대해 하는 일과 같은 이유다.
+set -u
+
+branch=${1:-}
+target=${2:-}
+if [ -z "$branch" ] || [ -z "$target" ]; then
+  echo "사용법: wtflow-move-branch <브랜치> <커밋>" >&2
+  exit 2
+fi
+
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || { echo "git 저장소가 아닙니다" >&2; exit 2; }
+sha=$(git rev-parse --verify --quiet "${target}^{commit}") || { echo "커밋을 못 찾습니다: $target" >&2; exit 2; }
+
+err=$(git branch -f "$branch" "$sha" 2>&1) && { echo "옮김: $branch → $(git rev-parse --short "$sha")"; exit 0; }
+
+held=$(printf '%s' "$err" | sed -nE "s/.*checked out at '([^']+)'.*/\1/p" | head -n 1)
+if [ -z "$held" ] || [ ! -d "$held" ]; then
+  echo "$err" >&2
+  exit 1
+fi
+
+if [ -n "$(git -C "$held" status --porcelain 2>/dev/null)" ]; then
+  echo "$branch 을 $held 가 체크아웃 중이고 저장 안 된 변경이 있어 옮기지 않았습니다:" >&2
+  git -C "$held" status --short >&2
+  exit 1
+fi
+
+if out=$(git -C "$held" checkout -B "$branch" "$sha" 2>&1); then
+  echo "옮김: $branch → $(git rev-parse --short "$sha") ($held 의 내용도 함께 교체)"
+  exit 0
+fi
+
+echo "$out" >&2
+exit 1
