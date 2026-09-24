@@ -172,6 +172,8 @@ mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 �
 
 **불변식 — 최상단 mirror = worktree tip.** 커밋이 쌓이면(Step 커밋이든 **후속 정정·비-Step chore 든**) 반드시 어떤 mirror 가 tip 을 가리켜야 한다. 새 Step면 새 mirror, 아니면 **최상단 mirror 를 HEAD 로 FF**. **wtflow:commit 을 안 거친 수동 `git commit` 이라도 직접 FF**한다("비-Step 라서 생략" 없음 — 가장 흔한 누락).
 
+**모델이 스킬 밖에서 치는 `git commit` 은 훅(`hooks/guard-direct-commit.sh`)이 막는다** — 거부 사유를 받으면 이 스킬로 커밋한다. 훅을 우회하려고 센티넬(`WTFLOW_COMMIT=1`)을 붙이지 않는다. **사람이 터미널에서 한 커밋은 훅이 못 잡으므로** 위 FF 의무가 그대로 남는다 — 그 경우가 이 문단이 여전히 필요한 이유다.
+
 **"최상단" 은 번호가 아니라 최근성(ancestry)으로.** Step 은 작업 항목 번호라 커밋 순서와 다를 수 있다(Step 6 을 Step 4 보다 먼저 커밋 → `-006` 이 `-004` 보다 옛 커밋). 최상단 = **HEAD 의 직계 조상 중 가장 최근 tip 을 가진 mirror**. `git for-each-ref`·`merge-base --is-ancestor` 로 판정 — ⚠️ `git branch --list` 의 `+`(다른 워크트리 체크아웃) 마커가 섞여 이름 `sort|tail` 은 틀린다. **손 sort 말고 ancestry 로.**
 
 → 라벨 번호와 tip 최신도가 어긋나 보이는 건 정상·무해. non-FF(별개 갈래)면 drift 의심 → 중단·보고.
