@@ -74,7 +74,7 @@ disable-model-invocation: false
    **FF-전진(브랜치 X → 워크트리 tip) — 모든 로컬 브랜치 전진에 공통**
    1. `git branch -f X <tip>` → **성공이면 끝**(X 가 어디에도 체크아웃 안 됨 → ref 만 이동)
    2. `fatal: ... checked out at '<PATH>'` 로 **막히면** = 누군가 `<PATH>` 에서 X 를 보고 있는 중 → 그 워킹트리에서 `git -C <PATH> merge --ff-only <worktree-branch>`(ref+워킹트리 함께 전진 → 화면 즉시 갱신). non-FF 거나 `<PATH>` 가 더티면 알리고 skip
-      - ⚠️ **워크트리에 격리된 세션은 이 명령을 실행하지 못한다** — harness 가 공유 체크아웃을 향한 `git -C` 를 거부한다. 스킬 밖 커밋이면 훅이 같은 일을 대신 하고, 이 스킬이 낸 커밋이면 **사용자에게 `! git -C <PATH> merge --ff-only <worktree-branch>` 를 제안하고 멈춘다**(훅은 센티넬이 붙은 커밋을 건너뛴다)
+      - ⚠️ **워크트리에 격리된 세션은 이 명령을 실행하지 못한다** — harness 가 공유 체크아웃을 향한 `git -C` 를 거부한다. 스킬 밖 커밋이면 훅이 같은 일을 대신 하고, 이 스킬이 낸 커밋이면 **사용자에게 Claude Code 밖 터미널에서 돌릴 명령을 주고 멈춘다**(훅은 센티넬이 붙은 커밋을 건너뛴다) — `cd <PATH> && git merge --ff-only <worktree-branch>`. **`!` 로 실행해도 같은 가드에 걸리므로 그 경로를 제안하지 않는다**
    - ⚠️ merge 는 **에러가 가리킨 그 `<PATH>` 에서만.** 임의 워킹트리(예: 메인)에서 돌리면 거기 체크아웃된 **다른 브랜치(예: develop)** 를 엉뚱하게 tip 으로 끌어올려 오염시킨다. `branch -f` 의 실패가 곧 '체크아웃 여부 + 정확한 위치' 를 알려주므로 사전 조회 불필요
 
    **한 곳에서 보기(viewing)** — 작업물을 한 브랜치에서만 보려면 그 브랜치를 체크아웃해 두면 된다. FF-전진 ②가 체크아웃된 브랜치를 매 커밋 자동으로 살려두므로 별도 viewing 로직이 필요 없다. 다만 mirror `-NNN` 은 Step 이 바뀌면 안 움직이니, **Step 전환을 넘어 항상 최신**을 보고 싶으면 accumulator 본체도 매 커밋 같은 FF-전진으로 올린다(로컬만).
@@ -174,6 +174,8 @@ mirror 는 **작업단위별 로컬 북마크**일 뿐이다. 최종 산출은 �
 **불변식 — 최상단 mirror = worktree tip.** 커밋이 쌓이면(Step 커밋이든 **후속 정정·비-Step chore 든**) 반드시 어떤 mirror 가 tip 을 가리켜야 한다. 새 Step면 새 mirror, 아니면 **최상단 mirror 를 HEAD 로 FF**. **wtflow:commit 을 안 거친 수동 `git commit` 이라도 직접 FF**한다("비-Step 라서 생략" 없음 — 가장 흔한 누락).
 
 **스킬 밖 커밋은 훅(`hooks/guard-direct-commit.sh`)이 뒤에서 최상단 mirror 를 전진시킨다** — 커밋을 막지는 않는다. 다만 훅은 **주제가 바뀌었는지 모른 채 최상단에 붙이므로**, 새 작업 항목이면 이 스킬을 `--step <N>` 으로 부른다. **사람이 터미널에서 한 커밋은 훅이 못 잡는다**(Claude 의 도구 호출에만 걸린다) — 위 FF 의무가 그대로 남는 이유다.
+
+**mirror 가 HEAD 보다 앞서거나 갈라져 있으면 그 훅이 먼저 흡수한다**(FF 아니면 머지). 이 스킬의 커밋은 센티넬 때문에 훅을 건너뛰므로, 그 상태를 만나면 **여기서 직접 같은 순서로 처리한다** — 앞서 있으면 `merge --ff-only <mirror>`, 갈라졌으면 `merge --no-ff <mirror>` 뒤 계약 4 의 FF-전진. 충돌이 나면 `merge --abort` 로 되돌리고 중단·보고한다. **rebase·reset·amend 로 맞추지 않는다**(계약 3).
 
 **"최상단" 은 번호가 아니라 최근성(ancestry)으로.** Step 은 작업 항목 번호라 커밋 순서와 다를 수 있다(Step 6 을 Step 4 보다 먼저 커밋 → `-006` 이 `-004` 보다 옛 커밋). 최상단 = **HEAD 의 직계 조상 중 가장 최근 tip 을 가진 mirror**. `git for-each-ref`·`merge-base --is-ancestor` 로 판정 — ⚠️ `git branch --list` 의 `+`(다른 워크트리 체크아웃) 마커가 섞여 이름 `sort|tail` 은 틀린다. **손 sort 말고 ancestry 로.**
 

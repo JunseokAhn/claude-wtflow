@@ -102,13 +102,13 @@ while read -r ref; do
   if git -C "$target" merge-base --is-ancestor HEAD "$ref" 2>/dev/null; then
     merr=$(git -C "$target" merge --ff-only "$ref" 2>&1) || \
       note "mirror ${ref} 가 이 커밋보다 앞서 있어 따라가려 했으나 실패했습니다: ${merr}. 사용자에게 알리세요."
-    absorbed="${absorbed} ${ref}(따라감)"
+    absorbed="${absorbed:+${absorbed}, }${ref}(따라감)"
   else
     merr=$(git -C "$target" merge --no-ff --no-edit "$ref" 2>&1) || {
       git -C "$target" merge --abort 2>/dev/null
       note "mirror ${ref} 와 이 작업 브랜치가 갈라졌고 합치는 중 충돌이 났습니다: ${merr}. 머지를 되돌렸습니다 — 어느 쪽을 남길지는 사용자가 정해야 합니다. 커밋은 그대로 있습니다."
     }
-    absorbed="${absorbed} ${ref}(머지)"
+    absorbed="${absorbed:+${absorbed}, }${ref}(머지)"
   fi
   head=$(git -C "$target" rev-parse HEAD 2>/dev/null) || exit 0
 done <<EOF
