@@ -52,6 +52,9 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 4. **본문 작성** — `issue-convention.md` 의 `## 본문 작성 규칙` 과 `## 본문 템플릿`
 
 5. **사용자 확인 한 번** — `issue-convention.md` 의 `## 확인 절차` → `### 생성`
+   - **본문 미리보기가 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
+     §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 미리보기를 턴 끝 응답으로 낸 뒤,
+     알림으로 시작된 턴에서 묻는다. **알림은 생성 승인이 아니다**
 
 6. **생성** — 먼저 `host-adapter.md` 의 `## 판별은 remote 주소 하나로` 로 호스트를 정하고,
    `## 이슈 명령 대응` 의 `이슈 생성` 행을 쓴다. `-R` 미지정 시 **현재 디렉토리 git remote 의
@@ -132,6 +135,10 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
    **임의로 맞추지 않는다.** 어긋난 섹션은 3의 미리보기에 드러내고 사용자가 정한다
 3. **미리보기 + 확인** — 무엇을 셀지는 `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
+   - **바뀌는 줄이 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
+     §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
+     낸 뒤, 알림으로 시작된 턴에서 묻는다. 셸 출력에만 두면 접혀서 안 보인다.
+     **알림은 「반영」 승인이 아니다**
 4. **반영** — `body-rewrite.md` 의 `## 본문은 파일로 넘긴다` · `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`.
    제목도 바꾸면 `-t "<새 제목>"` 을 함께
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
