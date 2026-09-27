@@ -6,6 +6,8 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다. 계약 8 에서 note 를 쓸 때만 `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(이슈 note 규격)를 읽는다.**
 
 ## 트리거

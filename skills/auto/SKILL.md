@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # /wtflow:auto — 워크트리 작업 항목 자율 순회
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 중에도 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-postcommit.md`(§7 코드 읽기·§11 제품 동작 확인)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 `/wtflow:plan` 이 만든 plan 의 작업 항목(Step)들을 **사람이 Step마다 끼어들지 않아도** 끝까지 돌린다.
