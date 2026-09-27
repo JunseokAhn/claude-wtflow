@@ -5,7 +5,7 @@
 **`commit`·`auto`·`issue`·`mr`·`briefing` 이 컨벤션 문서를 읽기 전에 읽는다.**
 
 브랜치 이름·Step 모델(`worktree-discipline.md`)과 사전문답(`learning-protocol.md` 과 그 색인이 가리키는
-`learning-*.md`)은 대상이 아니다 —
+`learning-*.md`), 응답 언어(`response-language.md`)는 대상이 아니다 —
 그건 플러그인의 작업 규율이지 팀마다 다른 컨벤션이 아니다.
 
 ## 새 설정 파일을 요구하지 않는다
