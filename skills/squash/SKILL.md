@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 # /wtflow:squash — 커밋 이력을 고른 단위로 접기
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 한 작업 항목 안에 진단·재시도 커밋이 쌓이면 브랜치 이력을 리뷰하기 어렵다. 접을 단위는

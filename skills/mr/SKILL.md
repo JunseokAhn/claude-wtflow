@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 # /wtflow:mr — 작업 브랜치로 MR 생성·본문 재작성
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고, `pr-convention.md`(MR 제목·본문 형식)를 읽는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
 
 작업이 끝난 브랜치를 origin 에 올리고 MR 을 연다. `/wtflow:merge` 와 **방향이 반대다**:

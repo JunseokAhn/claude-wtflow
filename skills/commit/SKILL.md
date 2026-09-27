@@ -7,6 +7,8 @@ disable-model-invocation: false
 
 # /wtflow:commit — 워크트리 작업단위 처리
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용·§10 수용 기준), `learning-postcommit.md`(§7 코드 읽기·§11 제품 동작 확인)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
 
 ## 호출

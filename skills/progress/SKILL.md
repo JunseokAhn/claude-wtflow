@@ -7,6 +7,8 @@ disable-model-invocation: false
 
 # /wtflow:progress — 워크트리 Step 진행 현황
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다.**
 
 작업 항목(Step)별 진행 상태를 표 하나로 보여준다. **읽기 전용** — 조회만 하고 어떤 변경도 하지 않는다.
@@ -86,6 +88,8 @@ disable-model-invocation: false
 - **미분류 커밋**: 어느 Step 인지 단정 금지. 표 아래 `미분류 커밋 <n>개: <hash> <subject>…` 로 **반드시 노출**(`--quiet` 여도 — 귀속 미상임을 드러내려). 정확히 넣으려면 wtflow:commit 으로 커밋하라 안내
 
 ## 출력 형식
+
+표 제목·머리글·상태 이름·요약 줄은 응답 언어로 옮겨 쓴다 — 기호·명령·줄 구성은 그대로(`response-language.md` 의 `## 고정 문장도 옮겨 쓴다`).
 
 **이슈 모드**:
 
