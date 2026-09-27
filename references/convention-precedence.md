@@ -76,3 +76,5 @@ CONTRIBUTING.md 에 "커밋 제목은 영어 conventional commits" 만 있으면
 ```
 컨벤션: 커밋 제목은 commitlint.config.js, 나머지는 플러그인 기본값
 ```
+
+이 줄도 응답이다 — 요청 언어가 한국어가 아니면 문장을 옮겨 쓰고 파일 이름은 그대로 둔다(`response-language.md` 의 `## 고정 문장도 옮겨 쓴다`).
