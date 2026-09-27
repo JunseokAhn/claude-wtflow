@@ -89,6 +89,8 @@ disable-model-invocation: false
 
 ## 출력 형식
 
+표 제목·머리글·상태 이름·요약 줄은 응답 언어로 옮겨 쓴다 — 기호·명령·줄 구성은 그대로(`response-language.md` 의 `## 고정 문장도 옮겨 쓴다`).
+
 **이슈 모드**:
 
 ```

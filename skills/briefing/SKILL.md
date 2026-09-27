@@ -56,6 +56,9 @@ allowed-tools: Bash(git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(cd *), B
 
 ## 출력 형식 (전체 통합본)
 
+섹션 이름·안내 문장은 응답 언어로 옮겨 쓴다 — 기호·번호·줄 구성은 그대로(`response-language.md` 의 `## 고정 문장도 옮겨 쓴다`).
+`--mr` 압축본은 MR 본문이라 대상 아님 — 언어는 `pr-convention.md` 가 정한다.
+
 ```
 # [<scope>] <제목>
 
