@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 # /wtflow:mr — 작업 브랜치로 MR 생성·본문 재작성
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 읽고, `pr-convention.md`(MR 제목·본문 형식)를 읽는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다.** 제목 규칙은 그 문서가 `commit-convention.md` 의 `## Subject` 를 가리키므로, 그것도 같은 순서로 찾는다.
 
 작업이 끝난 브랜치를 origin 에 올리고 MR 을 연다. `/wtflow:merge` 와 **방향이 반대다**:
@@ -201,3 +203,7 @@ Skill(wtflow:briefing) → /wtflow:briefing <base>..<이미 올라간 소스 브
 | 제목 | `변경 없음` 또는 `이전 → 이후` |
 
 - 상한 40줄은 `pr-convention.md` 의 `## 셀 수 있는 상한` 이 정한다
+- **바뀌는 줄이 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
+  §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
+  낸 뒤, 알림으로 시작된 턴에서 묻는다. 셸 출력에만 두면 접혀서 안 보인다.
+  **알림은 「반영」 승인이 아니다**

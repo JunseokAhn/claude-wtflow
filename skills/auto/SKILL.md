@@ -6,6 +6,8 @@ disable-model-invocation: true
 
 # /wtflow:auto — 워크트리 작업 항목 자율 순회
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 중에도 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-postcommit.md`(§7 코드 읽기·§11 제품 동작 확인)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 `/wtflow:plan` 이 만든 plan 의 작업 항목(Step)들을 **사람이 Step마다 끼어들지 않아도** 끝까지 돌린다.
@@ -94,10 +96,10 @@ Step 오름차순으로 반복:
 **커밋 직후에도 문답이 선다** — 코드 읽기와 제품 동작 확인이고, 시점·형식은 `/wtflow:commit` 계약 9 가
 지시한다. **소재도 동작 변화도 없으면 그 커밋은 멈춤 없이 지나간다.**
 
-**인용이 preview 를 넘으면 순회가 한 번 더 멈춘다** — `❓` Step 앞이든 커밋 직후든 인용 턴에서
-턴을 끝내고(§1 예측 `### 어디에 두나`), 사용자 입력이 오면 질문을 띄운다. 답을 받으면 재허락을
-묻지 않고 순회를 잇는다. 인용 턴이 도구 호출에 가려지면 질문이 화면에 없는 코드를 전제하게 된다 —
-멈춤 하나를 아끼려고 한 턴에 몰지 않는다.
+**인용이 preview 를 넘어도 순회는 한 번만 멈춘다** — `❓` Step 앞이든 커밋 직후든 알림 재개로 묻는다
+(§1 예측 `### 어디에 두나`): `sleep 1` 을 백그라운드로 걸고 인용을 턴 끝 응답으로 낸 뒤, 알림으로
+시작된 턴에서 질문을 띄운다. 답을 받으면 재허락을 묻지 않고 순회를 잇는다.
+**알림은 사용자 입력이 아니다** — 알림으로 시작된 턴을 순회 진행 허락이나 답으로 보지 않는다.
 
 **`--no-ask` 면 순회 중에는 묻지 않는다.** `❓` Step 앞에서도 커밋 직후에도 멈추지 않는다 — 못 끄는
 문항은 없다. 임의로 정하고 넘어간 설계 선택은 근거와 함께 적어 뒀다가 마지막 브리핑 뒤에 모아 낸다.

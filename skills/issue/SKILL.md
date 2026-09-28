@@ -6,6 +6,8 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 # /wtflow:issue — GitLab 이슈 생성·본문 재작성
 
+**사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
+
 **시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다. 계약 8 에서 note 를 쓸 때만 `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(이슈 note 규격)를 읽는다.**
 
 ## 트리거
@@ -52,6 +54,9 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 4. **본문 작성** — `issue-convention.md` 의 `## 본문 작성 규칙` 과 `## 본문 템플릿`
 
 5. **사용자 확인 한 번** — `issue-convention.md` 의 `## 확인 절차` → `### 생성`
+   - **본문 미리보기가 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
+     §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 미리보기를 턴 끝 응답으로 낸 뒤,
+     알림으로 시작된 턴에서 묻는다. **알림은 생성 승인이 아니다**
 
 6. **생성** — 먼저 `host-adapter.md` 의 `## 판별은 remote 주소 하나로` 로 호스트를 정하고,
    `## 이슈 명령 대응` 의 `이슈 생성` 행을 쓴다. `-R` 미지정 시 **현재 디렉토리 git remote 의
@@ -74,7 +79,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
     - ⚠️ **이 파일을 쓰는 건 여기가 처음이자 마지막이다** — 이후 아무 스킬도 갱신하지 않는다
       (규율 문서 `## 상세는 이슈가 아니라 note 에`)
 
-9. **최종 출력**:
+9. **최종 출력** — 블록의 문장은 응답 언어로 옮겨 쓴다 — 기호·명령·줄 구성은 그대로(`response-language.md` 의 `## 고정 문장도 옮겨 쓴다`).
     ```
     ✓ 이슈 생성: #<N> <제목>
       <이슈 URL>
@@ -132,6 +137,10 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 2. **템플릿을 읽는다** — `issue-convention.md` 의 `## 본문 템플릿` 1~2 그대로. 현재 본문이 템플릿과 어긋나 있어도
    **임의로 맞추지 않는다.** 어긋난 섹션은 3의 미리보기에 드러내고 사용자가 정한다
 3. **미리보기 + 확인** — 무엇을 셀지는 `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
+   - **바뀌는 줄이 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
+     §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
+     낸 뒤, 알림으로 시작된 턴에서 묻는다. 셸 출력에만 두면 접혀서 안 보인다.
+     **알림은 「반영」 승인이 아니다**
 4. **반영** — `body-rewrite.md` 의 `## 본문은 파일로 넘긴다` · `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`.
    제목도 바꾸면 `-t "<새 제목>"` 을 함께
 5. **출력** — 이슈 URL + 3에서 낸 변화 수치를 실제 반영값으로 다시 한 줄
