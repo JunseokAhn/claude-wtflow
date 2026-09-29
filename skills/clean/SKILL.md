@@ -1,7 +1,7 @@
 ---
 name: clean
 description: 끝난 워크트리와 그 브랜치·mirror 를 정리한다. "워크트리 정리", "이슈 42 정리해줘", "다 끝났으니 치워줘" 요청에. 확인 없이 바로 실행하고 스크립트 출력을 그대로 옮긴다. 사용자만 호출.
-allowed-tools: Bash(wtflow-clean *), Bash(git *), AskUserQuestion, ExitWorktree
+allowed-tools: Bash(*/scripts/wtflow-clean *), Bash(git *), AskUserQuestion, ExitWorktree
 disable-model-invocation: true
 ---
 
@@ -53,7 +53,7 @@ disable-model-invocation: true
    ```
    git rev-parse --abbrev-ref HEAD          # 예: fix/#18-clean-target-resolution
    ExitWorktree({ action: "keep" })
-   wtflow-clean "<위에서 읽은 이름>" -y
+   ${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean "<위에서 읽은 이름>" -y
    ```
    - ⚠️ **인자 없이 부르지 않는다.** 스크립트의 "인자 생략 = 현재 브랜치" 는 셸에서 워크트리 안에
      선 채로 부를 때를 위한 규칙이다. 이 스킬은 그 전에 워크트리를 빠져나오므로, 그 시점의
@@ -107,10 +107,10 @@ disable-model-invocation: true
 
 ## 비고
 
-- 스크립트 본체는 `${CLAUDE_PLUGIN_ROOT}/bin/wtflow-clean` 이다. 로직을 이 스킬에 옮겨 적지 않는다
+- 스크립트 본체는 `${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean` 이다. 로직을 이 스킬에 옮겨 적지 않는다
   — 옵션이 늘거나 바뀌면 스크립트 하나만 고치면 되게 둔다
-- **PATH 범위** — 플러그인은 `bin/` 을 **Claude Code 가 실행하는 셸의** PATH 에만 올린다. 그래서
-  이 스킬은 `wtflow-clean` 을 맨 이름으로 부를 수 있지만, **사용자의 터미널에는 자동으로 등록되지
-  않는다**(그쪽은 별개 프로세스라 그 환경변수를 물려받지 않는다). 사용자가 셸에서 직접 쓰고 싶다면
-  PATH 에 있는 디렉토리로 심링크를 걸어야 한다 — 안내는 README 에 있다
+- **PATH 에 없다 — 전체 경로로 부른다.** 스크립트는 `bin/` 이 아니라 `scripts/` 에 있다. 최상위
+  `bin/` 이 있는 플러그인은 Claude 앱의 마켓플레이스 동기화가 받지 않기 때문이다(#53). 그래서
+  PATH 에 자동으로 오르지 않고, 이 스킬도 사용자 터미널도 `${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean`
+  으로 부른다. 본문의 `wtflow-clean` 은 이 스크립트의 이름이다
 - 정리 후 남은 워크트리 목록은 `git worktree list` 로 확인한다
