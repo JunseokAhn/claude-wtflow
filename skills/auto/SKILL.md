@@ -116,8 +116,8 @@ Step 오름차순으로 반복:
 ```
 다음 단계 — MR 올리기:
   /wtflow:mr                    MR 만 올림
-  /wtflow:mr --clean            MR 을 올린 뒤 워크트리까지 정리
-  /wtflow:mr --clean -f         MR 을 올린 뒤 브랜치까지 강제 정리
+  /wtflow:mr --clean            MR 을 올린 뒤 정리 (미병합 브랜치는 남기고 워크트리까지만)
+  /wtflow:mr --clean -f         MR 을 올린 뒤 미병합 브랜치까지 강제 정리
 ```
 
 안내만 한다 — `--push` 를 받았어도 이 스킬이 `/wtflow:mr` 을 부르지 않는다(계약 6).

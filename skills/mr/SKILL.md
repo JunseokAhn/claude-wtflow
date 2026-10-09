@@ -33,8 +33,8 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 | `-b <타깃>` | 타깃 브랜치. 미지정 시 `develop`, 없으면 `main` |
 | `--draft` | Draft MR 로 생성 |
 | `--no-push` | push 를 건너뛴다(이미 올려둔 경우) |
-| `--clean` | MR 을 만든 뒤 그 작업의 **워크트리까지** 정리한다. 브랜치·mirror 는 남는다 (계약 12) |
-| `--clean -f` · `--clean --force` | 워크트리에 더해 **브랜치·mirror·스쿼시 브랜치까지** 강제 정리한다. origin 에 올린 소스 브랜치만 남는다 |
+| `--clean` | MR 을 만든 뒤 그 작업을 정리한다. **미병합 브랜치는 남기고 워크트리까지만** 지운다 (계약 12) |
+| `--clean -f` · `--clean --force` | **미병합 브랜치까지** 강제 정리한다. origin 에 올린 소스 브랜치만 남는다 |
 | `--rewrite` | 생성이 아니라 **이미 열린 MR 의 본문 재작성** (아래 `## 재작성 모드`) |
 
 ## 계약 (보장되어야 하는 것)
@@ -148,18 +148,24 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
     ```
     git rev-parse --abbrev-ref HEAD                 # accumulator 이름을 먼저 읽는다
     ExitWorktree({ action: "keep" })                # 세션이 그 워크트리 안이면
-    ${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean '<accumulator>' -w -y      # --clean
+    ${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean '<accumulator>' -y         # --clean
     ${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean '<accumulator>' -f -y      # --clean -f
     ```
 
-    | | 지워지는 것 | 남는 것 |
-    |---|---|---|
-    | `--clean` | 워크트리 | accumulator · mirror · 스쿼시 브랜치 · origin 의 소스 브랜치 |
-    | `--clean -f` | 워크트리 · accumulator · mirror · 스쿼시 브랜치 | origin 의 소스 브랜치 |
+    `--clean` 은 `/wtflow:clean` 을 옵션 없이 부른 것과 같다 — 무엇을 지울지는 스크립트의
+    보존 판정이 정한다:
 
-    - **기본이 워크트리까지인 이유** — MR 을 막 올린 브랜치는 아직 기본 브랜치에 병합되지 않았다.
-      리뷰 반영으로 커밋을 더 쌓을 때 브랜치가 남아 있어야 하고, 워크트리는 `wtflow:merge` 가
-      다시 붙인다(그 스킬의 「없으면 붙인다」)
+    | | 기본 브랜치에 병합된 브랜치 | 미병합 브랜치 | 워크트리 |
+    |---|---|---|---|
+    | `--clean` | 지운다 | **남긴다** | 지운다 |
+    | `--clean -f` | 지운다 | **지운다** | 지운다 |
+
+    - **MR 을 막 올린 작업은 대개 미병합이다** — 그래서 `--clean` 의 흔한 결과는 워크트리만
+      사라지고 accumulator·mirror·스쿼시 브랜치가 남는 것이다. 리뷰 반영으로 커밋을 더 쌓을 때
+      그 브랜치를 쓰고, 워크트리는 `wtflow:merge` 가 다시 붙인다(그 스킬의 「없으면 붙인다」)
+    - **스크립트의 「건너뜀(미보존)」 과 종료 코드 1 은 여기서 실패가 아니다** — `--clean` 이
+      미병합 브랜치를 남긴 정상 결과다. 출력은 원문으로 옮기되 「정리 실패」 로 보고하지 않고,
+      브랜치까지 지우려면 `--clean -f` 라고 한 줄 덧붙인다
     - ⚠️ **`-f` 는 사용자가 줬을 때만 붙인다.** origin 에 안 올라간 커밋이 그 자리에서 사라진다 —
       접힌 것을 올렸으면 접기 전 원본 커밋이, 원본을 올렸으면 스쿼시 브랜치가 그렇다.
       `--clean` 만 받고 임의로 `-f` 를 더하지 않는다

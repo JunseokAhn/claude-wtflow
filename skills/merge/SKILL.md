@@ -160,8 +160,8 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 ```
 다음 단계 — MR 올리기:
   /wtflow:mr                    MR 만 올림
-  /wtflow:mr --clean            MR 을 올린 뒤 워크트리까지 정리
-  /wtflow:mr --clean -f         MR 을 올린 뒤 브랜치까지 강제 정리
+  /wtflow:mr --clean            MR 을 올린 뒤 정리 (미병합 브랜치는 남기고 워크트리까지만)
+  /wtflow:mr --clean -f         MR 을 올린 뒤 미병합 브랜치까지 강제 정리
 ```
 
 `wtflow:mr` 이 이 스킬을 부른 경우에는 이 블록을 내지 않는다 — 이미 그 명령 안이다.
