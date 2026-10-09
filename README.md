@@ -29,7 +29,7 @@ claude cli로 병렬작업을 수행할 때 필요한 요청들을 스킬로 만
   /wtflow:squash     커밋 이력을 고른 단위로 접어 별도 브랜치로 (원본 보존)
   /wtflow:clean      생성된 워크트리·브랜치 제거 (-e 8 9 : 8·9번만 남기고 전부)
 
-  /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성 (--clean : 올린 뒤 정리, -f 면 미병합 브랜치까지)
+  /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성 (--clean : MR 을 올린 뒤 브랜치 정리, -f : 미병합본이 있어도 전부)
 ```
 
 ## 작업단위 분리
