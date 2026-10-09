@@ -28,6 +28,10 @@
 #   -M, --merge           삭제 전에 작업 tip 을 develop(없으면 main)에 머지.
 #                         머지 성공 시에만 진행하며, 성공하면 모든 이슈 브랜치를 삭제(미보존도 포함).
 #                         머지 충돌이면 abort 하고 아무것도 삭제하지 않음.
+#   -e, --except          위치 인자의 뜻을 뒤집는다 — 적은 작업만 남기고, 현재 있는 나머지 작업
+#                         전부를 대상으로 한다 (예: wtflow-clean -e 8 9 → 8·9번만 남김).
+#                         적은 것 중 하나라도 현재 작업에서 못 찾으면 아무것도 지우지 않고 중단한다.
+#                         안전장치는 그대로다 — 미병합 작업은 -f/-M 없이 브랜치가 안 지워진다.
 #   -f, --force           워크트리 강제 제거(내용 표시 후) + 미보존 브랜치도 강제 삭제
 #   -y, --yes             모든 프롬프트 건너뜀(=완전 비대화형; 더러운 워크트리는 보류)
 #   -n, --dry-run         삭제하지 않고 대상만 출력
@@ -43,6 +47,8 @@
 #                      대상마다 따로 처리하고, 하나가 실패해도 나머지는 계속한다.
 #                      끝에 대상별 성공·실패를 모아 보고하고, 하나라도 실패면 exit 1
 #   기본 브랜치      → develop/main/master 는 명시해도 거부한다
+#   -e 와 함께       → 위 형태 그대로 "남길 작업" 이 된다. 이슈 작업은 이슈 단위로 남는다
+#                      (같은 이슈번호의 브랜치가 여럿이면 전부 남김)
 #
 # 워크트리 브랜치가 곧 이슈 마커다(별도 마커 브랜치 없음) — 그래서 기본 정리 대상이다.
 # 보호의 근거는 "마커냐"가 아니라 "develop/main 에 들어갔냐"로 옮겼다: 안 들어간 건 -f/-M 없이 안 지운다.
@@ -127,6 +133,8 @@ force=0
 merge=0
 assume_yes=0
 dry=0
+self="$0"        # 대상마다 다시 부를 자기 경로
+except=0         # 1 이면 위치 인자가 "남길 작업" — 나머지 전부가 대상
 del_marker=1     # 워크트리 브랜치(= 마커)까지 삭제. -m/-w 전용 모드에서는 적용 안 됨
 target_arg=""
 targets=()       # 위치 인자(이슈번호·작업이름·브랜치명) — 여러 개 가능
@@ -138,6 +146,7 @@ while [ $# -gt 0 ]; do
     -m|--mirror-only)   mode=mirror;    opts+=("$1") ;;
     -w|--worktree-only) mode=worktree;  opts+=("$1") ;;
     -M|--merge)         merge=1;        opts+=("$1") ;;
+    -e|--except)        except=1 ;;     # opts 에 안 넣는다 — 대상마다 부르는 호출은 대상 하나를 받는다
     -f|--force)         force=1;        opts+=("$1") ;;
     -y|--yes)           assume_yes=1;   opts+=("$1") ;;
     -n|--dry-run)       dry=1;          opts+=("$1") ;;
@@ -149,6 +158,77 @@ while [ $# -gt 0 ]; do
   shift
 done
 while [ $# -gt 0 ]; do targets+=("$1"); shift; done   # `--` 뒤는 전부 대상
+
+# --except: 적은 작업만 남기고, 현재 있는 나머지 작업 전부를 대상 목록으로 바꾼다.
+#
+# 여기서 하는 일은 목록을 뒤집는 것뿐이다. 실제 삭제는 아래의 "대상이 여럿" 경로가 대상마다
+# 이 스크립트를 한 번씩 불러서 하므로, 미보존 건너뜀·기본 브랜치 보호·더러운 워크트리 보류가
+# 대상을 하나씩 지목했을 때와 똑같이 걸린다.
+#
+# 적은 이름을 하나라도 못 찾으면 중단한다. 오타 난 번호를 "남길 것 없음" 으로 넘기면
+# 남기려던 작업까지 대상에 들어간다 — 이 옵션에서 가장 비싼 실수다.
+if [ "$except" = 1 ]; then
+  [ ${#targets[@]} -gt 0 ] \
+    || die "--except 뒤에 남길 작업을 하나 이상 적으세요 (예: wtflow-clean --except 8 9)."
+  git rev-parse --git-dir >/dev/null 2>&1 || die "git 저장소 안에서 실행하세요."
+  ex_main=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
+
+  # 현재 있는 작업 = accumulator. 미러(-NNN)·스쿼시 브랜치(-squash)는 accumulator 를 지울 때 딸려 간다.
+  ex_all=$(git for-each-ref --format='%(refname:short)' refs/heads \
+    | grep -E '^[^/]+/[#+]' | grep -vE -- '-([0-9][0-9][0-9]|squash)$' || true)
+
+  ex_keep=""        # 남길 accumulator 이름들
+  ex_keep_nums=" "  # 남길 이슈번호들 — 이슈 작업은 번호 단위로 남긴다
+  for e in "${targets[@]}"; do
+    case "$e" in
+      *[!0-9]*) # 브랜치명(미러·스쿼시 브랜치를 줘도 그 accumulator 로 본다) 또는 작업 이름(slug)
+                ex_base=$(printf '%s' "$e" | sed -E 's/-([0-9][0-9][0-9]|squash)$//')
+                ex_m=$(printf '%s\n' "$ex_all" | awk -v e="$e" -v b="$ex_base" '
+                  $0 == "" { next }
+                  $0 == e || $0 == b { print; next }
+                  { s = $0; if (sub(/^[^\/]+\/\+/, "", s) && s == e) print }') ;;
+      *)        ex_m=$(printf '%s\n' "$ex_all" | grep -E "/#${e}-" || true) ;;
+    esac
+    [ -n "$ex_m" ] || die "--except: '$e' 에 해당하는 작업을 찾지 못했습니다 — 아무것도 지우지 않고 중단합니다.
+  현재 있는 작업:
+$(printf '%s\n' "${ex_all:-(없음)}" | sed 's/^/    /')"
+    ex_keep=$(printf '%s\n%s\n' "$ex_keep" "$ex_m" | grep -v '^$' | sort -u)
+    while IFS= read -r b; do
+      n=$(printf '%s\n' "$b" | sed -nE 's@^[^/]+/#([0-9]+)-.*@\1@p')
+      [ -z "$n" ] || ex_keep_nums="${ex_keep_nums}${n} "
+    done <<< "$ex_m"
+  done
+
+  # 대상 = 남길 것을 뺀 나머지. 이슈 작업은 이슈번호로 넘긴다 — 브랜치명으로 넘기면 같은 이슈의
+  # 브랜치가 둘일 때 첫 호출이 둘 다 지우고 둘째 호출이 "못 찾음" 으로 실패한다.
+  ex_targets=(); ex_seen=" "
+  while IFS= read -r b; do
+    [ -n "$b" ] || continue
+    n=$(printf '%s\n' "$b" | sed -nE 's@^[^/]+/#([0-9]+)-.*@\1@p')
+    if [ -n "$n" ]; then
+      case "$ex_keep_nums" in *" $n "*) continue ;; esac
+      case "$ex_seen" in *" $n "*) continue ;; esac
+      ex_seen="${ex_seen}${n} "; ex_targets+=("$n")
+    else
+      printf '%s\n' "$ex_keep" | grep -qxF -- "$b" && continue
+      ex_targets+=("$b")
+    fi
+  done <<< "$ex_all"
+
+  note "남길 작업:"
+  printf '%s\n' "$ex_keep" | sed 's/^/    /' >&2
+  if [ ${#ex_targets[@]} -eq 0 ]; then
+    note "삭제할 대상이 없습니다."
+    exit 0
+  fi
+  note "정리 대상 (${#ex_targets[@]}개): ${ex_targets[*]}"
+
+  # 현재 셸이 대상 워크트리 안이면, 그 워크트리가 지워진 뒤의 호출들이 사라진 cwd 에서 시작한다.
+  # 메인 체크아웃으로 옮겨 두되, 상대경로로 불렸으면 옮기기 전에 자기 경로를 절대경로로 고정한다.
+  case "$self" in /*) ;; */*) self="$PWD/$self" ;; esac
+  [ -z "$ex_main" ] || cd "$ex_main" 2>/dev/null || true
+  targets=("${ex_targets[@]}")
+fi
 
 # 대상이 여럿이면 대상마다 자기 자신을 한 번씩 부른다.
 #
@@ -163,7 +243,7 @@ if [ ${#targets[@]} -gt 1 ]; then
   for t in "${targets[@]}"; do
     note ""
     note "═══ 대상: $t"
-    if "$0" "$t" ${opts[@]+"${opts[@]}"}; then
+    if "$self" "$t" ${opts[@]+"${opts[@]}"}; then
       multi_ok="${multi_ok}${multi_ok:+, }$t"
     else
       multi_rc=1
