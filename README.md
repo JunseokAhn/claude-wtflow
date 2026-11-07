@@ -44,6 +44,8 @@ wtflow가 자동으로 브랜치를 생성합니다.
 | 작업항목2 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-002` | commit3 |
 | 작업항목3 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-003` | commit4<br>commit5 |
 
+작업 브랜치에서 입력하면 세션 이름이 `#<이슈번호>-<작업 이름>` 으로 붙습니다. iTerm 탭에도 띄우려면 프로필 설정 General → Title 의 "Applications in terminal may change the title" 을 켜 주세요.
+
 
 ## 확인 질문
 작업 이전 사용자의 의도와 선호 접근방식을 확인하고, 작업 이후 달라진 내용과 코드를 유저가 이해하고 넘어가게 합니다.
