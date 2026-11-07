@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 시작 전과 끝난 뒤에 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-postcommit.md`(§7 코드 읽기·§11 제품 동작 확인)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)를 읽는다. 사전문답(`--no-ask` 가 없으면 순회 시작 전과 끝난 뒤에 낸다)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용 — 같은 파일의 §10 수용 기준은 계획 단계 몫이라 순회에서 적용하지 않는다), `learning-postcommit.md`(§7 코드 읽기·§11 의도 재확인)를 읽는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다.**
 
 `/wtflow:plan` 이 만든 plan 의 작업 항목(Step)들을 **사람이 Step마다 끼어들지 않아도** 끝까지 돌린다.
 각 Step = 구현 → 가벼운 검증 → `/wtflow:commit` 로컬 커밋. **commit 메커니즘은 직접 짜지 않고 `/wtflow:commit` 에 위임**한다(분기·테스트·누적 contract 단일화).
@@ -30,8 +30,8 @@ disable-model-invocation: true
   - `--only` 와 함께 오면 되묻는다 — 둘 다 순회 범위를 정해 어느 쪽이 이기는지 정할 근거가 없다
 - `--only <Step,...>`: 지정한 Step 들만
 - `--no-test`: 각 `/wtflow:commit` 에 `--no-test` 전달(빠른 반복 — 검증 책임은 사용자)
-- `--no-ask`: 문답을 전부 끈다. 순회 시작 전에도, 순회가 끝난 뒤에도 코드 읽기·동작 확인을 묻지 않고, 내가 정하고 넘어간 설계 선택만 순회 뒤에 모아 낸다(기본은 시작 전·끝난 뒤에 묻는다)
-- `--no-quiz`: 순회가 끝난 뒤 내는 코드 읽기 질문만 끈다 — 각 `/wtflow:commit` 에 `--no-quiz` 전달. 착수 전 문답과 동작 확인 질문은 그대로 낸다. `--no-ask` 와 함께 오면 `--no-ask` 가 이긴다
+- `--no-ask`: 문답을 전부 끈다. 순회 시작 전에도, 순회가 끝난 뒤에도 코드 읽기·의도 재확인을 묻지 않고, 내가 정하고 넘어간 설계 선택만 순회 뒤에 모아 낸다(기본은 시작 전·끝난 뒤에 묻는다)
+- `--no-quiz`: 순회가 끝난 뒤 내는 코드 읽기 질문만 끈다 — 각 `/wtflow:commit` 에 `--no-quiz` 전달. 착수 전 문답과 의도 재확인 질문은 그대로 낸다. `--no-ask` 와 함께 오면 `--no-ask` 가 이긴다
 - `--push`: 각 Step 커밋을 origin 에도 push(기본 OFF — 이 스킬의 기본은 **로컬만**). 명시 안 하면 절대 push 안 함
 - `--dry-run`: 구현·커밋 없이 plan→Step 매핑과 각 Step 의 변경 대상만 출력하고 멈춤(계획 확인용)
 
@@ -99,9 +99,9 @@ Step 오름차순으로 반복:
 - 답을 받으면 그 자리에서 채점한다. **고른 설계안은 그 Step 을 구현할 때의 구속이다** — 구현하며 다른 안으로 가지 않는다
 - **"다음 Step 으로 갈까요?" 는 묻지 않는다** — 순회를 끝까지 도는 것은 이 스킬을 부른 시점에 이미 정해졌다
 
-**코드 읽기·동작 확인은 순회가 끝난 뒤 모아 묻는다(기본).** 각 커밋이 `--defer-ask` 로 미뤄 둔 줄
+**코드 읽기·의도 재확인은 순회가 끝난 뒤 모아 묻는다(기본).** 각 커밋이 `--defer-ask` 로 미뤄 둔 줄
 (`미룬 질문 : …`)을 모아, 마지막 Step 까지 커밋한 뒤 닫은 항목 전부의 질문을 한 자리에서 낸다 —
-동작 확인은 항목마다, 코드 읽기는 순회 전체에서 1~2건. 무엇을 어떤 순서로 내는지는
+의도 재확인은 항목마다, 코드 읽기는 순회 전체에서 1~2건. 무엇을 어떤 순서로 내는지는
 `learning-postcommit.md` 의 `## 순회가 끝난 뒤 모아 묻는다` 가 갖는다 — 여기 사본을 두지 않는다.
 **미룬 줄이 전부 「소재 없음 · 동작 그대로」 면 묻지 않고 브리핑으로 간다.**
 

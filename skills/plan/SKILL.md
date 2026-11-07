@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 읽기·§11 제품 동작 확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 읽기·§11 의도 재확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
 
 ## 작업 문서
 
@@ -166,7 +166,7 @@ disable-model-invocation: true
       /wtflow:auto --step 2         두 번째 작업까지 하고 멈춤
     ```
 
-    - **비개발자도 읽히는 말로 쓴다** — 설명 칸에 `❓`·절 이름(코드 읽기·동작 확인)·`Step` 을 쓰지 않는다
+    - **비개발자도 읽히는 말로 쓴다** — 설명 칸에 `❓`·절 이름(코드 읽기·의도 재확인)·`Step` 을 쓰지 않는다
     - **한 줄에 명령 하나.** 설명을 다음 줄로 내리지 않는다 — preview 폭(46자)에 맞춘 줄바꿈을
       여기 옮겨 오면 터미널에서 명령과 설명이 갈라져 보인다
     - `--step` 줄의 번호는 **남은 작업 중 두 번째**다 — 재플랜이면 그만큼 올려 적고(`--step 4` →
