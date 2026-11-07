@@ -1,7 +1,7 @@
 # 이슈 호스트 어댑터
 
 이슈를 읽고 쓰는 스킬이 공유하는 규칙. **어느 호스트인지 판별하는 자리를 여기 하나로 둔다.**
-**`issue`·`plan`·`progress`·`commit`·`milestone`·`briefing` 이 시작 전에 읽는다.**
+**`issue`·`plan`·`progress`·`commit`·`milestone`·`briefing` 이 시작 전에 읽는다. `merge` 는 `--close` 를 받았을 때만 읽는다.**
 
 브랜치 이름·Step 모델·note 종류은 `worktree-discipline.md`, 커밋 메시지 형식은
 `commit-convention.md` 를 본다.
@@ -66,6 +66,7 @@ CLI 하위명령이 없거나 호스트마다 모델이 다른 작업(마일스�
 | 이슈 본문·제목 조회 | `gh issue view <N> --json body,title` | `glab issue view <N> --output json` | `tea issue <N> --output json` |
 | 이슈 생성 | `gh issue create -t … -l … -F <파일>` | `glab issue create -t … -l … -d "…"` | `tea issue create -t … -l …` |
 | 이슈 본문 쓰기 | `gh issue edit <N> --body-file <파일>` | `glab issue update <N> -d "$(cat <파일>)"` | `tea issue edit <N>` |
+| 이슈 닫기 | `gh issue close <N>` | `glab issue close <N>` | `tea issue close <N>` |
 | 라벨 목록 | `gh label list` | `glab label list -R <repo>` | `tea label ls` |
 
 ⚠️ **응답 필드 이름이 다르다 — 명령만 갈아끼우면 깨진다:**
