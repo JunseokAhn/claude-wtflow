@@ -9,7 +9,7 @@ disable-model-invocation: false
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측 퀴즈~§6 유지보수 비용·§10 수용 기준), `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 확인 질문은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측 퀴즈~§6 유지보수 비용·§10 완료 조건), `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
 
 ## 호출
 
@@ -57,7 +57,7 @@ disable-model-invocation: false
    | `package.json`, `scripts.test` 없음 | `npm run lint` + (`tsconfig.json` 있으면) `npx tsc --noEmit` |
    | 그 외 | 사용자에게 보고하고 결정 대기 |
 
-3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **마지막 작업 항목을 닫는 커밋이면 `검증` 란에 완료 조건별 결과를 한 줄씩 적는다**(§10 수용 기준 `### 기록과 미달 처리`) — 저장소 컨벤션에 `검증` 란이 없으면 계약 7 요약에만 적는다. **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 Step 을 넓게 잡았다는 신호다** — 이 판정은 Step 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`Step:` 트레일러 안 넣음** — Step 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
+3. **워크트리 브랜치에 commit (항상 새 commit, amend 금지)** — subject = `<작업 설명>`, 본문에 요약 / 영향 / 검증 결과(`commit-convention.md` `## 본문`). **마지막 작업 항목을 닫는 커밋이면 `검증` 란에 완료 조건별 결과를 한 줄씩 적는다**(§10 완료 조건 `### 기록과 미달 처리`) — 저장소 컨벤션에 `검증` 란이 없으면 계약 7 요약에만 적는다. **커밋 전에 `## 커밋 본문 자체 검사` 를 돌린다.** **본문이 그 분량 상한을 넘으면 Step 을 넓게 잡았다는 신호다** — 이 판정은 Step 모델(`worktree-discipline.md`) 소관이라 저장소가 커밋 컨벤션을 덮어도 남는다. 푸터엔 `Co-Authored-By: <현재 실행 중인 모델명> <noreply@anthropic.com>` 만(예: `Claude Opus 4.8 (1M context)` — 이 커밋을 만드는 모델의 이름·버전 그대로. 확실치 않으면 `Claude`). **`Step:` 트레일러 안 넣음** — Step 귀속은 mirror 분기 이름(`-00N`)이 유일 소스라 계약 4의 mirror 전진/생성이 필수(dangling 금지).
    - **커밋 명령 앞에 환경변수 `WTFLOW_COMMIT=1` 을 붙인다** — `WTFLOW_COMMIT=1 git commit -F <메시지파일>`.
      이 스킬을 거친 커밋임을 밝히는 유일한 수단이다. 훅은 명령 문자열만 보므로 스킬 경유 여부를 스스로 알 수 없다
      - ⚠️ **이 환경변수를 붙인 커밋은 계약 4 의 mirror 전진·생성을 실제로 이어서 해야 한다.** 스킬 밖에서
@@ -88,7 +88,7 @@ disable-model-invocation: false
    - **새 Step 으로 전환(신규 분기 생성)** → 직전까지 진행하던 **이전 Step** 를 완료로 보고 체크. 첫 Step(분기 0개 → Step=1)면 이전 Step 없음 → 체크 안 함. 기존 Step 전진(같은 주제·`--step` 재방문·FF)은 완료 신호가 아니라 체크 안 함
    - **`--done` 지정** → 이번 커밋의 **현재 Step** 를 체크
 
-   ⚠️ **마지막 작업 항목을 닫는 커밋이면 이슈 본문 `## 완료 조건` 을 먼저 확인한다**(§10 수용 기준
+   ⚠️ **마지막 작업 항목을 닫는 커밋이면 이슈 본문 `## 완료 조건` 을 먼저 확인한다**(§10 완료 조건
    `### 기록과 미달 처리`). 확인된 조건은 그 체크리스트에서 켜고, **미달이 하나라도 있으면
    `--done` 이 와도 작업 항목을 체크하지 않는다.** 커밋은 그대로 하고 어느 조건이 미달인지
    계약 7 요약에 적는다 — 체크박스를 안 켜면 다음 호출이 그 항목을 이어받는다.
@@ -100,7 +100,7 @@ disable-model-invocation: false
 7. **요약 출력** — 변경 파일 stat / commit hash / 새 브랜치명 / viewing 브랜치 전진 결과 / 테스트 결과 / push 여부 / **체크한 작업 항목**(`이슈 #N 항목 Step`, 이슈 없는 작업이면 `mirror -00N 생성/전진` 으로 대신)
 
    **마지막 작업 항목을 닫는 커밋은 완료 조건별 결과를 함께 적는다** — 미달이 있으면 `--done` 을
-   안 켠 사실과 무엇이 남았는지까지(§10 수용 기준 `### 기록과 미달 처리`).
+   안 켠 사실과 무엇이 남았는지까지(§10 완료 조건 `### 기록과 미달 처리`).
 
    **이전 Step 의 트레이드오프이 이번 커밋에서 유지보수 비용을 드러냈으면 얼마였는지 함께 보고한다**
    (§6 유지보수 비용). 숫자로 적고, 반대 안이 더 쌌으면 그렇게 말한다.
@@ -125,7 +125,7 @@ disable-model-invocation: false
 
 8. **진행 현황 자동 출력** — 요약 직후 `/wtflow:progress --quiet` 1회 호출해 갱신된 Step 표를 덧붙인다. progress 가 표를 못 내도 **커밋은 이미 완료** — 막지 않고 종료
 
-9. **작업 항목을 닫을 때 문답 (소재나 동작 변화가 있을 때만)** — **닫는 커밋에서만 연다.** 닫기 전 커밋은 묻지 않고 지나간다 — 정상 경로라 요약에도 적지 않는다. 닫는 커밋·묻는 범위의 정의는 `learning-postcommit.md` 의 `## 언제`. 번호는 뒤지만 **실행은 계약 4 mirror 전진 직후, 계약 6 체크박스 동기화보다 앞이다.** 커밋이 있어야 사용자가 `git show` 로 코드를 놓고 답할 수 있고, 「의도와 다르다」 면 그 항목을 닫지 않아야 해서다. 절차는 §7 코드 퀴즈·§11 의도 재확인
+9. **작업 항목을 닫을 때 확인 질문 (소재나 동작 변화가 있을 때만)** — **닫는 커밋에서만 연다.** 닫기 전 커밋은 묻지 않고 지나간다 — 정상 경로라 요약에도 적지 않는다. 닫는 커밋·묻는 범위의 정의는 `learning-postcommit.md` 의 `## 언제`. 번호는 뒤지만 **실행은 계약 4 mirror 전진 직후, 계약 6 체크박스 동기화보다 앞이다.** 커밋이 있어야 사용자가 `git show` 로 코드를 놓고 답할 수 있고, 「의도와 다르다」 면 그 항목을 닫지 않아야 해서다. 절차는 §7 코드 퀴즈·§11 의도 재확인
 
    **소재를 거르는 기준, 형식, 두 절을 진행 여부와 한 호출에 담는 규칙, 넘칠 때 창을 나누는 규칙,
    코드 버그를 문항으로 내지 않는 이유는 전부 `learning-postcommit.md` 가 갖는다. 여기 사본을 두지 않는다.**
