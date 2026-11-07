@@ -231,9 +231,14 @@ description: >-
   /wtflow:mr                    MR 만 올림
   /wtflow:mr --clean            MR 을 올린 뒤 브랜치 정리
   /wtflow:mr --clean -f         MR 을 올린 뒤 브랜치 정리(미병합본이 있어도 전부)
+
+MR 없이 끝내기:
+  /wtflow:merge --local         로컬 develop 에 합친 뒤 브랜치 정리
+  /wtflow:merge --local --close 로컬 develop 에 합치고 정리한 뒤 이슈 닫기
 ```
 
 `wtflow:mr` 이 이 스킬을 부른 경우에는 이 블록을 내지 않는다 — 이미 그 명령 안이다.
+**이슈 없는 작업이면 `--close` 줄을 뺀다** — 닫을 이슈가 없다.
 
 **mirror 에서 옮겨 왔으면 맨 앞에 한 줄 더한다** — 어느 브랜치에서 어느 워크트리로 갔는지.
 워크트리를 새로 붙였으면 그 사실도 같이 적는다. 안 적으면 머지 커밋이 어디 쌓였는지 모른다.

@@ -25,7 +25,7 @@ claude cli로 병렬작업을 수행할 때 필요한 요청들을 스킬로 만
   /wtflow:progress   진행 현황 표 출력
   /wtflow:briefing   작업결과를 문서형태로 정리
 
-  /wtflow:merge      워크트리 충돌시 해소
+  /wtflow:merge      워크트리 충돌시 해소 (--local : MR 없이 로컬 develop 에 합친 뒤 정리, --close : 이슈도 닫기)
   /wtflow:squash     커밋 이력을 고른 단위로 접어 별도 브랜치로 (원본 보존)
   /wtflow:clean      생성된 워크트리·브랜치 제거 (-e 8 9 : 8·9번만 남기고 전부, --merged : 병합된 작업 전부)
 
