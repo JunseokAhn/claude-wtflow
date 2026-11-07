@@ -13,7 +13,7 @@ disable-model-invocation: false
 
 ## 호출
 
-`/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--no-quiz] [--push]`
+`/wtflow:commit <작업 설명> [--step <번호>] [-a <accumulator>] [-n|--new-topic] [-s|--same-topic] [--done] [--no-test] [--no-quiz] [--defer-ask] [--push]`
 
 - `<작업 설명>` (필수): 한 줄 제목. commit subject + 본문에 사용 (언어는 `commit-convention.md` 의 `## Subject` 를 따른다)
 - `--step <번호>`: **그 Step 하나만** 커밋한다(`/wtflow:auto` 의 `--step` 은 「그 Step 까지」라 뜻이 다르다). 작업단위(주제) 번호 = mirror 분기 `<mirror base>-<NNN>` 식별자. **작업 항목 번호와 일치**(wtflow:plan plan 의 Step N = 작업 항목 N). 명시 시 그 Step 사용(기존이면 전진, 신규면 생성). 미지정 시 아래 "주제 판단"으로 자동 결정
@@ -27,6 +27,7 @@ disable-model-invocation: false
 - `--done`: 이번 커밋으로 **현재 Step(작업 항목)가 완료**됨을 명시 → 이슈 본문 체크박스 체크(`## 작업 항목 체크박스 동기화`). 주제 전환 없이 끝나는 마지막 Step, 또는 단일 커밋으로 끝나는 Step 에 사용. **체크박스는 이슈 작업 전용** — 이슈 없는 작업엔 켤 체크박스가 없어 무시된다. 작업 항목을 닫는 신호(계약 9)로는 두 경우 다 쓴다
 - `--no-test`: 테스트 단계 생략
 - `--no-quiz`: 작업 항목을 닫을 때 내는 코드 읽기 질문만 생략 — 동작 확인 질문은 그대로 낸다(계약 9)
+- `--defer-ask`: 작업 항목을 닫아도 묻지 않고, 그 항목의 코드 읽기 소재·동작 변화를 요약에 한 줄로 남긴다(계약 9). **`/wtflow:auto` 가 넘기는 인자다** — 순회가 끝난 뒤 그 스킬이 모아 묻는다. 사용자 요청으로 직접 붙이지 않는다
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
 
 > **체크박스가 있느냐를 accumulator 이름이 정한다.** `/#` 뒤 정수 → 이슈 #N 본문에 체크리스트가
@@ -132,7 +133,10 @@ disable-model-invocation: false
    - 이 스킬에서만 다른 것 : 질문 본문에 **그 항목의 commit hash** 를 적어 `git show <hash>` 로 열어 보게 한다.
      코드 읽기 인용 없이 동작 확인만 나가면 hash 옆에 그 커밋들의 제목·`요약` 란도 적는다(§11 제품 동작 확인)
    - **이 호출이 그 Step 의 멈춤이다** — 진행 여부와 다음 Step 의 `❓` 를 같은 호출에 담는다(`## 한 번 호출 = 한 Step`).
-     마지막 작업 항목이면 진행 여부가 없고, `/wtflow:auto` 가 부른 커밋이면 진행 여부를 뺀다 — 순회가 이미 정했다
+     마지막 작업 항목이면 진행 여부가 없다
+   - **`--defer-ask` 면 묻지 않는다** — 멈추지 않고 계약 6·7·8 로 바로 간다. 요약(계약 7)에
+     `미룬 질문 : 코드 읽기 소재 <있음·없음> · 동작 <바뀜·그대로>` 한 줄을 남긴다 — 순회 끝에 `/wtflow:auto` 가
+     이 줄을 모아 묻는다(`learning-postcommit.md` 의 `## 순회가 끝난 뒤 모아 묻는다`)
    - **인용이 preview 를 넘으면 알림 재개로 묻는다**(§1 예측 `### 어디에 두나`) — `sleep 1` 을
      백그라운드로 걸고, 인용과 commit hash 를 턴 끝 응답으로 낸 뒤, 알림으로 시작된 턴에서 질문을 띄운다.
      **계약 6·7·8 은 답을 받은 뒤에** 잇는다 — 요약이 인용 뒤에 붙으면 턴 끝 응답이 인용이 아니게 된다
