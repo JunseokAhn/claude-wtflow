@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측 퀴즈·§4 설계 선택·§5 이해 퀴즈 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측 퀴즈·§4 트레이드오프·§5 이해 퀴즈 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
 
 ## 작업 문서
 
@@ -239,11 +239,11 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
 
 ```
 ❓ Step 2 — 코드를 인용해 붙이고 "무엇이 문제고 무엇으로 바꿀지" 를 먼저 답하신 뒤 진행합니다.
-   설계 선택 1건(판정을 어느 계층에 둘지)도 두 안으로 함께 띄웁니다.
+   트레이드오프 1건(판정을 어느 계층에 둘지)도 두 안으로 함께 띄웁니다.
 ```
 
-- 대상은 두 갈래 — **동작 판단이 든 Step**(§1 예측 퀴즈), **물어야 할 설계 선택이 있는 Step**(§4 설계 선택).
-  후자는 §4 설계 선택 `### 묻는 기준` 을 통과할 때만이고 **Step 당 1건 상한**이다
+- 대상은 두 갈래 — **동작 판단이 든 Step**(§1 예측 퀴즈), **물어야 할 트레이드오프이 있는 Step**(§4 트레이드오프).
+  후자는 §4 트레이드오프 `### 묻는 기준` 을 통과할 때만이고 **Step 당 1건 상한**이다
 - **§10 수용 기준은 `❓` 대상이 아니다** — 계획 단계에서 이슈 전체로 1회 묻는다(계약 9)
 - **통과하는 게 없으면 `❓` 를 안 붙인다** — 짜내면 질문이 구현 세부로 내려가 마찰만 남는다.
   삭제·정리·보일러플레이트에는 안 붙인다
