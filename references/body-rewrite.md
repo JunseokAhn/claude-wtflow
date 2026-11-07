@@ -11,7 +11,7 @@
 
 | 무엇 | 유일한 경로 | 예외 |
 |---|---|---|
-| 이슈 본문 | `/wtflow:issue --rewrite <N>` | `wtflow:commit` 의 체크박스 동기화 (`- [ ]` 한 줄만) |
+| 이슈 본문 | `/wtflow:issue --rewrite <N>` | `wtflow:commit` 의 체크박스 동기화 · `wtflow:merge --close` 의 작업 항목 켜기 (둘 다 `- [ ]` 한 줄만) |
 | MR·PR 본문 | `/wtflow:mr --rewrite` | 없음 |
 
 `gh issue edit --body` · `glab issue update -d` · `glab mr update -d` 를 직접 부르지 않는다.
