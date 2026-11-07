@@ -243,22 +243,10 @@ description: >-
 머지 커밋 해시·메시지 / 충돌 파일과 **어떻게 해소했는지** / 빌드 검증 결과 / push 안 됨 명시 /
 다음 단계(`/wtflow:mr`).
 
-**다음 단계는 정리 옵션까지 함께 적는다** — 한 줄에 명령 하나. 문장은 응답 언어로 옮겨 쓴다
-(`response-language.md` 의 `## 고정 문장도 옮겨 쓴다`):
-
-```
-다음 단계 — MR 올리기:
-  /wtflow:mr                    MR 만 올림
-  /wtflow:mr --clean            MR 을 올린 뒤 브랜치 정리
-  /wtflow:mr --clean -f         MR 을 올린 뒤 브랜치 정리(미병합본이 있어도 전부)
-
-MR 없이 끝내기:
-  /wtflow:merge --local         로컬 develop 에 합친 뒤 브랜치 정리
-  /wtflow:merge --local --close 로컬 develop 에 합치고 정리한 뒤 이슈 닫기
-```
+**다음 단계는 `${CLAUDE_PLUGIN_ROOT}/references/next-steps.md` 의 블록을 낸다** — 정리 옵션까지 함께.
+`--close` 줄을 빼는 경우도 그 문서가 갖는다.
 
 `wtflow:mr` 이 이 스킬을 부른 경우에는 이 블록을 내지 않는다 — 이미 그 명령 안이다.
-**이슈 없는 작업이면 `--close` 줄을 뺀다** — 닫을 이슈가 없다.
 
 **mirror 에서 옮겨 왔으면 맨 앞에 한 줄 더한다** — 어느 브랜치에서 어느 워크트리로 갔는지.
 워크트리를 새로 붙였으면 그 사실도 같이 적는다. 안 적으면 머지 커밋이 어디 쌓였는지 모른다.
