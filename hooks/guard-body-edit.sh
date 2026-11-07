@@ -11,7 +11,7 @@
 # 호출자가 밝히는 것 말고 구별할 방법이 없다. 스킬을 거친 호출인지 아닌지는 명령 형태로
 # 판정할 수 없기 때문이다.
 #
-#   WTFLOW_CHECKBOX_SYNC=1  wtflow:commit 의 체크박스 동기화. 본문을 다시 쓰는 게 아니라
+#   WTFLOW_CHECKBOX_SYNC=1  wtflow:commit 의 체크박스 동기화·wtflow:merge --close 의 작업 항목 켜기. 본문을 다시 쓰는 게 아니라
 #                           `- [ ]` 한 줄을 켜는 것이라 계약을 탈 이유가 없다.
 #   WTFLOW_BODY_REWRITE=1   wtflow:issue·wtflow:mr 의 `## 재작성 모드` 가 계약을 전부 통과한 뒤
 #                           내는 마지막 쓰기. 이게 없으면 훅이 안내하는 경로가 훅 자신에게 막힌다.

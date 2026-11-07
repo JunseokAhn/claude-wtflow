@@ -384,8 +384,10 @@ resolve_merge_target() {
   merge_wt=$(wt_lines | awk -F'\t' -v d="$merge_ref" '$2==d {print $1; exit}')
   if [ -z "$merge_wt" ]; then
     merge_block="$merge_ref 가 어느 워크트리에도 체크아웃돼 있지 않습니다 (develop 워크트리에서 실행하세요)"
-  elif [ -n "$(git -C "$merge_wt" status --porcelain 2>/dev/null)" ]; then
-    merge_block="$merge_ref 워크트리($merge_wt)에 커밋되지 않은 변경이 있습니다"
+  # 추적 파일의 변경만 막는다. untracked 는 머지와 무관하고, 머지가 그 파일을 덮어써야 하면
+  # git merge 가 스스로 거부한다(아래 실패 경로에서 원문을 보여준다).
+  elif [ -n "$(git -C "$merge_wt" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
+    merge_block="$merge_ref 워크트리($merge_wt)에 커밋되지 않은 추적 파일 변경이 있습니다"
   fi
 }
 
@@ -723,12 +725,13 @@ if [ "$merge" = 1 ]; then
      && [ "$(git -C "$main_top" rev-parse --verify -q "refs/heads/$marker_branch")" = "$tip_commit" ]; then
     merge_src="$marker_branch"
   fi
-  if git -C "$merge_wt" merge --no-ff --no-edit --log=500 "$merge_src" >/dev/null 2>&1; then
+  if merge_out=$(git -C "$merge_wt" merge --no-ff --no-edit --log=500 "$merge_src" 2>&1); then
     note "✓ 머지(no-ff): $merge_ref ← $merge_src ($(printf '%.9s' "$tip_commit"))"
     branch_force=1   # 머지 성공 → 모든 이슈 브랜치 삭제 (미보존도 포함)
   else
     git -C "$merge_wt" merge --abort >/dev/null 2>&1 || true
-    note "✗ 머지 실패(충돌 등): $merge_ref ← $merge_src — abort 했습니다. 수동 해결 후 다시 시도하세요."
+    note "✗ 머지 실패: $merge_ref ← $merge_src — abort 했습니다. 수동 해결 후 다시 시도하세요."
+    printf '%s\n' "$merge_out" | sed 's/^/    /' >&2
     note "  머지가 성공하지 않아 워크트리·브랜치는 그대로 둡니다."
     exit 1
   fi

@@ -8,7 +8,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 문답(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다. 계약 8 에서 note 를 쓸 때만 `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(이슈 note 규격)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 라벨·제목·본문·템플릿·확인 절차는 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `issue-convention.md` 를 읽는다. 진행 방향 확인 질문(계약 10)은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-direction.md`(§8 진행 방향) 둘만 읽는다 — 구현·커밋 단계 문서는 읽지 않는다. `--rewrite` 면 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(본문 재작성 규율·훅 계약)도 읽는다. 계약 8 에서 note 를 쓸 때만 `${CLAUDE_PLUGIN_ROOT}/references/note-format.md`(이슈 note 규격)를 읽는다.**
 
 ## 트리거
 
@@ -55,7 +55,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
 5. **사용자 확인 한 번** — `issue-convention.md` 의 `## 확인 절차` → `### 생성`
    - **본문 미리보기가 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
-     §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 미리보기를 턴 끝 응답으로 낸 뒤,
+     §1 예측 퀴즈 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 미리보기를 턴 끝 응답으로 낸 뒤,
      알림으로 시작된 턴에서 묻는다. **알림은 생성 승인이 아니다**
 
 6. **생성** — 먼저 `host-adapter.md` 의 `## 판별은 remote 주소 하나로` 로 호스트를 정하고,
@@ -102,7 +102,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
 
     절차·형식·건너뛰는 조건은 §8 진행 방향.
     묻기 직전에 같은 문서의 `## 질문을 내기 전 검사` 를 거친다 — 안들의 작업 항목 초안이 같으면 묻지 않는다.
-    **여기 사본을 두지 않는다** — 사전문답은 컨벤션이 아니라 작업 규율이라 저장소가 이슈
+    **여기 사본을 두지 않는다** — 확인 질문은 컨벤션이 아니라 작업 규율이라 저장소가 이슈
     컨벤션을 덮어도 남는다(`convention-precedence.md`).
 
     - 고른 안이 계약 4 의 **작업 항목 구성을 정한다.** 방향을 정하기 전에 본문을 쓰지 않는다
@@ -138,7 +138,7 @@ allowed-tools: Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_BODY_REWRITE=1
    **임의로 맞추지 않는다.** 어긋난 섹션은 3의 미리보기에 드러내고 사용자가 정한다
 3. **미리보기 + 확인** — 무엇을 셀지는 `issue-convention.md` 의 `## 확인 절차` → `### 재작성`
    - **바뀌는 줄이 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
-     §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
+     §1 예측 퀴즈 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
      낸 뒤, 알림으로 시작된 턴에서 묻는다. 셸 출력에만 두면 접혀서 안 보인다.
      **알림은 「반영」 승인이 아니다**
 4. **반영** — `body-rewrite.md` 의 `## 본문은 파일로 넘긴다` · `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`.
