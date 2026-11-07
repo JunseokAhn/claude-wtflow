@@ -87,6 +87,9 @@ disable-model-invocation: true
      **`squash` 로 끝내지 않는다** — 스쿼시 브랜치와 구분이 안 돼 accumulator 탐지에서 빠진다
      (`worktree-discipline.md` 의 `## 브랜치 이름 규칙 (세 종류, 역할이 다르다)`).
      **adhoc 은 slug 가 유일 식별자**라 기존 accumulator 와 겹치면 되묻는다(`-2` 자동 접미 금지)
+   - **세션 이름도 같은 확인에 담는다** — `#<N>-<짧은 이름>`(adhoc 은 `+<짧은 이름>`). 짧은 이름은
+     이슈 제목(adhoc 은 작업 설명)의 핵심을 **응답 언어의 명사구**로 줄인 것 — 공백 포함 20자 이내,
+     prefix·이슈 번호는 뺀다(예 `#63-세션 이름 자동 지정`). 질문을 따로 내지 않는다 — 멈춤이 둘이 된다
 
 4. **브랜치 + 워크트리 생성**
    - `git fetch origin <base>` 후 `git worktree add <경로> -b "<accumulator>" origin/<base>`
@@ -94,11 +97,20 @@ disable-model-invocation: true
    - **같은 이름 브랜치가 이미 있으면 재사용이 기본** — 사용자가 미리 만들어 둔 마커일 가능성이 높다.
      `-b` 없이 `git worktree add <경로> "<accumulator>"` 로 붙이고 tip·base 대비 ahead/behind 를 보고.
      **되묻는 건 그 브랜치가 이미 다른 워크트리에 물려 있을 때뿐**
+   - **짧은 이름을 브랜치 메모에 적는다** — `git config "branch.<accumulator>.wtflowTitle" "<짧은 이름>"`.
+     세션 이름 훅(`hooks/name-session.sh`)이 입력마다 이 칸을 읽는다. 없으면 훅은 slug 로 붙인다
+     - 재사용한 브랜치에 이미 값이 있으면 **계약 3 에서 바꾸기로 했을 때만** 덮어쓴다
+     - 표준 칸 `description` 을 쓰지 않는다 — format-patch·request-pull 도 읽는 칸이라 이미 쓰는 사람과 겹친다
+     - 정리할 것이 따로 없다 — `git branch -m` 이면 따라가고 `-D`(`wtflow-clean`)면 같이 지워진다
 
 5. **세션 진입** — `EnterWorktree({ path })` 로 현재 세션을 **인플레이스 이동**. `cd` 와 달리
    CWD·시스템프롬프트·메모리·plans 캐시까지 워크트리 기준으로 정리된다.
    - ⚠️ `claude --worktree` 금지 — 새 세션을 spawn 하고 브랜치명을 `worktree-…` 로 제멋대로 지어
      컨벤션을 깨고 mirror 가 붙을 곳을 잃는다
+   - **세션 이름은 진입 직후가 아니라 다음 입력부터 붙는다** — 이름을 줄 수 있는 훅이 `UserPromptSubmit`
+     뿐이고 디렉토리 이동 훅(`CwdChanged`)은 못 준다. 질문 창에 답하는 것은 입력으로 치지 않는다
+     - 사용자가 `/rename`·`claude -n` 으로 정한 이름은 덮어쓰지 않는다 — 비었거나 `#<N>-`·`+` 꼴일 때만 바꾼다.
+       같은 세션에서 다른 작업 워크트리로 옮기면 그 꼴이라 새 작업 이름으로 바뀐다
 
 6. **계획 문서 로드 (plan 출력 전 필수)** — 착수 전에 정해둔 계약이 있는지 본다. **읽기만 한다.**
 
