@@ -25,11 +25,11 @@ claude cli로 병렬작업을 수행할 때 필요한 요청들을 스킬로 만
   /wtflow:progress   진행 현황 표 출력
   /wtflow:briefing   작업결과를 문서형태로 정리
 
-  /wtflow:merge      워크트리 충돌시 해소
+  /wtflow:merge      워크트리 충돌시 해소 (--local : MR 없이 로컬 develop 에 합친 뒤 정리, --close : 이슈도 닫기)
   /wtflow:squash     커밋 이력을 고른 단위로 접어 별도 브랜치로 (원본 보존)
-  /wtflow:clean      생성된 워크트리·브랜치 제거
+  /wtflow:clean      생성된 워크트리·브랜치 제거 (-e 8 9 : 8·9번만 남기고 전부, --merged : 병합된 작업 전부)
 
-  /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성
+  /wtflow:mr         작업 브랜치를 origin 에 올리고 MR 생성 (--clean : MR 을 올린 뒤 브랜치 정리, -f : 미병합본이 있어도 전부)
 ```
 
 ## 작업단위 분리
@@ -43,6 +43,8 @@ wtflow가 자동으로 브랜치를 생성합니다.
 | 작업항목1 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-001` | commit1<br>commit2 |
 | 작업항목2 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-002` | commit3 |
 | 작업항목3 | `feat/#1-wtflow-intro` | `feat/#1-wtflow-intro-003` | commit4<br>commit5 |
+
+작업 브랜치에서 입력하면 세션 이름이 `#<이슈번호>-<작업 이름>` 으로 붙습니다. iTerm 탭에도 띄우려면 프로필 설정 General → Title 의 "Applications in terminal may change the title" 을 켜 주세요.
 
 
 ## 확인 질문

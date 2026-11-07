@@ -53,6 +53,9 @@ git branch -m '<prefix>/+<slug>' '<prefix>/#<N>-<slug>'            # accumulator
 git branch -m '<prefix>/+<slug>-001' '<prefix>/#<N>-<slug>-001'    # mirror 전부
 ```
 
+세션 이름은 따로 손대지 않는다 — 짧은 이름 메모(`branch.<accumulator>.wtflowTitle`)가 `git branch -m` 을
+따라가므로, 다음 입력부터 `+<짧은 이름>` 이 `#<N>-<짧은 이름>` 으로 바뀐다.
+
 그리고 **현재 plan 표의 작업 항목을 이슈 본문 체크리스트로 옮긴다** — 이미 커밋된 Step(mirror 가 있는
 번호)는 `- [x]` 로. 이 순간부터 진실원이 이슈로 넘어가고, `--done` 이 동작하기 시작한다.
 

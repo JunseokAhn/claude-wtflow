@@ -1,7 +1,7 @@
 ---
 name: mr
 description: 작업 브랜치를 origin 에 올리고 MR 을 생성한다 + 이미 열린 MR 의 본문을 재작성한다. "MR 올려줘", "머지 리퀘스트 올려줘", "리뷰 올려줘", "MR 본문 다시 써줘" 요청에. 제목은 커밋 컨벤션을 따르고 본문은 브리핑 압축본을 쓴다. MR 본문을 바꾸는 유일한 경로 — glab mr update 직접 호출 금지. 사용자만 호출.
-allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Read, AskUserQuestion, Skill
+allowed-tools: Bash(glab *), Bash(WTFLOW_BODY_REWRITE=1 glab *), Bash(git *), Bash(*/scripts/wtflow-clean *), Read, AskUserQuestion, Skill, ExitWorktree
 disable-model-invocation: true
 ---
 
@@ -23,7 +23,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 
 ## 호출
 
-`/wtflow:mr [이슈번호] [-t <제목>] [-b <타깃>] [--draft] [--no-push]`
+`/wtflow:mr [이슈번호] [-t <제목>] [-b <타깃>] [--draft] [--no-push] [--clean [-f|--force]]`
 
 | 인자 | 뜻 |
 |---|---|
@@ -33,6 +33,8 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 | `-b <타깃>` | 타깃 브랜치. 미지정 시 `develop`, 없으면 `main` |
 | `--draft` | Draft MR 로 생성 |
 | `--no-push` | push 를 건너뛴다(이미 올려둔 경우) |
+| `--clean` | MR 을 올린 뒤 브랜치 정리 (계약 12) |
+| `--clean -f` · `--clean --force` | MR 을 올린 뒤 브랜치 정리(미병합본이 있어도 전부) |
 | `--rewrite` | 생성이 아니라 **이미 열린 MR 의 본문 재작성** (아래 `## 재작성 모드`) |
 
 ## 계약 (보장되어야 하는 것)
@@ -141,6 +143,45 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 11. **브리핑을 못 얻으면 MR 을 만들지 않는다.** 빈 본문이나 손으로 지어낸 요약으로 대체하지 않는다
     — 사유를 보고하고 멈춘다. 본문 없는 MR 은 리뷰가 성립하지 않는다
 
+12. **`--clean` 이면 MR 을 만든 뒤 그 작업을 정리한다 — MR 이 만들어졌을 때만.**
+    `glab mr create` 가 MR URL 을 돌려준 뒤에 `wtflow-clean` 을 부른다:
+    ```
+    git rev-parse --abbrev-ref HEAD                 # accumulator 이름을 먼저 읽는다
+    ExitWorktree({ action: "keep" })                # 세션이 그 워크트리 안이면
+    ${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean '<accumulator>' -y         # --clean
+    ${CLAUDE_PLUGIN_ROOT}/scripts/wtflow-clean '<accumulator>' -f -y      # --clean -f
+    ```
+
+    `--clean` 은 `/wtflow:clean` 을 옵션 없이 부른 것과 같다 — 무엇을 지울지는 스크립트의
+    보존 판정이 정한다:
+
+    | | 기본 브랜치에 병합된 브랜치 | 미병합 브랜치 | 워크트리 |
+    |---|---|---|---|
+    | `--clean` | 지운다 | **남긴다** | 지운다 |
+    | `--clean -f` | 지운다 | **지운다** | 지운다 |
+
+    - **MR 을 막 올린 작업은 대개 미병합이다** — 그래서 `--clean` 의 흔한 결과는 워크트리만
+      사라지고 accumulator·mirror·스쿼시 브랜치가 남는 것이다. 리뷰 반영으로 커밋을 더 쌓을 때
+      그 브랜치를 쓰고, 워크트리는 `wtflow:merge` 가 다시 붙인다(그 스킬의 「없으면 붙인다」)
+    - **스크립트의 「건너뜀(미보존)」 과 종료 코드 1 은 여기서 실패가 아니다** — `--clean` 이
+      미병합 브랜치를 남긴 정상 결과다. 출력은 원문으로 옮기되 「정리 실패」 로 보고하지 않고,
+      브랜치까지 지우려면 `--clean -f` 라고 한 줄 덧붙인다
+    - ⚠️ **`-f` 는 사용자가 줬을 때만 붙인다.** origin 에 안 올라간 커밋이 그 자리에서 사라진다 —
+      접힌 것을 올렸으면 접기 전 원본 커밋이, 원본을 올렸으면 스쿼시 브랜치가 그렇다.
+      `--clean` 만 받고 임의로 `-f` 를 더하지 않는다
+    - **MR 이 안 만들어졌으면 정리하지 않는다** — 머지 충돌·검증 실패(계약 5), 갈라진 원격(계약 3),
+      브리핑 실패(계약 11), `glab mr create` 실패가 전부 해당한다. 정리는 되돌릴 수 없고,
+      올리지 못한 작업을 지우면 남는 것이 없다
+    - **이미 열린 MR 이 있어 만들지 않고 끝낸 경우(계약 4)에도 정리하지 않는다** — 그 MR 이 지금
+      로컬과 같은 커밋을 담고 있는지 이 호출은 확인하지 않았다. 정리하려면 `/wtflow:clean` 을 따로 부른다
+    - **대상은 accumulator 이름이다.** 접힌 것을 올렸어도 `-squash` 이름을 넘기지 않는다 —
+      워크트리는 accumulator 에 붙어 있다
+    - 워크트리를 나오는 순서와 `action: "keep"` 을 쓰는 이유, 스크립트 출력을 원문으로 옮기는 것은
+      **`wtflow:clean` 의 계약 1·3 그대로다.** 여기 다시 적지 않는다
+    - `wtflow:clean` 을 `Skill()` 로 부르지 않는다 — 그 스킬은 모델 호출이 막혀 있다. 스크립트를 직접 부른다
+    - `-f` 가 `--clean` 없이 오면 무시하고 그 사실을 알린다 — force-push 로 읽지 않는다(계약 3)
+    - **정리 실패는 MR 을 되돌리지 않는다.** MR URL 과 스크립트 출력을 함께 보고하고 끝낸다
+
 ## 재작성 모드 (`--rewrite`)
 
 이미 열린 MR 의 **본문(필요하면 제목)을 다시 쓴다.** 계약 4 가 손을 떼던 자리를 이 모드가 받는다
@@ -169,6 +210,7 @@ push 하면 리뷰를 건너뛴다 — 그 길을 쓰지 않는다.
 | 9 본문 = 브리핑 압축본 | **그대로 적용** — 아래 |
 | 10 본문은 파일 경유 | 그대로 |
 | 11 브리핑 없으면 안 만듦 | **그대로 — 손으로 지어낸 요약으로 기존 본문을 덮어쓰지 않는다** |
+| 12 `--clean` 정리 | **적용 안 함** — 본문만 고치는 호출이다. `--clean` 이 함께 오면 무시하고 그 사실을 알린다 |
 
 ⚠️ **6 의 `WTFLOW_BODY_REWRITE=1` 환경변수를 빼지 않는다** — 이유와 금지 사항은
 `body-rewrite.md` 의 `## WTFLOW_BODY_REWRITE=1 을 빼지 않는다`. 이 스킬에서 "실제로 거친 뒤" 란
@@ -204,6 +246,6 @@ Skill(wtflow:briefing) → /wtflow:briefing <base>..<이미 올라간 소스 브
 
 - 상한 40줄은 `pr-convention.md` 의 `## 셀 수 있는 상한` 이 정한다
 - **바뀌는 줄이 preview 에 안 들어가면 알림 재개로 묻는다**(`learning-implementation.md` 의
-  §1 예측 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
+  §1 예측 퀴즈 `### 어디에 두나`) — `sleep 1` 을 백그라운드로 걸고 바뀌는 줄 원문과 수치를 턴 끝 응답으로
   낸 뒤, 알림으로 시작된 턴에서 묻는다. 셸 출력에만 두면 접혀서 안 보인다.
   **알림은 「반영」 승인이 아니다**

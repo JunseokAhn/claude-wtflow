@@ -11,7 +11,7 @@
 
 | 무엇 | 유일한 경로 | 예외 |
 |---|---|---|
-| 이슈 본문 | `/wtflow:issue --rewrite <N>` | `wtflow:commit` 의 체크박스 동기화 (`- [ ]` 한 줄만) |
+| 이슈 본문 | `/wtflow:issue --rewrite <N>` | `wtflow:commit` 의 체크박스 동기화 · `wtflow:merge --close` 의 작업 항목 켜기 (둘 다 `- [ ]` 한 줄만) |
 | MR·PR 본문 | `/wtflow:mr --rewrite` | 없음 |
 
 `gh issue edit --body` · `glab issue update -d` · `glab mr update -d` 를 직접 부르지 않는다.
@@ -80,7 +80,7 @@ WTFLOW_BODY_REWRITE=1 gh issue edit <N> --body-file <본문파일>
 
 - **셸 출력에만 두지 않는다** — 도구 결과는 화면에서 접혀 ctrl+o 를 눌러야 보인다
 - 줄 수를 줄이려고 원문을 요약하지 않는다. 바뀌는 줄이 길어도 그대로 적는다
-- 응답 안 어디에 두는지는 `learning-implementation.md` 의 §1 예측 `### 어디에 두나` 가 정한다 — 여기 사본을 두지 않는다
+- 응답 안 어디에 두는지는 `learning-implementation.md` 의 §1 예측 퀴즈 `### 어디에 두나` 가 정한다 — 여기 사본을 두지 않는다
 
 **Why:** 완료 조건을 더하는 재작성에서 확인 화면에 「완료 조건 4줄 추가」 같은 개수만 나왔다.
 새 본문은 접힌 셸 출력 안에만 있어 사용자가 무엇이 들어가는지 모른 채 「반영」을 고르게 됐다(#48).
