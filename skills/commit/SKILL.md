@@ -1,6 +1,6 @@
 ---
 name: commit
-description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
+description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤, 마지막 작업 항목을 닫으면 브리핑까지). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
 allowed-tools: Bash(git *), Bash(WTFLOW_COMMIT=1 git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
@@ -143,6 +143,15 @@ disable-model-invocation: false
    - **`--no-quiz` 면 코드 퀴즈를 소재 없음으로 본다** — 의도 재확인만 남는다
    - **소재도 동작 변화도 없으면** 그 항목 몫의 문항 없이 진행 여부·다음 Step `❓` 만 낸다 — 그 사실을 요약(계약 7)에 한 줄로 적는다
    - 버그를 찾아 고쳤으면 **같은 Step 의 다음 커밋**으로 잇는다 — 문항으로 내지 않는다
+
+10. **작업 끝맺음 — 마지막 작업 항목을 닫았을 때만** (`## 마지막 작업 항목 판정`) — 계약 8 진행표 뒤에
+    **`/wtflow:briefing` 을 호출해 전체 작업 브리핑을 낸다**(범위 = accumulator base..HEAD).
+    `/wtflow:auto` 가 순회 끝에 내는 것과 같은 브리핑이다 — 어느 스킬로 끝냈든 끝맺음이 같아야 한다
+    - **`--defer-ask` 면 내지 않는다** — `/wtflow:auto` 가 넘기는 인자라, 그 스킬이 순회 끝에 브리핑을 낸다.
+      여기서도 내면 같은 브리핑이 두 번 나온다
+    - **완료 조건 미달로 항목을 안 켰으면 내지 않는다**(계약 6) — 작업이 아직 안 끝났다. 요약의 미달 줄이 그 자리를 맡는다
+    - **계약 9 의 답을 받은 뒤에** 낸다 — 「의도와 다르다」 면 그 항목이 안 닫혀 마지막도 아니게 된다
+    - briefing 이 범위 추정 실패 등으로 못 돌면 **막지 않는다** — 커밋은 이미 끝났다. 못 낸 이유를 한 줄 적는다
 
 ## 결정·중단 트리거
 
