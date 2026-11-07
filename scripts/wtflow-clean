@@ -159,6 +159,22 @@ while [ $# -gt 0 ]; do
 done
 while [ $# -gt 0 ]; do targets+=("$1"); shift; done   # `--` 뒤는 전부 대상
 
+# 현재 있는 작업 = accumulator. 미러(-NNN)·스쿼시 브랜치(-squash)는 accumulator 를 지울 때 딸려 간다.
+list_works() {
+  git for-each-ref --format='%(refname:short)' refs/heads \
+    | grep -E '^[^/]+/[#+]' | grep -vE -- '-([0-9][0-9][0-9]|squash)$' || true
+}
+
+# 대상 목록을 만든 뒤, 대상마다 자기 자신을 부르기 전에 메인 체크아웃으로 옮긴다.
+# 현재 셸이 대상 워크트리 안이면, 그 워크트리가 지워진 뒤의 호출들이 사라진 cwd 에서 시작한다.
+# 상대경로로 불렸으면 옮기기 전에 자기 경로를 절대경로로 고정한다.
+enter_main_checkout() {
+  local top
+  top=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
+  case "$self" in /*) ;; */*) self="$PWD/$self" ;; esac
+  [ -z "$top" ] || cd "$top" 2>/dev/null || true
+}
+
 # --except: 적은 작업만 남기고, 현재 있는 나머지 작업 전부를 대상 목록으로 바꾼다.
 #
 # 여기서 하는 일은 목록을 뒤집는 것뿐이다. 실제 삭제는 아래의 "대상이 여럿" 경로가 대상마다
@@ -171,11 +187,7 @@ if [ "$except" = 1 ]; then
   [ ${#targets[@]} -gt 0 ] \
     || die "--except 뒤에 남길 작업을 하나 이상 적으세요 (예: wtflow-clean --except 8 9)."
   git rev-parse --git-dir >/dev/null 2>&1 || die "git 저장소 안에서 실행하세요."
-  ex_main=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
-
-  # 현재 있는 작업 = accumulator. 미러(-NNN)·스쿼시 브랜치(-squash)는 accumulator 를 지울 때 딸려 간다.
-  ex_all=$(git for-each-ref --format='%(refname:short)' refs/heads \
-    | grep -E '^[^/]+/[#+]' | grep -vE -- '-([0-9][0-9][0-9]|squash)$' || true)
+  ex_all=$(list_works)
 
   ex_keep=""        # 남길 accumulator 이름들
   ex_keep_nums=" "  # 남길 이슈번호들 — 이슈 작업은 번호 단위로 남긴다
@@ -223,10 +235,7 @@ $(printf '%s\n' "${ex_all:-(없음)}" | sed 's/^/    /')"
   fi
   note "정리 대상 (${#ex_targets[@]}개): ${ex_targets[*]}"
 
-  # 현재 셸이 대상 워크트리 안이면, 그 워크트리가 지워진 뒤의 호출들이 사라진 cwd 에서 시작한다.
-  # 메인 체크아웃으로 옮겨 두되, 상대경로로 불렸으면 옮기기 전에 자기 경로를 절대경로로 고정한다.
-  case "$self" in /*) ;; */*) self="$PWD/$self" ;; esac
-  [ -z "$ex_main" ] || cd "$ex_main" 2>/dev/null || true
+  enter_main_checkout
   targets=("${ex_targets[@]}")
 fi
 
