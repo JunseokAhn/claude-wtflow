@@ -1,6 +1,6 @@
 ---
 name: commit
-description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤, 마지막 작업 항목을 닫으면 브리핑까지). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
+description: 워크트리 작업단위 로컬 커밋 + accumulator-Step 분기. 인자 --step/--done/--push/--no-test/--no-quiz. 한 Step 구현+검증 완료 시 "커밋할까요?" 묻지 말고 모델이 자율 호출(커밋·미러 후 멈춤, 마지막 작업 항목을 닫으면 브리핑·다음 단계 안내까지). 사용자 신호는 다음 Step 진행 여부에만; 다중 Step 순회는 wtflow:auto.
 allowed-tools: Bash(git *), Bash(WTFLOW_COMMIT=1 git *), Bash(gh *), Bash(glab *), Bash(tea *), Bash(WTFLOW_CHECKBOX_SYNC=1 gh *), Bash(WTFLOW_CHECKBOX_SYNC=1 glab *), Bash(WTFLOW_CHECKBOX_SYNC=1 tea *), Bash(./gradlew *), Bash(npm *), Bash(npx *), Read, Edit, AskUserQuestion
 disable-model-invocation: false
 ---
@@ -152,6 +152,8 @@ disable-model-invocation: false
     - **완료 조건 미달로 항목을 안 켰으면 내지 않는다**(계약 6) — 작업이 아직 안 끝났다. 요약의 미달 줄이 그 자리를 맡는다
     - **계약 9 의 답을 받은 뒤에** 낸다 — 「의도와 다르다」 면 그 항목이 안 닫혀 마지막도 아니게 된다
     - briefing 이 범위 추정 실패 등으로 못 돌면 **막지 않는다** — 커밋은 이미 끝났다. 못 낸 이유를 한 줄 적는다
+    - **브리핑 뒤에 다음 단계 안내로 끝낸다** — `${CLAUDE_PLUGIN_ROOT}/references/next-steps.md` 의 블록.
+      브리핑을 못 냈어도 안내는 낸다. 안 내는 경우(`--defer-ask`·완료 조건 미달)는 브리핑과 같다
 
 ## 결정·중단 트리거
 
