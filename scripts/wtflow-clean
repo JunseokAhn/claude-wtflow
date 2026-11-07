@@ -174,11 +174,15 @@ list_works() {
 
 # 대상 목록을 만든 뒤, 대상마다 자기 자신을 부르기 전에 메인 체크아웃으로 옮긴다.
 # 현재 셸이 대상 워크트리 안이면, 그 워크트리가 지워진 뒤의 호출들이 사라진 cwd 에서 시작한다.
-# 상대경로로 불렸으면 옮기기 전에 자기 경로를 절대경로로 고정한다.
+# 옮기기 전에 자기 경로를 실제 경로로 고정한다 — "$PWD/../wc" 처럼 지워질 워크트리를 거치는 경로는
+# 그 워크트리가 사라진 뒤 풀리지 않아, 첫 대상 다음부터 호출이 전부 실패한다.
+# 스크립트 파일 자체가 지워질 워크트리 안에 있으면 이것으로도 못 막는다 — 플러그인 경로로 부르면 해당 없음.
 enter_main_checkout() {
-  local top
+  local top dir
   top=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
-  case "$self" in /*) ;; */*) self="$PWD/$self" ;; esac
+  case "$self" in
+    */*) dir=$(cd "$(dirname "$self")" 2>/dev/null && pwd -P) && self="$dir/$(basename "$self")" ;;
+  esac
   [ -z "$top" ] || cd "$top" 2>/dev/null || true
 }
 
