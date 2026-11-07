@@ -161,7 +161,7 @@ disable-model-invocation: true
     ```
     다음 단계 — 이어서 할 일:
       /wtflow:auto                  남은 작업을 끝까지
-      /wtflow:auto --no-quiz        코드 동작을 묻는 질문만 빼고 끝까지
+      /wtflow:auto --no-quiz        정답을 맞히는 질문만 빼고 끝까지
       /wtflow:auto --no-ask         의도 확인을 묻는 질문도 없이 끝까지
       /wtflow:auto --step 2         두 번째 작업까지 하고 멈춤
     ```
