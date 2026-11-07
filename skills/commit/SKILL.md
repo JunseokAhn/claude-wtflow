@@ -9,7 +9,7 @@ disable-model-invocation: false
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측~§6 유지보수 비용·§10 수용 기준), `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측 퀴즈~§6 유지보수 비용·§10 수용 기준), `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)를 읽는다. `learning-direction.md`(§8 진행 방향·§9 커밋 경계)는 이슈·계획 단계 몫이라 읽지 않는다. 커밋 메시지 형식은 `${CLAUDE_PLUGIN_ROOT}/references/convention-precedence.md`(어디에 적힌 컨벤션이 우선하는지) 를 먼저 읽고 `commit-convention.md` 를 읽는다. 이슈 작업에서 체크박스를 동기화할 때만 `${CLAUDE_PLUGIN_ROOT}/references/body-rewrite.md`(훅 계약)를 읽는다.**
 
 ## 호출
 
@@ -26,7 +26,7 @@ disable-model-invocation: false
   중 현재 HEAD 와 ancestry 를 공유하는 것(`-<NNN>` 은 mirror, `-squash` 는 스쿼시 브랜치라 제외)
 - `--done`: 이번 커밋으로 **현재 Step(작업 항목)가 완료**됨을 명시 → 이슈 본문 체크박스 체크(`## 작업 항목 체크박스 동기화`). 주제 전환 없이 끝나는 마지막 Step, 또는 단일 커밋으로 끝나는 Step 에 사용. **체크박스는 이슈 작업 전용** — 이슈 없는 작업엔 켤 체크박스가 없어 무시된다. 작업 항목을 닫는 신호(계약 9)로는 두 경우 다 쓴다
 - `--no-test`: 테스트 단계 생략
-- `--no-quiz`: 퀴즈(코드 퀴즈·예측·변경 시나리오)만 생략 — 의도 재확인·설계 선택 질문은 그대로 낸다(계약 9)
+- `--no-quiz`: 퀴즈(코드 퀴즈·예측 퀴즈·이해 퀴즈)만 생략 — 의도 재확인·설계 선택 질문은 그대로 낸다(계약 9)
 - `--defer-ask`: 작업 항목을 닫아도 묻지 않고, 그 항목의 코드 퀴즈 소재·동작 변화를 요약에 한 줄로 남긴다(계약 9). **`/wtflow:auto` 가 넘기는 인자다** — 순회가 끝난 뒤 그 스킬이 모아 묻는다. 사용자 요청으로 직접 붙이지 않는다
 - `--push`: 분기 브랜치를 origin 에도 push (기본은 로컬만)
 
@@ -137,7 +137,7 @@ disable-model-invocation: false
    - **`--defer-ask` 면 묻지 않는다** — 멈추지 않고 계약 6·7·8 로 바로 간다. 요약(계약 7)에
      `미룬 질문 : 코드 퀴즈 소재 <있음·없음> · 동작 <바뀜·그대로>` 한 줄을 남긴다 — 순회 끝에 `/wtflow:auto` 가
      이 줄을 모아 묻는다(`learning-postcommit.md` 의 `## 순회가 끝난 뒤 모아 묻는다`)
-   - **인용이 preview 를 넘으면 알림 재개로 묻는다**(§1 예측 `### 어디에 두나`) — `sleep 1` 을
+   - **인용이 preview 를 넘으면 알림 재개로 묻는다**(§1 예측 퀴즈 `### 어디에 두나`) — `sleep 1` 을
      백그라운드로 걸고, 인용과 commit hash 를 턴 끝 응답으로 낸 뒤, 알림으로 시작된 턴에서 질문을 띄운다.
      **계약 6·7·8 은 답을 받은 뒤에** 잇는다 — 요약이 인용 뒤에 붙으면 턴 끝 응답이 인용이 아니게 된다
    - **`--no-quiz` 면 코드 퀴즈를 소재 없음으로 본다** — 의도 재확인만 남는다

@@ -9,7 +9,7 @@ disable-model-invocation: true
 
 **사용자에게 내는 응답·질문·안내의 언어는 `${CLAUDE_PLUGIN_ROOT}/references/response-language.md`(요청마다 정하는 응답 언어)를 따른다 — 시작 전에 읽는다.**
 
-**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측·§4 설계 선택·§5 변경 시나리오 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
+**시작 전에 `${CLAUDE_PLUGIN_ROOT}/references/worktree-discipline.md`(브랜치 이름 규칙·Step 모델·note 종류)와 `${CLAUDE_PLUGIN_ROOT}/references/host-adapter.md`(이슈 호스트 판별·CLI 대응)를 읽는다. 사전문답은 `${CLAUDE_PLUGIN_ROOT}/references/learning-protocol.md`(켜는 자리·질문 형식·질문 전 검사)와 `learning-implementation.md`(§1 예측 퀴즈·§4 설계 선택·§5 이해 퀴즈 — 어느 Step 을 착수 전에 멈출지, 그리고 §10 수용 기준 — 계획 단계에서 1회 묻는다), `learning-direction.md`(§9 커밋 경계)를 읽는다. `learning-postcommit.md`(§7 코드 퀴즈·§11 의도 재확인)는 커밋 때 쓰는 것이라 읽지 않는다. **조건부로만 읽는 것 둘** — 인자가 문장이면 `${CLAUDE_PLUGIN_ROOT}/references/plan-adhoc.md`(이슈 없는 작업), 계약 2 가 재플랜으로 갈리면 `${CLAUDE_PLUGIN_ROOT}/references/plan-replan.md`(델타 플랜). 해당 안 되면 읽지 않는다.**
 
 ## 작업 문서
 
@@ -127,7 +127,7 @@ disable-model-invocation: true
 8. **plan 출력** — 작업 정의 + 계약 6 의 계획 문서 + **코드 분석 결과**로 작업 단계 추정
    (`## plan 출력 형식`). 자동 실행 안 함, 가이드 용도.
    **어느 Step 이 사전문답 대상인지도 이때 표시**한다(`### 사전문답 대상 표시`) — 착수 후에 정하면
-   이미 구현이 시작돼 §1 예측이 성립하지 않는다
+   이미 구현이 시작돼 §1 예측 퀴즈이 성립하지 않는다
 
    ⚠️ **여기서 끝이다 — plan 표를 파일로 저장하지 않는다.** 이슈 작업이면 작업 항목의 진실원은
    이미 이슈 본문이고, adhoc 이면 이 출력 + mirror 분기가 곧 기록이다. 파일을 하나 더 두면
@@ -136,7 +136,7 @@ disable-model-invocation: true
 9. **완료 조건 — 계획 단계에서 1회** (§10 수용 기준). 실행은 계약 8 의 표를 낸 직후이고,
    **§9 커밋 경계와 같은 `AskUserQuestion` 호출에 담는다** — 호출을 나누면 계획 한 번에 멈춤이 둘이 된다.
    조건별 확인 방법·분해안처럼 preview 에 안 들어가는 판단 자료는 **알림 재개로 낸다**
-   (§1 예측 `### 어디에 두나`) — 질문 바로 위에 두면 질문이 떠 있는 동안 요약돼 안 보인다.
+   (§1 예측 퀴즈 `### 어디에 두나`) — 질문 바로 위에 두면 질문이 떠 있는 동안 요약돼 안 보인다.
 
    묻는 것은 **작업 항목이 전부 끝났을 때 반드시 동작해야 하는 것**이다. 항목마다 묻지 않는다 —
    중간 항목은 관측 가능한 동작이 없는 경우가 흔하다.
@@ -242,7 +242,7 @@ Step 번호 뒤에 `❓`** 를 붙인다. 표 아래 한 줄로 무엇을 물을
    설계 선택 1건(판정을 어느 계층에 둘지)도 두 안으로 함께 띄웁니다.
 ```
 
-- 대상은 두 갈래 — **동작 판단이 든 Step**(§1 예측), **물어야 할 설계 선택이 있는 Step**(§4 설계 선택).
+- 대상은 두 갈래 — **동작 판단이 든 Step**(§1 예측 퀴즈), **물어야 할 설계 선택이 있는 Step**(§4 설계 선택).
   후자는 §4 설계 선택 `### 묻는 기준` 을 통과할 때만이고 **Step 당 1건 상한**이다
 - **§10 수용 기준은 `❓` 대상이 아니다** — 계획 단계에서 이슈 전체로 1회 묻는다(계약 9)
 - **통과하는 게 없으면 `❓` 를 안 붙인다** — 짜내면 질문이 구현 세부로 내려가 마찰만 남는다.
