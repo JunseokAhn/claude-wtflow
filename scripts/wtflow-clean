@@ -589,8 +589,13 @@ if [ -n "$marker_branch" ]; then
     marker_action="already"   # 이미 최상단
   elif git -C "$main_top" merge-base --is-ancestor "$marker_commit" "$tip_commit" 2>/dev/null; then
     marker_action="ff"        # 마커가 뒤처짐 → 최상단으로 올림
+  elif git -C "$main_top" merge-base --is-ancestor "$tip_commit" "$marker_commit" 2>/dev/null; then
+    # 마커가 앞섬 → 마커가 최신 작업물이다. tip 을 마커로 옮겨야 --merge 가 마커를 합친다.
+    # 미러 tip 을 그대로 두면 마커에만 쌓인 커밋(충돌을 풀며 develop 을 받은 머지 커밋 등)이 빠진다(#67).
+    tip_commit="$marker_commit"; tip_ref="$marker_branch"
+    marker_action="already"
   else
-    marker_action="skip"      # 갈라짐/앞섬 → 건드리지 않음
+    marker_action="skip"      # 갈라짐 → 건드리지 않음
   fi
 fi
 
