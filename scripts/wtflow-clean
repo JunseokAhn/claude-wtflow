@@ -375,7 +375,7 @@ main_top=$(wt_lines | head -n1 | cut -f1)
 # --merge 대상(develop, 없으면 main) ref 와 그 워크트리를 전역(merge_ref/merge_wt/merge_block)에 채운다.
 # merge_block 비어있으면 머지 가능, 차있으면 그 사유로 불가.
 resolve_merge_target() {
-  merge_ref=""; merge_wt=""; merge_block=""
+  merge_ref=""; merge_wt=""; merge_block=""; merge_tmp=0
   local d
   for d in develop main; do
     if git -C "$main_top" rev-parse --verify -q "refs/heads/$d" >/dev/null 2>&1; then merge_ref="$d"; break; fi
@@ -383,12 +383,35 @@ resolve_merge_target() {
   if [ -z "$merge_ref" ]; then merge_block="develop/main 브랜치를 찾지 못했습니다"; return; fi
   merge_wt=$(wt_lines | awk -F'\t' -v d="$merge_ref" '$2==d {print $1; exit}')
   if [ -z "$merge_wt" ]; then
-    merge_block="$merge_ref 가 어느 워크트리에도 체크아웃돼 있지 않습니다 (develop 워크트리에서 실행하세요)"
+    # 어디에도 체크아웃돼 있지 않으면 머지할 때만 임시 워크트리를 만든다(merge_open_tmp).
+    # 메인 체크아웃을 바꾸지 않으려는 것 — 사용자가 직접 checkout 할 일이 없어진다.
+    merge_tmp=1
   # 추적 파일의 변경만 막는다. untracked 는 머지와 무관하고, 머지가 그 파일을 덮어써야 하면
   # git merge 가 스스로 거부한다(아래 실패 경로에서 원문을 보여준다).
   elif [ -n "$(git -C "$merge_wt" status --porcelain --untracked-files=no 2>/dev/null)" ]; then
     merge_block="$merge_ref 워크트리($merge_wt)에 커밋되지 않은 추적 파일 변경이 있습니다"
   fi
+}
+
+# merge_tmp=1 일 때 머지 직전에 merge_ref 를 임시 워크트리로 붙인다. 경로는 저장소 밖 —
+# .claude/worktrees/ 아래면 대상 워크트리 탐지에 걸린다. 실패하면 merge_block 을 채운다.
+merge_tmp_dir=""
+merge_open_tmp() {
+  merge_tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/wtflow-merge.XXXXXX") || { merge_block="임시 디렉토리를 만들지 못했습니다"; return; }
+  if git -C "$main_top" worktree add -q "$merge_tmp_dir/wt" "$merge_ref" >/dev/null 2>&1; then
+    merge_wt="$merge_tmp_dir/wt"
+  else
+    rm -rf "$merge_tmp_dir"; merge_tmp_dir=""
+    merge_block="$merge_ref 임시 워크트리를 만들지 못했습니다"
+  fi
+}
+# 머지가 성공하든 실패하든 임시 워크트리를 남기지 않는다.
+merge_close_tmp() {
+  [ -n "$merge_tmp_dir" ] || return 0
+  git -C "$main_top" worktree remove --force "$merge_tmp_dir/wt" >/dev/null 2>&1 || true
+  rm -rf "$merge_tmp_dir"
+  git -C "$main_top" worktree prune >/dev/null 2>&1 || true
+  merge_tmp_dir=""
 }
 
 # 이슈 번호 N → 작업 브랜치 역추적 (브랜치/위치 무관)
@@ -661,7 +684,9 @@ if [ "$merge" = 1 ]; then
        && { [ "$marker_action" = ff ] || [ "$marker_action" = already ]; }; then
       plan_src="$marker_branch"
     fi
-    note "  머지       : $merge_ref ← $plan_src (no-ff, $(printf '%.9s' "$tip_commit")) — 성공 시 모든 이슈 브랜치 삭제"
+    plan_where=""
+    [ "$merge_tmp" = 1 ] && plan_where=" · $merge_ref 가 체크아웃돼 있지 않아 임시 워크트리에서"
+    note "  머지       : $merge_ref ← $plan_src (no-ff, $(printf '%.9s' "$tip_commit")$plan_where) — 성공 시 모든 이슈 브랜치 삭제"
   fi
 fi
 
@@ -730,11 +755,17 @@ if [ "$merge" = 1 ]; then
      && [ "$(git -C "$main_top" rev-parse --verify -q "refs/heads/$marker_branch")" = "$tip_commit" ]; then
     merge_src="$marker_branch"
   fi
+  if [ "$merge_tmp" = 1 ]; then
+    merge_open_tmp
+    [ -z "$merge_block" ] || die "--merge: $merge_block — 머지할 수 없어 중단합니다 (삭제 안 함)."
+  fi
   if merge_out=$(git -C "$merge_wt" merge --no-ff --no-edit --log=500 "$merge_src" 2>&1); then
+    merge_close_tmp
     note "✓ 머지(no-ff): $merge_ref ← $merge_src ($(printf '%.9s' "$tip_commit"))"
     branch_force=1   # 머지 성공 → 모든 이슈 브랜치 삭제 (미보존도 포함)
   else
     git -C "$merge_wt" merge --abort >/dev/null 2>&1 || true
+    merge_close_tmp
     note "✗ 머지 실패: $merge_ref ← $merge_src — abort 했습니다. 수동 해결 후 다시 시도하세요."
     printf '%s\n' "$merge_out" | sed 's/^/    /' >&2
     note "  머지가 성공하지 않아 워크트리·브랜치는 그대로 둡니다."
